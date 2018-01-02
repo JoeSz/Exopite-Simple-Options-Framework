@@ -23,9 +23,10 @@ DESCRIPTION
 
 WHY?
 I need someting fast, easy and lightweight to generate option page and/or metabox for my plugins and/or post types.
-I also love to create/program someting new (for me) to have fun and leary every day. For my theme I use CodeStar Framework,
-so I created similarly. Unfortunately CodeStar Framework based on static class, can not initialize multiple times, and
-this is required for plugns.
+
+I also love to create/program someting new (for me) to have fun and leary every day.
+
+For my theme I use CodeStar Framework, so I created similarly. Unfortunately CodeStar Framework based on static class, can not initialize multiple times and this is required for plugns.
 
 Lightweight
 No ads, Files are loaded only when required. Minimum footprint.
@@ -81,6 +82,7 @@ INSTALLATION
 Copy to plugin/theme folder.
 Hook to 'init'.
 
+```php
 $config = array(
 
     'type'              => 'menu',                          // Required, menu or metabox
@@ -128,6 +130,7 @@ $fields[] = array(
 );
 
 $options_panel = new Exopite_Simple_Options_Framework( $config, $fields );
+```
 
 CHANGELOG
 ---------
