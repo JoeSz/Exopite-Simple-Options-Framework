@@ -7,7 +7,8 @@ Stable tag: 4.9
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Version: 20180102
-
+Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
+GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 
 == Note ==
 

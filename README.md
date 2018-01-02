@@ -4,7 +4,8 @@
 
 - Author: Joe Szalai
 - Version: 20180102
-- Plugin URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
+- Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
+- GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 - Author URL: https://joe.szalai.org
 - License: GNU General Public License v3 or later
 - License URI: http://www.gnu.org/licenses/gpl-3.0.html
