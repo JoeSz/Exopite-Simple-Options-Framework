@@ -42,25 +42,28 @@ Exopite Simple Options is free and available on Github. Feel free to submit patc
 ### FEATURES
 
 Available fields:
-- card
-- content
+- ace_field
+- video (mp4/oembed)
+- upload (multiple)
+- attached (Attached files/images/etc... to the post -> only for Metabox)
 - notice
 - text
+- password
+- color (rgb/rgba/html5)
+- image
 - textarea
-- select
+- switcher
+- date (datepicker/html5)
 - checkbox
 - radio
-- date
-- switcher
-- range
-- image_select
-- tap_list
+- button_bar
+- select (single/multiselect + posttype)
+- panel
+- content
 - number
-- color_picker
-- botton_bar
-- media upload drag and drop
-- ACE field
-- video mp4/oembed
+- range
+- tap_list (radio/checkbox)
+- image_select (radio/checkbox)
 
 ![](assets/screenshot-1.png)
 
