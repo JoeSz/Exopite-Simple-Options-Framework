@@ -62,6 +62,8 @@ Available fields:
 - ACE field
 - video mp4/oembed
 
+![](assets/screenshot-1.png)
+
 ### REQUIREMENTS
 
 Server
@@ -132,7 +134,6 @@ $fields[] = array(
 
 $options_panel = new Exopite_Simple_Options_Framework( $config, $fields );
 ```
-
 ### CHANGELOG
 
 = 20180102 - 2018-01-02 =
