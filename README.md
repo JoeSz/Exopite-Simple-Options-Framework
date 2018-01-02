@@ -45,7 +45,7 @@ Available fields:
 - ace_field
 - video (mp4/oembed)
 - upload (multiple)
-- attached (Attached files/images/etc... to the post -> only for Metabox)
+- attached (Attached files/images/etc... to the post -> only for Metabox, multiselect, AJAX delete)
 - notice
 - text
 - password
