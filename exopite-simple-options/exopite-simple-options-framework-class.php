@@ -307,11 +307,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
                 $page_post_hooks = array( 'post-new.php', 'post.php'  );
 
+                $post_type = ( isset( $this->config['post_types'] ) ) ? $this->config['post_types'] : array();
+
                 global $post;
 
                 // Embed the Script on our Plugin's Option Page Only, or if metabox, on the requested post types only
                 if ( ( isset($_GET['page']) && $_GET['page'] == $this->unique ) ||
-                     ( in_array( $hook, $page_post_hooks ) && is_array( $this->config['post_types'] ) && in_array( $post->post_type, $this->config['post_types'] ) )
+                     ( in_array( $hook, $page_post_hooks ) && in_array( $post->post_type, $post_type ) )
                     ) {
 
                     // Add jQuery form scripts for menu options AJAX save
