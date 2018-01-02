@@ -86,7 +86,8 @@ Hook to 'init'.
 $config = array(
 
     'type'              => 'menu',                          // Required, menu or metabox
-    'id'                => $this->plugin_name,              // Required, meta box id, unique per page, to save: get_option( id )
+    'id'                => $this->plugin_name,              // Required, meta box id, unique per page,
+                                                            //   to save: get_option( id )
     'menu'              => 'plugins.php',                   // Required, sub page to your options page
     'submenu'           => true,                            // Required for submenu
     'title'             => 'The name',                      // The name of this page
