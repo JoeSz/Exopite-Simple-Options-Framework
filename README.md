@@ -43,11 +43,13 @@ Exopite Simple Options is free and available on Github. Feel free to submit patc
 ### FEATURES
 
 Available fields:
+
 - ace_field
 - video (mp4/oembed)
 - upload (multiple)
 - attached (Attached files/images/etc... to the post -> only for Metabox, multiselect, AJAX delete)
 - notice
+- editor (WYSIWYG WordPress Editor)
 - text
 - password
 - color (rgb/rgba/html5)
