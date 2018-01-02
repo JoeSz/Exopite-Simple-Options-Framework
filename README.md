@@ -1,5 +1,6 @@
 # Exopite-Simple-Options-Framework
-Fast, easy and lightweight option/metabox form generator.
+
+## Fast, easy and lightweight option/metabox form generator.
 
 - Author: Joe Szalai
 - Version: 20180102
@@ -8,7 +9,7 @@ Fast, easy and lightweight option/metabox form generator.
 - License: GNU General Public License v3 or later
 - License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-### Note
+### NOTE
 
 The Framework still in development stage.
 
@@ -17,7 +18,7 @@ Documentation is still in-progress.
 The Framework based on some CodeStar Framework, MetaBox.io code and design. The fields configs desgin also based on CodeStar Framework.
 I created this framework for plugins and metaboxes. Not for Themes. For Themes I recommend CodeStar Framework.
 
-### Description
+### DESCRIPTION
 
 WHY?
 I need someting fast, easy and lightweight to generate option page and/or metabox for my plugins and/or post types.
@@ -38,7 +39,7 @@ Easy to integrate with any plugin or post type (even WordPress theme, but it is 
 
 Exopite Simple Options is free and available on Github. Feel free to submit patches or add more features.
 
-### Features
+### FEATURES
 
 Available fields:
 - card
@@ -61,7 +62,7 @@ Available fields:
 - ACE field
 - video mp4/oembed
 
-### Requirements
+### REQUIREMENTS
 
 Server
 
@@ -75,7 +76,7 @@ Browsers
 * Firefox, Chrome, Safari, Opera, IE 10+
 * Tested on Firefox, Chrome, Edge, IE 11
 
-### Installation
+### INSTALLATION
 
 Copy to plugin/theme folder.
 
@@ -132,16 +133,16 @@ $fields[] = array(
 $options_panel = new Exopite_Simple_Options_Framework( $config, $fields );
 ```
 
-### Changelog
+### CHANGELOG
 
 = 20180102 - 2018-01-02 =
 * Initial release.
 
-### License Details
+### LICENSE DETAILS
 
 The GPL license of Sticky anything without cloning it grants you the right to use, study, share (copy), modify and (re)distribute the software, as long as these license terms are retained.
 
-### Disclamer
+### DISCLAMER
 
 NO WARRANTY OF ANY KIND! USE THIS SOFTWARES AND INFORMATIONS AT YOUR OWN RISK!
 [READ DISCLAMER.TXT!](https://joe.szalai.org/disclaimer/)
