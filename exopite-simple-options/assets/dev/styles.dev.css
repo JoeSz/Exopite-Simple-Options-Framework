@@ -105,8 +105,10 @@
 .exopite-sof-btn:hover {
     background-color: #80a9d4;
 }
+.exopite-sof-btn:focus,
 .exopite-sof-btn:hover {
     color: #fff;
+    box-shadow: none;
 }
 .exopite-sof-field-upload .qq-uploader::before {
     content: "\f0ee";
