@@ -6,7 +6,7 @@ Tested up to: 4.9.1
 Stable tag: 4.9
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Version: 20180102
+Version: 20180107
 Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 
@@ -135,5 +135,20 @@ $options_panel = new Exopite_Simple_Options_Framework( $config, $fields );
 
 == Changelog ==
 
+= 20180107 - 2018-01-07 =
+* Add button field.
+
 = 20180102 - 2018-01-02 =
 * Initial release.
+
+== License Details ==
+
+The GPL license of Sticky anything without cloning it grants you the right to use, study, share (copy), modify and (re)distribute the software, as long as these license terms are retained.
+
+== Disclamer ==
+
+NO WARRANTY OF ANY KIND! USE THIS SOFTWARES AND INFORMATIONS AT YOUR OWN RISK!
+[READ DISCLAMER.TXT!](https://joe.szalai.org/disclaimer/)
+License: GNU General Public License v3
+
+[![forthebadge](http://forthebadge.com/images/badges/built-by-developers.svg)](http://forthebadge.com) [![forthebadge](http://forthebadge.com/images/badges/for-you.svg)](http://forthebadge.com)
