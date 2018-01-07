@@ -99,10 +99,14 @@
     cursor: pointer;
     margin-right: 10px;
     margin-bottom: 10px;
+    text-decoration: none;
 }
 .exopite-sof-btn,
 .exopite-sof-btn:hover {
     background-color: #80a9d4;
+}
+.exopite-sof-btn:hover {
+    color: #fff;
 }
 .exopite-sof-field-upload .qq-uploader::before {
     content: "\f0ee";
