@@ -3,7 +3,7 @@
 ## Fast, easy and lightweight option/metabox form generator.
 
 - Author: Joe Szalai
-- Version: 20180107
+- Version: 20180113
 - Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 - GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 - Author URL: https://joe.szalai.org
@@ -67,6 +67,7 @@ Available fields:
 - range
 - tap_list (radio/checkbox)
 - image_select (radio/checkbox)
+- meta (readonly -> to the post -> only for Metabox)
 
 ![](assets/screenshot-1.png)
 
@@ -141,6 +142,9 @@ $fields[] = array(
 $options_panel = new Exopite_Simple_Options_Framework( $config, $fields );
 ```
 ### CHANGELOG
+
+= 20180113 - 2018-01-13 =
+* Add meta field.
 
 = 20180107 - 2018-01-07 =
 * Add button field.

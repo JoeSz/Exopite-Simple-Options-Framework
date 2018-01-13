@@ -6,7 +6,7 @@ Tested up to: 4.9.1
 Stable tag: 4.9
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Version: 20180107
+Version: 20180113
 Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 
@@ -134,6 +134,9 @@ $fields[] = array(
 $options_panel = new Exopite_Simple_Options_Framework( $config, $fields );
 
 == Changelog ==
+
+= 20180113 - 2018-01-13 =
+* Add meta field.
 
 = 20180107 - 2018-01-07 =
 * Add button field.
