@@ -103,7 +103,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                 return;
             }
 
-            $this->version = '20180113';
+            $this->version = '20180118';
 
             // Filter for override
             $this->config  = apply_filters( 'exopite-simple-options-framework-config', $config );
@@ -526,7 +526,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
                 if( class_exists( $class ) && method_exists( $class, 'enqueue' ) ) {
 
-                    $class::enqueue( plugin_dir_url( __FILE__ ), plugin_dir_path( __FILE__ ) );
+                    $url = $this->get_url( plugin_dir_path( __FILE__ ) );
+                    // $url = plugin_dir_url( __FILE__ );
+
+                    $class::enqueue( $url, plugin_dir_path( __FILE__ ) );
 
                 }
 
