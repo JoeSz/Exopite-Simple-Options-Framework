@@ -141,6 +141,10 @@ $fields[] = array(
 
 $options_panel = new Exopite_Simple_Options_Framework( $config, $fields );
 ```
+
+Example: 
+https://github.com/JoeSz/WordPress-Plugin-Boilerplate-Tutorial/blob/e1b1a561a08de46411f6705aa5bf33eee96b5fc1/plugin-name/admin/class-plugin-name-admin.php#L104
+
 ### CHANGELOG
 
 = 20180113 - 2018-01-13 =
