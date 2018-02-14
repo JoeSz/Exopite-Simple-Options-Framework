@@ -103,7 +103,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                 return;
             }
 
-            $this->version = '20180118';
+            $this->version = '20180113';
 
             // Filter for override
             $this->config  = apply_filters( 'exopite-simple-options-framework-config', $config );
@@ -131,6 +131,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                 case 'menu':
                     add_action( 'admin_init', array( $this, 'register_setting' ) );
                     add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
+                    add_action( 'wp_ajax_exopite-sof-export-options', array( $this, 'export_options' ) );
+                    add_action( 'wp_ajax_exopite-sof-import-options', array( $this, 'import_options' ) );
+                    add_action( 'wp_ajax_exopite-sof-reset-options', array( $this, 'reset_options' ) );
 
                     if ( ! empty( $this->config['plugin_basename'] ) ) {
                         add_filter( 'plugin_action_links_' . $this->config['plugin_basename'], array( $this, 'plugin_action_links' ) );
@@ -151,6 +154,59 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
             // add_action( 'wp_ajax_exopite_test', array( $this, 'exopite_test' ) );
 
+        }
+
+        public function import_options() {
+
+            $retval = 'error';
+
+            if( isset( $_POST['unique'] ) && ! empty( $_POST['value'] ) && isset( $_POST['wpnonce'] ) && wp_verify_nonce( $_POST['wpnonce'], 'exopite_sof_backup' ) ) {
+
+                $value = unserialize( gzuncompress( stripslashes( call_user_func( 'base'. '64' .'_decode', rtrim( strtr( $_POST['value'], '-_', '+/' ), '=' ) ) ) ) );
+
+                if ( is_array( $value ) ) {
+
+                    update_option( $_POST['unique'], $value );
+                    $retval = 'success';
+
+                }
+
+            }
+
+            die( $retval );
+
+        }
+
+        public function export_options() {
+
+            if( isset( $_GET['export'] ) && isset( $_GET['wpnonce'] ) && wp_verify_nonce( $_GET['wpnonce'], 'exopite_sof_backup' ) ) {
+
+                header('Content-Type: plain/text');
+                header('Content-disposition: attachment; filename=exopite-sof-options-'. gmdate( 'd-m-Y' ) .'.txt');
+                header('Content-Transfer-Encoding: binary');
+                header('Pragma: no-cache');
+                header('Expires: 0');
+
+                echo rtrim( strtr( call_user_func( 'base'. '64' .'_encode', addslashes( gzcompress( serialize( get_option( $_GET['export'] ) ), 9 ) ) ), '+/', '-_' ), '=' );
+
+            }
+
+            die();
+        }
+
+        function reset_options() {
+
+            $retval = 'error';
+
+            if( isset( $_POST['unique'] ) && isset( $_POST['wpnonce'] ) && wp_verify_nonce( $_POST['wpnonce'], 'exopite_sof_backup' ) ) {
+
+                delete_option( $_POST['unique'] );
+
+                $retval = 'success';
+
+            }
+
+            die( $retval );
         }
 
         /*
@@ -316,6 +372,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                      ( in_array( $hook, $page_post_hooks ) && in_array( $post->post_type, $post_type ) )
                     ) {
 
+                    if ( ! wp_style_is( 'font-awesome' ) || ! wp_style_is( 'font-awesome-470' ) || ! wp_style_is( 'FontAwesome' ) ) {
+
+                        /* Get font awsome */
+                        wp_register_style( 'font-awesome-470', "//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css", false, '470' );
+                        wp_enqueue_style( 'font-awesome-470' );
+
+                    }
+
                     // Add jQuery form scripts for menu options AJAX save
                     wp_enqueue_script( 'jquery-form' );
 
@@ -360,37 +424,124 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
             $valid = array();
 
+            $this->write_log( 'subfield-repeater-post', var_export( $_POST, true ) );
+            // $this->write_log( 'subfield-repeater-post', var_export( $this->fields, true ) );
+
             foreach ( $this->fields as $section ) {
 
                 foreach ( $section['fields'] as $field ) {
 
-                    switch ( $this->config['type'] ) {
-                        case 'menu':
-                            $value = $fields[$field['id']];
-                            break;
+                    if ( $field['type'] == 'group' ) {
 
-                        case 'metabox':
-                            $value = ( isset( $_POST[$this->unique][$field['id']] ) ) ? $_POST[$this->unique][$field['id']] : '';
-                            break;
-                    }
+                        if ( isset( $field['options']['repeater'] ) && $field['options']['repeater'] )  {
 
-                    // sanitize
-                    if( ! empty( $field['sanitize'] ) ) {
+                            // $this->write_log( 'subfield-repeater-post-3', var_export( $this->fields, true ) );
+                            // $this->write_log( 'subfield-repeater-post-3', var_export( $field['id'], true ) );
+                            // $this->write_log( 'subfield-repeater-post-1', var_export( $_POST[$this->unique], true ) );
 
-                        $sanitize = $field['sanitize'];
+                            // $this->write_log( 'subfield-repeater-full', PHP_EOL . var_export( $field, true ) );
+                            $i = 0;
 
-                        if( function_exists( $sanitize ) ) {
+                            switch ( $this->config['type'] ) {
+                                case 'menu':
+                                    $value_array =  $fields[$field['id']];
+                                    break;
 
-                            $value_sanitize = isset( $value ) ? $value : '';
-                            $valid[$field['id']] = call_user_func( $sanitize, $value_sanitize );
+                                case 'metabox':
+                                    $value_array = ( isset( $_POST[$this->unique][$field['id']] ) ) ? $_POST[$this->unique][$field['id']] : array();
+                                    break;
+                            }
+
+                            foreach ( $value_array as $field_value ) {
+                            // foreach ( $fields[$field['id']] as $field_value ) { // <-- menu
+
+                                // $this->write_log( 'subfield-repeater-post-2', var_export( $_POST[$this->unique], true ) );
+
+                                foreach ( $field['fields'] as $sub_field ) {
+
+
+                                    // $this->write_log( 'subfield-repeater', 'FIELDS: ' . var_export( $sub_field['id'], true ) . ' - TYPE: ' . $sub_field['type'] . ' - VALUES:' .var_export( $field_value[$sub_field['id']], true ) );
+
+                                    // $this->write_log( 'subfield-repeater-post', var_export( $_POST, true ) );
+
+                                    switch ( $this->config['type'] ) {
+                                        case 'menu':
+                                            $value =  $field_value[$sub_field['id']];
+                                            break;
+
+                                        case 'metabox':
+                                            $value = ( isset( $_POST[$this->unique][$field['id']][$i][$sub_field['id']] ) ) ? $_POST[$this->unique][$field['id']][$i][$sub_field['id']] : '';
+                                            break;
+                                    }
+
+
+                                    $valid[$field['id']][$i][$sub_field['id']] = $this->sanitize( $sub_field, $value );
+                                    // $valid[$field['id']][$i][$sub_field['id']] = $this->sanitize( $sub_field, $field_value[$sub_field['id']] );
+
+                                }
+                                $i++;
+                                // $this->write_log( 'subfield-repeater', '-------' );
+
+                            }
+
+                        } else {
+
+                            foreach ( $field['fields'] as $sub_field ) {
+
+                                // $this->write_log( 'subfield-group', 'FIELDS: ' . var_export( $sub_field, true ) . PHP_EOL . 'VALUES:' .var_export( $fields[$field['id']][$sub_field['id']], true ) );
+
+                                switch ( $this->config['type'] ) {
+                                    case 'menu':
+                                        $value = $fields[$field['id']][$sub_field['id']];
+                                        break;
+
+                                    case 'metabox':
+                                        $value = ( isset( $_POST[$this->unique][$field['id']][$sub_field['id']] ) ) ? $_POST[$this->unique][$field['id']][$sub_field['id']] : '';
+                                        break;
+                                }
+
+                                $valid[$field['id']][$sub_field['id']] = $this->sanitize( $sub_field, $value );
+                                // $valid[$field['id']][$sub_field['id']] = $this->sanitize( $sub_field, $fields[$field['id']][$sub_field['id']] );
+
+                            }
 
                         }
 
                     } else {
 
+                        // not group
+
+                        switch ( $this->config['type'] ) {
+                            case 'menu':
+                                $value = $fields[$field['id']];
+                                break;
+
+                            case 'metabox':
+                                $value = ( isset( $_POST[$this->unique][$field['id']] ) ) ? $_POST[$this->unique][$field['id']] : '';
+                                break;
+                        }
+
+                        // $valid = $this->save_check( $valid, $field, $value );
+
                         $valid[$field['id']] = $this->sanitize( $field, $value );
+                        // $this->write_log( 'value', 'FIE: ' . var_export( $field, true ) . PHP_EOL .  'VAL: ' . var_export( $value, true ) );
+                        // $valid[$field['id']] = $value;
 
                     }
+
+
+                    // switch ( $this->config['type'] ) {
+                    //     case 'menu':
+                    //         $value = $fields[$field['id']];
+                    //         break;
+
+                    //     case 'metabox':
+                    //         $value = ( isset( $_POST[$this->unique][$field['id']] ) ) ? $_POST[$this->unique][$field['id']] : '';
+                    //         break;
+                    // }
+
+                    // $valid[$field['id']] = $value;
+
 
                 }
 
@@ -398,6 +549,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
             switch ( $this->config['type'] ) {
                 case 'menu':
+                    // return array();
                     return $valid;
                     break;
 
@@ -414,6 +566,19 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
          */
         public function sanitize( $field, $value ) {
 
+            if( ! empty( $field['sanitize'] ) ) {
+
+                $sanitize = $field['sanitize'];
+
+                if( function_exists( $sanitize ) ) {
+
+                    $value_sanitize = isset( $value ) ? $value : '';
+                    return call_user_func( $sanitize, $value_sanitize );
+
+                }
+
+            }
+
             switch ( $field['type'] ) {
 
                 case 'panel':
@@ -425,12 +590,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                 case 'select':
                     // no break
                 case 'tap_list':
+                    // no break
+                case 'textarea':
                     // HTML and array are allowed
                     break;
 
-                case 'textarea':
-                    $value = sanitize_text_field( $value );
-                    break;
+                // case 'textarea':
+                //     $value = sanitize_text_field( $value );
+                //     break;
 
                 case 'ace_editor':
                     // $value = base64_encode( $value );
@@ -475,8 +642,21 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
                 foreach ( $section['fields'] as $field ) {
 
-                    // main
+                    // If has subfields
+                    if (  $callbacks['main'] == 'include_enqueue_field_class' && isset( $field['fields'] ) ) {
+
+                        foreach ( $field['fields'] as $subfield ) {
+
+                            if ( $callbacks['main'] ) call_user_func( array( $this, $callbacks['main'] ), $subfield );
+
+                        }
+
+                    }
+
                     if ( $callbacks['main'] ) call_user_func( array( $this, $callbacks['main'] ), $field );
+
+                    // main
+
 
                 }
 
@@ -531,6 +711,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
                     $class::enqueue( $url, plugin_dir_path( __FILE__ ) );
 
+                    // $class::enqueue( plugin_dir_url( __FILE__ ), plugin_dir_path( __FILE__ ) );
+
                 }
 
             }
@@ -542,19 +724,20 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
          * @param  array $field field args
          * @return string       generated HTML for the field
          */
-        public function add_field( $field ) {
+        public function add_field( $field, $value = '' ) {
 
             $output     = '';
             $class      = 'Exopite_Simple_Options_Framework_Field_' . $field['type'];
             $depend     = '';
             $wrap_class = ( ! empty( $field['wrap_class'] ) ) ? ' ' . $field['wrap_class'] : '';
             $hidden     = ( $field['type'] == 'hidden' ) ? ' hidden' : '';
+            $sub        = ( ! empty( $field['sub'] ) ) ? 'sub-': '';
 
             if ( ! empty( $field['dependency'] ) ) {
                 $hidden  = ' hidden';
-                $depend .= ' data-controller="' . $field['dependency'][0] . '"';
-                $depend .= ' data-condition="' . $field['dependency'][1] . '"';
-                $depend .= ' data-value="' . $field['dependency'][2] . '"';
+                $depend .= ' data-'. $sub .'controller="'. $field['dependency'][0] .'"';
+                $depend .= ' data-'. $sub .'condition="'. $field['dependency'][1] .'"';
+                $depend .= ' data-'. $sub .'value="'. $field['dependency'][2] .'"';
             }
 
             $output .= '<div class="exopite-sof-field exopite-sof-field-'. $field['type'] . $wrap_class . $hidden . '"'. $depend .'>';
@@ -575,14 +758,18 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
             if( class_exists( $class ) ) {
 
-                switch ( $this->config['type'] ) {
-                    case 'menu':
-                        $value = ( isset( $field['id'] ) && isset( $this->db_options[$field['id']] ) ) ? $this->db_options[$field['id']] : '';
-                        break;
+                if ( empty( $value ) ) {
 
-                    case 'metabox':
-                        $value = ( isset( $field['id'] ) && isset( $this->db_options[$field['id']] ) ) ? $this->db_options[$field['id']] : '';
-                        break;
+                    switch ( $this->config['type'] ) {
+                        case 'menu':
+                            $value = ( isset( $field['id'] ) && isset( $this->db_options[$field['id']] ) ) ? $this->db_options[$field['id']] : '';
+                            break;
+
+                        case 'metabox':
+                            $value = ( isset( $field['id'] ) && isset( $this->db_options[$field['id']] ) ) ? $this->db_options[$field['id']] : '';
+                            break;
+                    }
+
                 }
 
                 ob_start();
@@ -712,6 +899,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
             $tabbed = ( $sections > 1 && $this->config['tabbed'] ) ? ' exopite-sof-content-nav exopite-sof-content-js' : '';
 
+            // echo '<pre>';
+            // var_export( $this->db_options );
+            // echo '</pre>';
+
             /*
              * Generate fields
              */
@@ -724,15 +915,24 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                 foreach ( $this->fields as $section ) {
                     $active = '';
                     if ( $section === reset( $this->fields ) ) $active = ' active';
-                    echo '<li  class="exopite-sof-nav-list-item' . $active . '" data-section="' . $section['name'] . '"><span class="dashicons-before ' . $section['icon'] . '"></span>' . $section['title'] . '</li>';
+
+                    // Dependency for tabs too
+                    if ( ! empty( $section['dependency'] ) ) {
+                        $hidden  = ' hidden';
+                        $depend .= ' data-controller="' . $section['dependency'][0] . '"';
+                        $depend .= ' data-condition="' . $section['dependency'][1] . '"';
+                        $depend .= ' data-value="' . $section['dependency'][2] . '"';
+                    }
+
+                    echo '<li  class="exopite-sof-nav-list-item' . $active . $hidden . '"' . $depend . ' data-section="' . $section['name'] . '"><span class="dashicons-before ' . $section['icon'] . '"></span>' . $section['title'] . '</li>';
+
                 }
+
                 echo '</ul></div>';
 
             }
 
             echo '<div class="exopite-sof-sections">';
-
-            // echo wp_oembed_get('https://www.youtube.com/watch?v=Lq0fUa0vW_E');
 
             // Generate fields
             $callbacks = array(
