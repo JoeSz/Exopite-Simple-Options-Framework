@@ -1,9 +1,9 @@
 function updateRangeInput( elem ) {
-    jQuery( elem ).next().val( jQuery( elem ).val() );
+    $( elem ).next().val( $( elem ).val() );
 }
 
 function updateInputRange( elem ) {
-    jQuery( elem ).prev().val( jQuery( elem ).val() );
+    $( elem ).prev().val( $( elem ).val() );
 }
 
 if (typeof throttle !== "function") {
