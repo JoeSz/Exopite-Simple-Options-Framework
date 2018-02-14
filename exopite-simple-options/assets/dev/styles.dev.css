@@ -554,8 +554,8 @@
 }
 .exopite-sof-content .success {
     color: #155724;
-    background-color: #d4edda !important;
-    border-color: #c3e6cb !important;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
 }
 .exopite-sof-content .danger {
     color: #721c24;
@@ -1699,32 +1699,4 @@ input:disabled + .switch__toggle {
 }
 .exopite-sof-field-radio .radio-button__checkmark {
     margin-right: 10px;
-}
-.exopite-sof-ajax-message.success {
-    width: auto;
-    padding: 6px 10px 7px;
-    line-height: 15px;
-    font-size: 15px;
-    margin-right: 10px;
-    border: none !important;
-}
-#side-sortables .exopite-sof-field .exopite-sof-title {
-    width: 100%;
-    float: none;
-}
-#side-sortables .exopite-sof-field .exopite-sof-fieldset {
-    margin-left: 0;
-}
-#side-sortables .exopite-sof-nav {
-    display: none;
-}
-#side-sortables .chosen-container,
-#side-sortables .exopite-sof-content-nav .exopite-sof-sections {
-    width: 100% !important;
-}
-#side-sortables .exopite-sof-field {
-    padding: 15px 12px;
-}
-.exopite-sof-content .success {
-    width: auto;
 }
