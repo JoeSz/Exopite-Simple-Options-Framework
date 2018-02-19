@@ -73,7 +73,15 @@ if( ! class_exists( 'Exopite_Simple_Options_Framework_Field_backup' ) ) {
             return unserialize( gzuncompress( stripslashes( call_user_func( 'base'. '64' .'_decode', rtrim( strtr( $string, '-_', '+/' ), '=' ) ) ) ) );
         }
 
+        public static function enqueue( $plugin_sof_url, $plugin_sof_path ) {
 
+            /*
+             * https://sweetalert.js.org/guides/
+             */
+            wp_enqueue_script( 'sweetalert', '//unpkg.com/sweetalert/dist/sweetalert.min.js',  false, '2.1.0', true );
+
+
+        }
 
     }
 
