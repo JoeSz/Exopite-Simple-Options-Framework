@@ -424,7 +424,19 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
             $valid = array();
 
-            $this->write_log( 'subfield-repeater-post', var_export( $_POST, true ) );
+            // Preserve values start with "_".
+            $options = get_option( $this->unique );
+            foreach ( $options as $key => $value ) {
+
+                if ( substr( $key, 0, 1 ) === '_') {
+
+                    $valid[$key] = $value;
+
+                }
+
+            }
+
+            // $this->write_log( 'subfield-repeater-post', var_export( $_POST, true ) );
             // $this->write_log( 'subfield-repeater-post', var_export( $this->fields, true ) );
 
             foreach ( $this->fields as $section ) {
@@ -561,10 +573,22 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
         }
 
+        //DEGUB
+        // public function write_log( $type, $log_line ) {
+
+        //     $hash = 'ee0b589bc9c7a7ba65c46cd960764e52ca37e0ae';
+        //     $fn = EXOPITE_NOTIFICATOR_PLUGIN_DIR . 'logs/' . $type . '-' . $hash . '.log';
+        //     $log_in_file = file_put_contents( $fn, date('Y-m-d H:i:s') . ' - ' . $log_line . PHP_EOL, FILE_APPEND );
+
+        // }
+        // DEBUG
+
         /*
          * Validate and sanitize values
          */
         public function sanitize( $field, $value ) {
+
+            // $this->write_log( 'sanitize', 'TYPE: ' . $field['type'] .  ' - VAL: ' . var_export( $value, true ) );
 
             if( ! empty( $field['sanitize'] ) ) {
 
@@ -705,6 +729,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 
                 if( class_exists( $class ) && method_exists( $class, 'enqueue' ) ) {
+
 
                     $url = $this->get_url( plugin_dir_path( __FILE__ ) );
                     // $url = plugin_dir_url( __FILE__ );
