@@ -681,12 +681,34 @@ if (typeof throttle !== "function") {
             plugin.$element.find( '.exopite-sof-import-js' ).off().on( 'click'+'.'+plugin._name, function( event ) {
 
                 event.preventDefault();
+                if ( $( this ).hasClass( 'loading' ) ) return;
 
-                if ( confirm( $( this ).data( 'confirm' ) ) ) {
+                swal({
 
-                    plugin.importOptions.call( this, event, plugin );
+                    // title: "Are you sure?",
+                    text: $( this ).data( 'confirm' ),
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
 
-                }
+                }).then(( willImport ) => {
+
+                    if ( willImport ) {
+
+                        $( this ).addClass('loading');
+                        $( this ).prop( "disabled", true );
+                        this.disabled = true;
+                        plugin.importOptions.call( this, event, plugin );
+
+                    }
+
+                });
+
+                // if ( confirm( $( this ).data( 'confirm' ) ) ) {
+
+                //     plugin.importOptions.call( this, event, plugin );
+
+                // }
 
             });
 
@@ -694,11 +716,25 @@ if (typeof throttle !== "function") {
 
                 event.preventDefault();
 
-                if ( confirm( $( this ).data( 'confirm' ) ) ) {
+                swal({
 
+                    // title: "Are you sure?",
+                    text: $( this ).data( 'confirm' ),
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
 
-                    plugin.resetOptions.call( this, event, plugin );
-                }
+                }).then(( willDelete ) => {
+
+                    if (willDelete) {
+
+                        $( this ).addClass('loading');
+                        $( this ).prop( "disabled", true );
+                        plugin.resetOptions.call( this, event, plugin );
+
+                    }
+
+                });
 
             });
 
@@ -727,14 +763,20 @@ if (typeof throttle !== "function") {
                     if ( response == 'success' ) {
 
                         plugin.$element.find( '.exopite-sof__import' ).val( '' );
+                        swal({
+                            icon: "success",
+                        });
                         location.reload();
 
                     }
 
                 },
                 error: function( xhr, status, error ) {
+
                     console.log( 'Status: ' + xhr.status );
                     console.log( 'Error: ' + xhr.responseText );
+                    swal( "Error!", "Check console for more info!", "error" );
+
                 }
             });
 
@@ -758,14 +800,19 @@ if (typeof throttle !== "function") {
 
                     if ( response == 'success' ) {
 
+                        swal({
+                            icon: "success",
+                        });
                         location.reload();
 
                     }
 
                 },
+
                 error: function( xhr, status, error ) {
                     console.log( 'Status: ' + xhr.status );
                     console.log( 'Error: ' + xhr.responseText );
+                    swal( "Error!", "Check console for more info!", "error" );
                 }
             });
 
