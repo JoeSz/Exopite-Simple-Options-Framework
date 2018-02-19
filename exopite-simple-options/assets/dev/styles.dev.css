@@ -1700,3 +1700,65 @@ input:disabled + .switch__toggle {
 .exopite-sof-field-radio .radio-button__checkmark {
     margin-right: 10px;
 }
+/*repeater*/
+.exopite-sof-cloneable__title {
+    border-bottom: 1px solid #e5e5e5;
+    background: #fafafa;
+    padding: 12px 30px;
+    cursor: pointer;
+    position: relative;
+    margin: 0;
+}
+.exopite-sof-cloneable__item {
+    border: 1px solid #e5e5e5;
+    margin-bottom: 5px;
+}
+.exopite-sof-cloneable--helper {
+    float: right;
+}
+.exopite-sof-cloneable__muster--hidden {
+    display: none;
+}
+.exopite-sof-accordion--hidden .exopite-sof-accordion__content {
+    display: none;
+}
+.exopite-sof-cloneable__item mute {
+    font-size: 89%;
+    font-style: italic;
+    color: #aaa;
+}
+.exopite-sof-content.exopite-sof-content-nav {
+    display: flex;
+}
+.chosen-container {
+    max-width: 100%;
+}
+.exopite-sof-info--small {
+    display: block;
+    color: #777;
+    font-style: italic;
+}
+.exopite-sof-info--warning {
+    color: #f00;
+}
+.wp-core-ui .button-warning:focus,
+.wp-core-ui .button-warning:hover,
+.wp-core-ui .button-warning:active,
+.wp-core-ui .button-warning {
+    background: #de0000;
+    border-color: #c00000;
+    box-shadow: 0 1px 0 red;
+    text-shadow: 0 -1px 1px #b40000,1px 0 1px #b40000,0 1px 1px #b40000,-1px 0 1px #b40000;
+    color: #fff;
+}
+.button.loading,
+.button.loading:active,
+.button.loading:focus,
+.button.loading:hover {
+    background: #aaa;
+    border-color: #aaa;
+    box-shadow: none;
+    color: #666;
+    text-shadow: none;
+    cursor: default;
+}
