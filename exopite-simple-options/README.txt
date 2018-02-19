@@ -135,6 +135,12 @@ $options_panel = new Exopite_Simple_Options_Framework( $config, $fields );
 
 == Changelog ==
 
+= 20180219 - 2018-02-19 =
+* Add SweetAlert (https://sweetalert.js.org/docs/)
+
+= 20180114 - 2018-01-14 =
+* Add backup and group/repeater field.
+
 = 20180113 - 2018-01-13 =
 * Add meta field.
 
