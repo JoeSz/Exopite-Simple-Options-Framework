@@ -731,8 +731,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                 if( class_exists( $class ) && method_exists( $class, 'enqueue' ) ) {
 
 
-                    $url = $this->get_url( plugin_dir_path( __FILE__ ) );
-                    // $url = plugin_dir_url( __FILE__ );
+                    // $url = $this->get_url( plugin_dir_path( __FILE__ ) );
+                    $url = plugin_dir_url( __FILE__ );
 
                     $class::enqueue( $url, plugin_dir_path( __FILE__ ) );
 
