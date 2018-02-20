@@ -1762,3 +1762,12 @@ input:disabled + .switch__toggle {
     text-shadow: none;
     cursor: default;
 }
+#side-sortables .exopite-sof-field .exopite-sof-title {
+    position: relative;
+    width: 100%;
+    float: none;
+}
+#side-sortables .exopite-sof-field .exopite-sof-fieldset {
+    margin-left: 0;
+    padding-top: 5px;
+}
