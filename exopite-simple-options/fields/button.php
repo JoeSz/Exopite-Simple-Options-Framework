@@ -13,10 +13,10 @@ if( ! class_exists( 'Exopite_Simple_Options_Framework_Field_button' ) ) {
             parent::__construct( $field, $value, $unique, $where );
 
             $defaults = array(
-              'href'                     => '#',
-              'target'                   => '_self',
-              'value'                    => 'button',
-              'btn-class'                => 'exopite-sof-btn',
+                'href'      => '#',
+                'target'    => '_self',
+                'value'     => 'button',
+                'btn-class' => 'exopite-sof-btn',
             );
 
             $options = ( ! empty( $this->field['options'] ) ) ? $this->field['options'] : array();
