@@ -424,16 +424,18 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
             $valid = array();
 
-            // Preserve values start with "_".
-            $options = get_option( $this->unique );
-            foreach ( $options as $key => $value ) {
+            if ( $menu ) {
+                // Preserve values start with "_".
+                $options = get_option( $this->unique );
+                foreach ( $options as $key => $value ) {
 
-                if ( substr( $key, 0, 1 ) === '_') {
+                    if ( substr( $key, 0, 1 ) === '_') {
 
-                    $valid[$key] = $value;
+                        $valid[$key] = $value;
+
+                    }
 
                 }
-
             }
 
             // $this->write_log( 'subfield-repeater-post', var_export( $_POST, true ) );
@@ -829,7 +831,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
         public function display_options_page_header() {
 
 
-            echo '<form method="post" action="options.php" enctype="multipart/form-data" name="' . $this->config['id'] . '" class="exopite-sof-form-js ' . $this->config['id'] . '-form" data-save="' . __( 'Saving...', 'exopite-simple-options' ) . '" data-saved="' . __( 'Saved Successfully.', 'exopite-simple-options' ) . '">';
+            echo '<form method="post" action="options.php" enctype="multipart/form-data" name="' . $this->unique . '" class="exopite-sof-form-js ' . $this->unique . '-form" data-save="' . __( 'Saving...', 'exopite-simple-options' ) . '" data-saved="' . __( 'Saved Successfully.', 'exopite-simple-options' ) . '">';
 
             settings_fields( $this->unique );
             do_settings_sections( $this->unique );
@@ -899,7 +901,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
             settings_errors();
 
-            echo '<div class="exopite-sof-wrapper exopite-sof-wrapper-' . $this->config['type'] . ' ' . $this->config['id'] . '-options">';
+            echo '<div class="exopite-sof-wrapper exopite-sof-wrapper-' . $this->config['type'] . ' ' . $this->unique . '-options">';
 
             switch ( $this->config['type'] ) {
                 case 'menu':
