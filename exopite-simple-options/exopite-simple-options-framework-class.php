@@ -946,7 +946,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                     // Dependency for tabs too
                     if ( ! empty( $section['dependency'] ) ) {
                         $hidden  = ' hidden';
-                        $depend .= ' data-controller="' . $section['dependency'][0] . '"';
+                        $depend = ' data-controller="' . $section['dependency'][0] . '"';
                         $depend .= ' data-condition="' . $section['dependency'][1] . '"';
                         $depend .= ' data-value="' . $section['dependency'][2] . '"';
                     }
