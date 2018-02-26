@@ -943,6 +943,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                     $active = '';
                     if ( $section === reset( $this->fields ) ) $active = ' active';
 
+                    $depend = '';
+                    $hidden = '';
                     // Dependency for tabs too
                     if ( ! empty( $section['dependency'] ) ) {
                         $hidden  = ' hidden';
