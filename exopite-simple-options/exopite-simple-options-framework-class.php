@@ -948,12 +948,19 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                     // Dependency for tabs too
                     if ( ! empty( $section['dependency'] ) ) {
                         $hidden  = ' hidden';
-                        $depend .= ' data-controller="' . $section['dependency'][0] . '"';
+                        $depend = ' data-controller="' . $section['dependency'][0] . '"';
                         $depend .= ' data-condition="' . $section['dependency'][1] . '"';
                         $depend .= ' data-value="' . $section['dependency'][2] . '"';
                     }
 
-                    echo '<li  class="exopite-sof-nav-list-item' . $active . $hidden . '"' . $depend . ' data-section="' . $section['name'] . '"><span class="dashicons-before ' . $section['icon'] . '"></span>' . $section['title'] . '</li>';
+                    echo '<li  class="exopite-sof-nav-list-item' . $active . $hidden . '"' . $depend . ' data-section="' . $section['name'] . '">';
+                    if ( strpos( $section['icon'], 'dashicon' ) !== false ) {
+                        echo '<span class="dashicons-before ' . $section['icon'] . '"></span>';
+                    } elseif ( strpos( $section['icon'], 'fa' ) !== false ) {
+                        echo '<span class="fa-before ' . $section['icon'] . '" aria-hidden="true"></span>';
+                    }
+                    echo $section['title'];
+                    echo '</li>';
 
                 }
 
