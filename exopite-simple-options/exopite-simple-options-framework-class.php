@@ -118,6 +118,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
             $this->dirname = wp_normalize_path( dirname( __FILE__ ) );
             $this->unique = $this->config['id'];
 
+            if ( ! isset( $this->config['type'] ) ) $this->config['type'] = '';
+
             // Load options only if menu
             // on metabox, page id is not yet available
             if ( $this->config['type'] == 'menu' ) {
