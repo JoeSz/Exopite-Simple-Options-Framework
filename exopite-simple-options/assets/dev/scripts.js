@@ -547,7 +547,7 @@ if (typeof throttle !== "function") {
 
             var numItems = this.$element.find( '.exopite-sof-cloneable__wrapper' ).children( '.exopite-sof-cloneable__item' ).length;
 
-            if ( $.isFunction( 'chosen' ) ) $group.find("select.chosen").chosen("destroy");
+            if ( $.fn.chosen ) $group.find("select.chosen").chosen("destroy");
 
             var $cloned = this.$element.find( '.exopite-sof-cloneable__muster' ).clone( true );
             $cloned.find( '.exopite-sof-cloneable--remove' ).removeClass( 'disabled' );
@@ -558,7 +558,7 @@ if (typeof throttle !== "function") {
             $group.find( '.exopite-sof-cloneable__wrapper' ).append( $cloned );
             this.checkAmount();
             this.updateNameIndex();
-            if ( $.isFunction( 'chosen' ) ) $group.find("select.chosen").chosen({width:"300px"});
+            if ( $.fn.chosen ) $group.find("select.chosen").chosen({width:"300px"});
 
             $cloned.find( '.datepicker' ).each(function(index, el) {
                 var dateFormat = $( el ).data( 'format' );
