@@ -495,6 +495,7 @@ if (typeof throttle !== "function") {
             $button.parents( '.exopite-sof-cloneable__item' ).remove();
             this.checkAmount();
             this.updateNameIndex();
+            $cloned.trigger('exopite-sof-field-group-item-removed');
         },
 
         checkAmount: function() {
@@ -518,8 +519,8 @@ if (typeof throttle !== "function") {
             this.$element.find( '.exopite-sof-cloneable__wrapper' ).find( '.exopite-sof-cloneable__item' ).each(function(index, el) {
                 var title = $( el ).find( '[data-title=title]' ).val();
                 $( el ).find( '.exopite-sof-cloneable__text' ).text( title );
+                $( el ).trigger('exopite-sof-field-group-item-title-updated');
             });
-
 
         },
 
@@ -555,6 +556,7 @@ if (typeof throttle !== "function") {
             $cloned.removeClass( 'exopite-sof-cloneable__muster--hidden' );
             $cloned.removeClass( 'exopite-sof-accordion--hidden' );
             $cloned.find( '[disabled]' ).attr('disabled', false);
+            $cloned.trigger('exopite-sof-field-group-item-added-before');
             $group.find( '.exopite-sof-cloneable__wrapper' ).append( $cloned );
             this.checkAmount();
             this.updateNameIndex();
@@ -562,12 +564,12 @@ if (typeof throttle !== "function") {
 
             $cloned.find( '.datepicker' ).each(function(index, el) {
                 var dateFormat = $( el ).data( 'format' );
-                console.log( 'format: ' + dateFormat );
                 $( el ).removeClass('hasDatepicker').datepicker( { 'dateFormat': dateFormat } );
             });
 
             // $cloned.exopiteSofManageDependencies({modifier: 'sub-'});
             $cloned.exopiteSofManageDependencies( 'sub' );
+            $cloned.trigger('exopite-sof-field-group-item-added-after');
         },
 
     };
