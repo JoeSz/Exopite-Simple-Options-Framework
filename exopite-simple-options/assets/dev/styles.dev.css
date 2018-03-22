@@ -1795,3 +1795,12 @@ input:disabled + .switch__toggle {
     text-align: center;
     font-size: 16px;
 }
+.exopite-sof-fieldset input[type=text].colorpicker.wp-color-picker {
+    display: inline-block;
+    background: #fff;
+    height: auto;
+    position: relative;
+}
+.exopite-sof-fieldset .wp-picker-container .hidden {
+    display: inline-block;
+}
