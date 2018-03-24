@@ -124,7 +124,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
             // on metabox, page id is not yet available
             if ( $this->config['type'] == 'menu' ) {
 
-                $this->db_options = get_option( $this->unique );
+                $this->db_options = apply_filters( 'exopite-simple-options-framework-menu-get-options', get_option( $this->unique ), $this->unique );
 
             }
 
@@ -539,12 +539,19 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
             }
 
+            do_action( 'exopite-simple-options-framework-do-save-options', $valid, $this->unique );
+            $valid = apply_filters( 'exopite-simple-options-framework-save-options', $valid, $this->unique );
             switch ( $this->config['type'] ) {
                 case 'menu':
+                //exopite-simple-options-framework-options
+                    $valid = apply_filters( 'exopite-simple-options-framework-save-menu-options', $valid, $this->unique );
+                    do_action( 'exopite-simple-options-framework-do-save-menu-options', $value, $this->unique );
                     return $valid;
                     break;
 
                 case 'metabox':
+                    $valid = apply_filters( 'exopite-simple-options-framework-save-meta-options', $valid, $this->unique, $post->ID );
+                    do_action( 'exopite-simple-options-framework-do-save-meta-options', $valid, $this->unique, $post->ID );
                     update_post_meta( $post->ID, $this->unique, $valid );
                     break;
             }
@@ -887,7 +894,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                      * Get options
                      * Can not get options in __consturct, because there, the_ID is not yet available.
                      */
-                    $this->db_options = get_post_meta( get_the_ID(), $this->unique, true );
+                    $meta_options = get_post_meta( get_the_ID(), $this->unique, true );
+                    $this->db_options = apply_filters( 'exopite-simple-options-framework-meta-get-options', $meta_options, $this->unique, get_the_ID() );
                     // $this->db_options = json_decode( get_post_meta( get_the_ID(), $this->unique, true ), true );
                     break;
             }
