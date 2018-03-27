@@ -99,11 +99,9 @@ if( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
                         return call_user_func( $default['function'], $args );
                     }
 
-                } else {
-
-                    return $default;
-
                 }
+
+                return $default;
 
             }
 
