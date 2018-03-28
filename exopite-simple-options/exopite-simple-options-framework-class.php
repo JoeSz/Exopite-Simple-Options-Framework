@@ -265,8 +265,20 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
             /*
              *  Documentation : https://codex.wordpress.org/Plugin_API/Filter_Reference/plugin_action_links_(plugin_file_name)
              */
+            $settings_link = '';
+
+            if ( isset( $this->config['submenu'] ) && $this->config['submenu'] == true && isset( $this->config['menu'] ) && $this->config['menu'] == 'plugins.php' && ( ! isset( $this->config['settings-link'] ) || empty( $this->config['settings-link'] ) ) ) {
+                $settings_link = 'plugins.php?page=' . $this->unique;
+            }
+
+            if ( isset( $this->config['settings-link'] ) && ! empty( $this->config['settings-link'] ) ) {
+                $settings_link = esc_url( $this->config['settings-link'] );
+            }
+
+            if ( empty( $settings_link ) ) return $links;
+
             $settings_link = array(
-                '<a href="' . admin_url( 'plugins.php?page=' . $this->unique ) . '">' . __( 'Settings', '' ) . '</a>',
+                '<a href="' . admin_url( $settings_link ) . '">' . __( 'Settings', '' ) . '</a>',
             );
 
             return array_merge(  $settings_link, $links );
