@@ -78,7 +78,8 @@ Exopite Simple Options is free and available on Github. Feel free to submit patc
 - upload (multiple, on post type -post, page, custom- you can attach uploaded to post)
 - video (mp4/oembed, eg.: youtube)
 
-![](assets/screenshot-1.png)
+![](assets/screenshot-2.png)
+![](assets/screenshot-3.png)
 
 ### REQUIREMENTS
 
