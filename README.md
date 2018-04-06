@@ -3,7 +3,7 @@
 ## Fast, easy and lightweight option/metabox form generator.
 
 - Author: Joe Szalai
-- Version: 20180113
+- Version: 20180406
 - Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 - GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 - Author URL: https://joe.szalai.org
