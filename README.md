@@ -10,13 +10,12 @@
 - License: GNU General Public License v3 or later
 - License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-### NOTE
-
-The Framework still in development stage.
-
-Documentation is still in-progress.
-
-The Framework based on some CodeStar Framework, MetaBox.io code and design. The fields configs desgin also based on CodeStar Framework.
+> ### NOTE
+>
+> The Framework still in development stage. <br />
+> Documentation is still in-progress.
+>
+> The Framework based on some CodeStar Framework, MetaBox.io code and design. The fields configs desgin also based on CodeStar Framework.
 I created this framework for plugins and metaboxes. Not for Themes. For Themes I recommend CodeStar Framework.
 
 ### DESCRIPTION
@@ -24,7 +23,7 @@ I created this framework for plugins and metaboxes. Not for Themes. For Themes I
 WHY?
 I need someting fast, easy and lightweight to generate option page and/or metabox for my plugins and/or post types.
 
-I also love to create/program someting new (for me) to have fun and leary every day.
+I also love to create/code to have fun and leary every day someting new.
 
 For my theme I use CodeStar Framework, so I created similarly. Unfortunately CodeStar Framework based on static class, can not initialize multiple times and this is required for plugns.
 
@@ -42,32 +41,42 @@ Exopite Simple Options is free and available on Github. Feel free to submit patc
 
 ### FEATURES
 
-Available fields:
+- Easy field generator for plugin options for metabox for any post type.
+- All field support callback on default value, content callback for content and notice field.
+- Dependency handling, also for section tabs (only in tabbed=true).
+- No ads, and never will.
+- Files are loaded only when required.
+- Minimum footprint.
 
-- ace_field
-- video (mp4/oembed)
-- upload (multiple)
-- attached (Attached files/images/etc... to the post -> only for Metabox, multiselect, AJAX delete)
-- notice
-- editor (WYSIWYG WordPress Editor)
-- text
-- password
-- color (rgb/rgba/html5)
-- image
-- textarea
-- switcher
-- date (datepicker/html5)
-- checkbox
-- radio
+### Fields:
+- ACE editor
+- attached (Attached files/images/etc..., multiselect, AJAX delete. Metabox only.)
+- backup
+- button
 - button_bar
-- select (single/multiselect + posttype)
-- panel
+- card
+- checkbox
+- color (rgb/rgba/html5)
 - content
+- date (datepicker/html5)
+- editor (WYSIWYG WordPress Editor)
+- group (Dynamically add groups. All fields are valid, except: group and editor)
+- hidden
+- image
+- image_select
+- meta
+- notice
 - number
+- password
+- radio
 - range
-- tap_list (radio/checkbox)
-- image_select (radio/checkbox)
-- meta (readonly -> to the post -> only for Metabox)
+- select (single/multiselect + posttype)
+- switcher
+- tap_list
+- text
+- textarea
+- upload (multiple, on post type -post, page, custom- you can attach uploaded to post)
+- video (mp4/oembed, eg.: youtube)
 
 ![](assets/screenshot-1.png)
 
@@ -87,22 +96,49 @@ Browsers
 
 ### INSTALLATION
 
-Copy to plugin/theme folder.
+* Copy to plugin/theme folder.
+* Indluce exopite-simple-options/exopite-simple-options-framework-class.php
+* Create options and fields nad hook to 'init'.
 
-Hook to 'init'.
+#### Complete example with all available fields:
+https://github.com/JoeSz/WordPress-Plugin-Boilerplate-Tutorial/blob/f8b70137c1beb3fc6f087f185418d51bef85a1bc/plugin-name/admin/class-plugin-name-admin.php#L117
 
+#### Example:
 ```php
-$config = array(
-
-    'type'              => 'menu',                          // Required, menu or metabox
-    'id'                => $this->plugin_name,              // Required, meta box id, unique per page,
-                                                            //   to save: get_option( id )
-    'menu'              => 'plugins.php',                   // Required, sub page to your options page
-    'submenu'           => true,                            // Required for submenu
-    'title'             => 'The name',                      // The name of this page
-    'capability'        => 'manage_options',                // The capability needed to view the page
-    'tabbed'            => false,                           // Separate sections to tabs
-
+/*
+ * Create a submenu page under Plugins and metabox for seleted post type(s).
+ * Framework also add "Settings" link to your plugin in plugins list.
+ */
+$config_submenu = array(
+    'type'              => 'menu',                // Required, menu or metabox
+    'id'                => $this->plugin_name,    // Required, meta box id,
+                                                  // unique per page, to save:
+                                                  // get_option( id )
+    'menu'              => 'plugins.php',         // Required, sub page to your options page
+    'submenu'           => true,                  // Required for submenu
+    'title'             => 'Demo Admin Page',     //The name of this page
+    'capability'        => 'manage_options',      // The capability needed to view the page
+    'plugin_basename'   =>  plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_name . '.php' ),
+    // 'tabbed'            => false,              // is tabbed or not
+                                                  // Note: if only one section then
+                                                  // Tabs are disabled.
+);
+/*
+ * To add a metabox.
+ * This normally go to your functions.php or another hook
+ */
+$config_metabox = array(
+    /*
+     * METABOX
+     */
+    'type'              => 'metabox',
+    'id'                => $this->plugin_name . '-meta',
+    'post_types'        => array( 'post', 'page' )    // Post types to display meta box
+    'context'           => 'advanced',
+    'priority'          => 'default',
+    'title'             => 'Demo Metabox',
+    'capability'        => 'edit_posts',              // The capability needed to view the page
+    'tabbed'            => true,
 );
 
 $fields[] = array(
@@ -113,7 +149,7 @@ $fields[] = array(
         // fields...
 
         array(
-            'id'      => 'autoload',
+            'id'      => 'unique_id_1',
             'type'    => 'switcher',
             'title'   => 'Field title',
             'default' => 'yes',
@@ -130,7 +166,7 @@ $fields[] = array(
         // fields...
 
         array(
-            'id'      => 'autoload',
+            'id'      => 'unique_id_2',
             'type'    => 'switcher',
             'title'   => 'Field title',
             'default' => 'yes',
@@ -139,11 +175,9 @@ $fields[] = array(
     ),
 );
 
-$options_panel = new Exopite_Simple_Options_Framework( $config, $fields );
+$options_panel = new Exopite_Simple_Options_Framework( $config_submenu, $fields );
+$metabox_panel = new Exopite_Simple_Options_Framework( $config_metabox, $fields );
 ```
-
-Example: 
-https://github.com/JoeSz/WordPress-Plugin-Boilerplate-Tutorial/blob/e1b1a561a08de46411f6705aa5bf33eee96b5fc1/plugin-name/admin/class-plugin-name-admin.php#L104
 
 ### CHANGELOG
 
