@@ -462,6 +462,7 @@
 .exopite-sof-fieldset input[type="password"],
 .exopite-sof-fieldset input[type="text"] {
     width: 375px;
+    height: auto;
 }
 .exopite-sof-fieldset input[type="date"],
 .exopite-sof-field-date input[type="text"] {
@@ -1850,6 +1851,7 @@ input:disabled + .switch__toggle {
     font-weight: 400;
     position: relative;
     padding: .2em 0;
+    text-align: center;
 }
 .ui-datepicker .ui-datepicker-title {
     margin-top: .4em;
@@ -1867,6 +1869,9 @@ input:disabled + .switch__toggle {
 }
 .ui-datepicker .ui-datepicker-prev {
     left: 2px;
+}
+.ui-datepicker .ui-datepicker-next {
+    right: 2px;
 }
 .ui-datepicker .ui-datepicker-next,
 .ui-datepicker .ui-datepicker-prev {
