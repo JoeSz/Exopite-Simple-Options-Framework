@@ -1780,15 +1780,6 @@ input:disabled + .switch__toggle {
     text-shadow: none;
     cursor: default;
 }
-#side-sortables .exopite-sof-field .exopite-sof-title {
-    position: relative;
-    width: 100%;
-    float: none;
-}
-#side-sortables .exopite-sof-field .exopite-sof-fieldset {
-    margin-left: 0;
-    padding-top: 5px;
-}
 .fa-before::before {
     width: 20px;
     height: 20px;
@@ -1945,6 +1936,16 @@ input:disabled + .switch__toggle {
     background: #0073aa;
     color: #fff;
 }
+/* Admin sidebar in posts */
+.meta-box-sortables.ui-sortable .exopite-sof-field .exopite-sof-title {
+    position: relative;
+    width: 100%;
+    float: none;
+}
+.meta-box-sortables.ui-sortable .exopite-sof-field .exopite-sof-fieldset {
+    margin-left: 0;
+    padding-top: 5px;
+}
 .meta-box-sortables.ui-sortable .exopite-sof-content-nav {
     background-color: #fff;
 }
@@ -1962,19 +1963,21 @@ input:disabled + .switch__toggle {
     padding: 7px 7px;
 	border-bottom: none;
 }
-.meta-box-sortables.ui-sortable .exopite-sof-cloneable__title {
+.meta-box-sortables.ui-sortable .exopite-sof-sections h4 {
+    font-size: 1.3em;
+    padding: 6px 0;
+}
+.meta-box-sortables.ui-sortable .exopite-sof-sections .exopite-sof-cloneable__title {
     border-bottom: none;
     padding: 7px 10px;
     cursor: pointer;
 	font-size: 0.8rem;
     font-weight: 400;
 }
-.meta-box-sortables.ui-sortable .exopite-sof-sections h4 {
-    font-size: 1.3em;
-    margin: 1.33em 0;
-    padding: 6px 0;
+.meta-box-sortables.ui-sortable .exopite-sof-sections .exopite-sof-field .exopite-sof-title {
+    font-size: 13px;
 }
-.meta-box-sortables.ui-sortable .exopite-sof-sections h2 {
+#poststuff .exopite-sof-sections h2 {
     font-size: 18px;
 	padding: 8px 6px;
 }
