@@ -495,7 +495,7 @@ if (typeof throttle !== "function") {
             $button.parents( '.exopite-sof-cloneable__item' ).remove();
             this.checkAmount();
             this.updateNameIndex();
-            $cloned.trigger('exopite-sof-field-group-item-removed');
+            $button.trigger('exopite-sof-field-group-item-removed');
         },
 
         checkAmount: function() {
@@ -550,25 +550,62 @@ if (typeof throttle !== "function") {
 
             if ( $.fn.chosen ) $group.find("select.chosen").chosen("destroy");
 
-            var $cloned = this.$element.find( '.exopite-sof-cloneable__muster' ).clone( true );
+            var $muster = this.$element.find( '.exopite-sof-cloneable__muster' );
+            var $cloned = $muster.clone( true );
+
+            /**
+             * Get hidden "muster" element and clone it. Remove hidden muster classes.
+             * Finaly append to group.
+             * After that need to initilaize components like:
+             * - ACE Editor
+             * - Choosen
+             * - Date picker
+             * - Dependencies
+             */
             $cloned.find( '.exopite-sof-cloneable--remove' ).removeClass( 'disabled' );
             $cloned.removeClass( 'exopite-sof-cloneable__muster' );
             $cloned.removeClass( 'exopite-sof-cloneable__muster--hidden' );
             $cloned.removeClass( 'exopite-sof-accordion--hidden' );
             $cloned.find( '[disabled]' ).attr('disabled', false);
             $cloned.trigger('exopite-sof-field-group-item-added-before');
+
+            /**
+             * Deal with ACE Editor.
+             * ACE Editor need a field ID and ID has to be unique.
+             * So we need to update ID to the next one.
+             */
+            var hasACE = false;
+            if( $cloned.find( '.exopite-sof-ace-editor' ).length !== 0 ) {
+                hasACE = true;
+                console.log( 'has ace editor' );
+                var lastACEEditor = $group.find( '.exopite-sof-ace-editor' ).last().attr( 'id' );
+                var lastID = lastACEEditor.substr( lastACEEditor.length - 1 );
+                var nextACEEditorID = lastACEEditor.substr( 0, lastACEEditor.length - 1 ) + ( ++lastID);
+                $cloned.find( '.exopite-sof-ace-editor' ).attr( 'id', nextACEEditorID );
+            }
+
             $group.find( '.exopite-sof-cloneable__wrapper' ).append( $cloned );
+
+            // Initialize ACE Editor
+            if ( hasACE ) $cloned.find( '.exopite-sof-field-ace_editor' ).exopiteSofFieldACEEditor();
+
             this.checkAmount();
             this.updateNameIndex();
+
+            // If has choosen, initilize it.
             if ( $.fn.chosen ) $group.find("select.chosen").chosen({width:"300px"});
 
+            // If has date picker, initilize it.
             $cloned.find( '.datepicker' ).each(function(index, el) {
                 var dateFormat = $( el ).data( 'format' );
                 $( el ).removeClass('hasDatepicker').datepicker( { 'dateFormat': dateFormat } );
             });
 
             // $cloned.exopiteSofManageDependencies({modifier: 'sub-'});
+
+            // Handle dependencies.
             $cloned.exopiteSofManageDependencies( 'sub' );
+
             $cloned.trigger('exopite-sof-field-group-item-added-after');
         },
 
@@ -612,6 +649,8 @@ if (typeof throttle !== "function") {
             if ( this.$element.data('sortable') ) {
 
                 /**
+                 * Make accordion items sortable.
+                 *
                  * https://jqueryui.com/sortable/
                  * http://api.jqueryui.com/sortable/
                  */
@@ -620,9 +659,6 @@ if (typeof throttle !== "function") {
                     cursor: "move",
                 });
                 this.$element.disableSelection();
-                console.log('do sort');
-            } else {
-                console.log('do not sort');
             }
 
         },
@@ -637,6 +673,10 @@ if (typeof throttle !== "function") {
 
             });
 
+            /**
+             * Need to "reorder" name elements for metabox,
+             * so it is saved in the order of displayed.
+             */
             // Call function if sorting is stopped
             plugin.$element.on('sortstop' + '.' + plugin._name, function () {
 
@@ -676,6 +716,7 @@ if (typeof throttle !== "function") {
 
             var $this = $header.parent( '.exopite-sof-accordion__item' );
 
+            // To prevent unwanted click trigger after sort (drag and drop)
             if ( this.isSortableCalled ) {
                 this.isSortableCalled = false;
                 return;
