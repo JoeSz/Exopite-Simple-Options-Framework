@@ -1936,51 +1936,54 @@ input:disabled + .switch__toggle {
     background: #0073aa;
     color: #fff;
 }
+.exopite-sof-accordion__title {
+    min-height: 19px;
+}
 /* Admin sidebar in posts */
-.meta-box-sortables.ui-sortable .exopite-sof-field .exopite-sof-title {
+#side-sortables .exopite-sof-field .exopite-sof-title {
     position: relative;
     width: 100%;
     float: none;
 }
-.meta-box-sortables.ui-sortable .exopite-sof-field .exopite-sof-fieldset {
+#side-sortables .exopite-sof-field .exopite-sof-fieldset {
     margin-left: 0;
     padding-top: 5px;
 }
-.meta-box-sortables.ui-sortable .exopite-sof-content-nav {
+#side-sortables .exopite-sof-content-nav {
     background-color: #fff;
 }
-.meta-box-sortables.ui-sortable .exopite-sof-nav {
+#side-sortables .exopite-sof-nav {
     display: none;
 }
-.meta-box-sortables.ui-sortable .exopite-sof-content-nav .exopite-sof-sections {
+#side-sortables .exopite-sof-content-nav .exopite-sof-sections {
     width: 100%;
 }
-.meta-box-sortables.ui-sortable .exopite-sof-content-nav .exopite-sof-section-header,
-.meta-box-sortables.ui-sortable .exopite-sof-content-nav .hide {
+#side-sortables .exopite-sof-content-nav .exopite-sof-section-header,
+#side-sortables .exopite-sof-content-nav .hide {
     display: block;
 }
-.meta-box-sortables.ui-sortable .exopite-sof-field {
+#side-sortables .exopite-sof-field {
     padding: 7px 7px;
 	border-bottom: none;
 }
-.meta-box-sortables.ui-sortable .exopite-sof-sections h4 {
+#side-sortables .exopite-sof-sections h4 {
     font-size: 1.3em;
     padding: 6px 0;
 }
-.meta-box-sortables.ui-sortable .exopite-sof-sections .exopite-sof-cloneable__title {
+#side-sortables .exopite-sof-sections .exopite-sof-cloneable__title {
     border-bottom: none;
     padding: 7px 10px;
     cursor: pointer;
 	font-size: 0.8rem;
     font-weight: 400;
 }
-.meta-box-sortables.ui-sortable .exopite-sof-sections .exopite-sof-field .exopite-sof-title {
+#side-sortables .exopite-sof-sections .exopite-sof-field .exopite-sof-title {
     font-size: 13px;
 }
 #poststuff .exopite-sof-sections h2 {
     font-size: 18px;
 	padding: 8px 6px;
 }
-.meta-box-sortables.ui-sortable .exopite-sof-section-header .dashicons-before {
+#side-sortables .exopite-sof-section-header .dashicons-before {
     padding-right: 14px;
 }
