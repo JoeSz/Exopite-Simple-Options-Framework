@@ -542,11 +542,11 @@ if (typeof throttle !== "function") {
 
         },
 
-        addNew: function( $button ) {
+        addNew: function() {
 
-            $group = this.$element.parents( '.exopite-sof-field-group' );
+            var $group = this.$element.parents( '.exopite-sof-field-group' );
 
-            var numItems = this.$element.find( '.exopite-sof-cloneable__wrapper' ).children( '.exopite-sof-cloneable__item' ).length;
+            // var numItems = this.$element.find( '.exopite-sof-cloneable__wrapper' ).children( '.exopite-sof-cloneable__item' ).length;
 
             if ( $.fn.chosen ) $group.find("select.chosen").chosen("destroy");
 
@@ -598,6 +598,7 @@ if (typeof throttle !== "function") {
         this.element = element;
         this._name = pluginName;
         this.$element = $( element );
+        this.isSortableCalled = false;
         this.init();
 
     }
@@ -608,16 +609,59 @@ if (typeof throttle !== "function") {
 
             this.bindEvents();
 
+            if ( this.$element.data('sortable') ) {
+
+                /**
+                 * https://jqueryui.com/sortable/
+                 * http://api.jqueryui.com/sortable/
+                 */
+                this.$element.sortable({
+                    axis: "y",
+                    cursor: "move",
+                });
+                this.$element.disableSelection();
+                console.log('do sort');
+            } else {
+                console.log('do not sort');
+            }
+
         },
 
        // Bind events that trigger methods
         bindEvents: function() {
             var plugin = this;
 
-            plugin.$element.off().on( 'click'+'.'+plugin._name, '.exopite-sof-accordion__title', function(e) {
-
+            plugin.$element.off().on( 'click' + '.' + plugin._name, '.exopite-sof-accordion__title', function(e) {
                 e.preventDefault();
                 plugin.toggleAccordion.call( plugin, $( this ) );
+
+            });
+
+            // Call function if sorting is stopped
+            plugin.$element.on('sortstop' + '.' + plugin._name, function () {
+
+                // If it is a metabox (not a plugin options)
+                if ( plugin.$element.parents('.exopite-sof-wrapper-metabox').length && plugin.$element.data('sortable') ) {
+                    // Need to reorder name index, make sure, saved in the wanted order in meta
+                    plugin.$element.find('.exopite-sof-accordion__item').each(function (index_item) {
+                        $(this).find('[name^="' + plugin.$element.data('name') + '"]').each(function () {
+                            var $this_name = $(this).attr('name');
+                            // Get name "prefix" from parent
+                            var $name_prefix = plugin.$element.data('name');
+                            // Escape square brackets
+                            $name_prefix = $name_prefix.replace(/\[/g, '\\[').replace(/]/g, '\\]');
+                            var regex = new RegExp($name_prefix + '\\[\\d+\\]');
+                            // Generate name to replace based on the parent item
+                            var $this_name_updated = $this_name.replace(regex, plugin.$element.data('name') + '\[' + index_item + '\]');
+                            // Update
+                            $(this).attr('name', $this_name_updated);
+                        });
+                    });
+                }
+
+                // Stop next click after reorder
+                // @link https://stackoverflow.com/questions/947195/jquery-ui-sortable-how-can-i-cancel-the-click-event-on-an-item-thats-dragged/19858331#19858331
+                plugin.isSortableCalled = true;
 
             });
 
@@ -631,6 +675,11 @@ if (typeof throttle !== "function") {
         toggleAccordion: function( $header ) {
 
             var $this = $header.parent( '.exopite-sof-accordion__item' );
+
+            if ( this.isSortableCalled ) {
+                this.isSortableCalled = false;
+                return;
+            }
 
             if ( $this.hasClass('exopite-sof-accordion--hidden' ) ) {
                 $this.find( '.exopite-sof-accordion__content' ).slideDown(350, function(){
@@ -862,6 +911,7 @@ if (typeof throttle !== "function") {
 
         $( '.exopite-sof-group' ).exopiteSOFRepeater();
         $( '.exopite-sof-accordion__wrapper' ).exopiteSOFAccordion();
+
         $( '.exopite-sof-field-backup' ).exopiteImportExportAJAX();
 
     });
