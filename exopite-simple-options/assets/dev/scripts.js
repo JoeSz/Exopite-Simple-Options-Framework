@@ -657,6 +657,7 @@ if (typeof throttle !== "function") {
                 this.$element.sortable({
                     axis: "y",
                     cursor: "move",
+                    handle: '.exopite-sof-accordion__title',
                 });
                 this.$element.disableSelection();
             }
