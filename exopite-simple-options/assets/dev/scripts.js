@@ -577,7 +577,6 @@ if (typeof throttle !== "function") {
             var hasACE = false;
             if( $cloned.find( '.exopite-sof-ace-editor' ).length !== 0 ) {
                 hasACE = true;
-                console.log( 'has ace editor' );
                 var lastACEEditor = $group.find( '.exopite-sof-ace-editor' ).last().attr( 'id' );
                 var lastID = lastACEEditor.substr( lastACEEditor.length - 1 );
                 var nextACEEditorID = lastACEEditor.substr( 0, lastACEEditor.length - 1 ) + ( ++lastID);
@@ -605,6 +604,8 @@ if (typeof throttle !== "function") {
 
             // Handle dependencies.
             $cloned.exopiteSofManageDependencies( 'sub' );
+
+
 
             $cloned.trigger('exopite-sof-field-group-item-added-after');
         },
@@ -658,6 +659,8 @@ if (typeof throttle !== "function") {
                     axis: "y",
                     cursor: "move",
                     handle: '.exopite-sof-accordion__title',
+                    tolerance: "pointer",
+                    distance: 5,
                 });
                 this.$element.disableSelection();
             }
@@ -679,6 +682,14 @@ if (typeof throttle !== "function") {
              * so it is saved in the order of displayed.
              */
             // Call function if sorting is stopped
+            // plugin.$element.on('sortstart' + '.' + plugin._name, function () {
+
+            //     plugin.$element.find('.tinymce-js').each(function(){
+            //         tinyMCE.execCommand( 'mceRemoveEditor', false, $(this).attr('id') );
+            //     });
+
+            // });
+
             plugin.$element.on('sortstop' + '.' + plugin._name, function () {
 
                 // If it is a metabox (not a plugin options)
@@ -699,6 +710,11 @@ if (typeof throttle !== "function") {
                         });
                     });
                 }
+
+                plugin.$element.find('.tinymce-js').each(function(){
+                    tinyMCE.execCommand( 'mceRemoveEditor', false, $(this).attr('id') );
+                    tinyMCE.execCommand( 'mceAddEditor', true, $(this).attr('id') );
+                });
 
                 // Stop next click after reorder
                 // @link https://stackoverflow.com/questions/947195/jquery-ui-sortable-how-can-i-cancel-the-click-event-on-an-item-thats-dragged/19858331#19858331
@@ -933,6 +949,69 @@ if (typeof throttle !== "function") {
 
 })( jQuery, window, document );
 
+/*
+ * Exopite Save Options with AJAX
+ */
+;(function ( $, window, document, undefined ) {
+
+    var pluginName = "exopiteTinyMCE";
+
+    // The actual plugin constructor
+    function Plugin( element, options ) {
+
+        this.element = element;
+        this._name = pluginName;
+        this.$element = $( element );
+        this.init();
+
+    }
+
+    Plugin.prototype = {
+
+        init: function() {
+
+            this.reInitTinyMCE();
+
+        },
+
+        reInitTinyMCE: function() {
+            var plugin = this;
+
+            plugin.$element.find( '.tinymce-js' ).each(function(index, el) {
+                $( this ).attr( 'id', 'tinymce-' + index );
+                var fullId = $( this ).attr( 'id' );
+
+                tinyMCE.execCommand('mceRemoveEditor', true, fullId);
+                tinyMCE.init({
+                    theme:'modern',
+                    plugins : "charmap,colorpicker,hr,lists,media,paste,tabfocus,textcolor,fullscreen,wordpress,wpautoresize,wpeditimage,wpemoji,wpgallery,wplink,wpdialogs,wptextpattern,wpview,code",
+                    quicktags : true,
+                    tinymce : true,
+                    branding:false,
+                    media_buttons : true,
+                });
+
+                tinyMCE.execCommand('mceAddEditor', true, fullId);
+
+
+            });
+
+        },
+
+
+    };
+
+    $.fn[pluginName] = function ( options ) {
+        return this.each(function () {
+            if (!$.data(this, "plugin_" + pluginName)) {
+                $.data(this, "plugin_" + pluginName,
+                new Plugin( this, options ));
+            }
+        });
+    };
+
+})( jQuery, window, document );
+
 ;(function( $ ) {
     "use strict";
 
@@ -951,6 +1030,7 @@ if (typeof throttle !== "function") {
 
         $( '.exopite-sof-content-js' ).exopiteOptionsNavigation();
 
+        $( '.exopite-sof-group' ).exopiteTinyMCE();
         $( '.exopite-sof-group' ).exopiteSOFRepeater();
         $( '.exopite-sof-accordion__wrapper' ).exopiteSOFAccordion();
 
