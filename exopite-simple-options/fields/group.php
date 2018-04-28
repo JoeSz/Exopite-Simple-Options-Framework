@@ -47,7 +47,7 @@ if( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 
             echo $this->element_before();
 
-            $unallows    = array( 'editor', 'group' );
+            $unallows    = array( 'group' );
             $fields      = array_values( $this->field['fields'] );
             $unique_id   = ( ! empty( $this->unique ) ) ? $this->unique : $this->field['id'];
             $base_id = ( $this->field['options']['repeater'] ) ? array( 'id' => $this->unique . '[' . $this->field['id'] . '][]' ) : array( 'id' => $this->unique . '[' . $this->field['id'] . ']' );
