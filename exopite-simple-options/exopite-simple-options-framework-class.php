@@ -109,7 +109,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                 return;
             }
 
-            $this->version = '20180425';
+            $this->version = '20180428';
 
             // Filter for override
             $this->config  = apply_filters( 'exopite-simple-options-framework-config', $config );
@@ -134,6 +134,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
             //scripts and styles
             add_action( 'admin_enqueue_scripts', array( $this, 'load_scripts_styles' ) );
+
+            // Add "code" plugin for TinyMCE
+            // @link https://www.tinymce.com/docs/plugins/code/
+            add_filter( 'mce_external_plugins', array( $this, 'mce_external_plugins' ) );
 
             switch ( $this->config['type'] ) {
                 case 'menu':
@@ -162,6 +166,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
             // add_action( 'wp_ajax_exopite_test', array( $this, 'exopite_test' ) );
 
+        }
+
+        // for TinyMCE Code Plugin
+        public function mce_external_plugins( $plugins ) {
+            $url = $this->get_url( $this->dirname );
+            $base = trailingslashit( join( '/', array( $url, 'assets' ) ) );
+            $plugins['code'] = $base . 'plugin.code.min.js';
+            return $plugins;
         }
 
         public function import_options() {
