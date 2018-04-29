@@ -59,8 +59,8 @@ Exopite Simple Options is free and available on Github. Feel free to submit patc
 - color (rgb/rgba/html5)
 - content
 - date (datepicker/html5)
-- editor (WYSIWYG WordPress Editor)
-- group (Dynamically add groups. All fields are valid, except: group and editor)
+- editor (Trumbowyg or WYSIWYG WordPress Editor)
+- group (Dynamically add groups. All fields are valid, except: group itself)
 - hidden
 - image
 - image_select
@@ -181,6 +181,11 @@ $metabox_panel = new Exopite_Simple_Options_Framework( $config_metabox, $fields 
 ```
 
 ### CHANGELOG
+
+= 20180429 - 2018-04-29 =
+* add Trumbowyg editor to editor field
+* allow TinyMCE in group field
+* improve JavaScripts
 
 = 20180113 - 2018-01-13 =
 * Add meta field.
