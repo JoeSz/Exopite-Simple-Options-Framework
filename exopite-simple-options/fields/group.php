@@ -118,10 +118,6 @@ if( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 
                 }
 
-                // echo '<pre>';
-                // var_export( $field_value );
-                // echo '</pre>';
-
                 $self->add_field( $field, $field_value );
 
 
@@ -185,18 +181,10 @@ if( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 
             echo '</div>'; // exopite-sof-group
 
-            // echo '<pre>';
-            // var_export( $this->value );
-            // echo '</pre>';
+            echo $this->element_after();
 
-        echo $this->element_after();
+        }
 
     }
-
-
-
-    }
-
-
 
 }
