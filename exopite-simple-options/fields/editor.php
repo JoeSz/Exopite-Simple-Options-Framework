@@ -33,13 +33,6 @@ if( ! class_exists( 'Exopite_Simple_Options_Framework_Field_editor' ) ) {
 
                 echo '<textarea id="' . $this->field['id'] . '" name="'. $this->element_name() .'" class="' . $classes . '"' . $this->element_attributes() .'>'. $this->element_value() .'</textarea>';
 
-            } elseif ( $editor == 'wysiwyg' ) {
-
-                $classes[] = 'wysiwyg-js';
-                $classes = implode( ' ', $classes );
-
-                echo '<textarea id="' . $this->field['id'] . '" name="'. $this->element_name() .'" class="' . $classes . '"' . $this->element_attributes() .'>'. $this->element_value() .'</textarea>';
-
             } else {
 
                 $args = array(
