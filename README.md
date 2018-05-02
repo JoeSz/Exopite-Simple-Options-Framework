@@ -56,11 +56,11 @@ Exopite Simple Options is free and available on Github. Feel free to submit patc
 - button_bar
 - card
 - checkbox
-- color (rgb/rgba/html5)
+- color  (rgb/rgba/html5)
 - content
-- date (datepicker/html5)
+- date   (datepicker/html5)
 - editor (Trumbowyg or WYSIWYG WordPress Editor)
-- group (Dynamically add groups. All fields are valid, except: group itself)
+- group  (Dynamically add groups. Repeatable and sortable (on/off). All fields are valid, except: group itself)
 - hidden
 - image
 - image_select
