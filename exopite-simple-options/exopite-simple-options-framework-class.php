@@ -109,7 +109,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                 return;
             }
 
-            $this->version = '20180429';
+            $this->version = '20180511';
 
             // Filter for override
             $this->config  = apply_filters( 'exopite-simple-options-framework-config', $config );
@@ -657,7 +657,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                     break;
             }
 
-            return $value;
+            return apply_filters( 'exopite-simple-options-framework-sanitize-value', $value, $this->config );
 
         }
 
@@ -764,6 +764,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
          */
         public function add_field( $field, $value = '' ) {
 
+            do_action( 'exopite-simple-options-framework-before-generate-field', $field, $this->config );
+            do_action( 'exopite-simple-options-framework-before-add-field', $field, $this->config );
+
             $output     = '';
             $class      = 'Exopite_Simple_Options_Framework_Field_' . $field['type'];
             $depend     = '';
@@ -831,7 +834,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
             $output .= '</div>'; // exopite-sof-field
 
-            echo $output;
+            do_action( 'exopite-simple-options-framework-after-generate-field', $field, $this->config );
+
+            echo apply_filters( 'exopite-simple-options-framework-add-field', $output, $field, $this->config );
+
+            do_action( 'exopite-simple-options-framework-after-add-field', $field, $this->config );
 
         }
 
@@ -916,7 +923,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
             switch ( $this->config['type'] ) {
                 case 'menu':
-                    $this->display_options_page_header();
+                    add_action( 'exopite-simple-options-framework-display-page-header', array( $this, 'display_options_page_header' ), 10, 1 );
+                    do_action( 'exopite-simple-options-framework-display-page-header', $this->config );
                     break;
 
                 case 'metabox':
@@ -996,6 +1004,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
             if ( $this->config['type'] == 'menu' ) {
 
+                add_action( 'exopite-simple-options-framework-display-page-footer', array( $this, 'display_options_page_footer' ), 10, 1 );
+                do_action( 'exopite-simple-options-framework-display-page-footer', $this->config );
                 $this->display_options_page_footer();
 
             }
