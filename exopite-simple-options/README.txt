@@ -6,7 +6,7 @@ Tested up to: 4.9.1
 Stable tag: 4.9
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Version: 20180113
+Version: 20180511
 Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 
@@ -134,6 +134,14 @@ $fields[] = array(
 $options_panel = new Exopite_Simple_Options_Framework( $config, $fields );
 
 == Changelog ==
+
+= 20180219 - 2018-05-11 =
+* Add loading class and hooks
+
+= 20180429 - 2018-04-29 =
+* add Trumbowyg editor to editor field
+* allow TinyMCE in group field
+* improve JavaScripts
 
 = 20180219 - 2018-02-19 =
 * Add SweetAlert (https://sweetalert.js.org/docs/)

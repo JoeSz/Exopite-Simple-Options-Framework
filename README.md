@@ -78,9 +78,6 @@ Exopite Simple Options is free and available on Github. Feel free to submit patc
 - upload (multiple, on post type -post, page, custom- you can attach uploaded to post)
 - video (mp4/oembed, eg.: youtube)
 
-![](assets/screenshot-1.jpg)
-![](assets/screenshot-3.png)
-
 ### REQUIREMENTS
 
 Server
@@ -180,12 +177,52 @@ $options_panel = new Exopite_Simple_Options_Framework( $config_submenu, $fields 
 $metabox_panel = new Exopite_Simple_Options_Framework( $config_metabox, $fields );
 ```
 
+![](assets/screenshot-1.jpg)
+![](assets/screenshot-3.png)
+
+### HOOKS
+
+#### Filters
+exopite-simple-options-framework-config (config)
+exopite-simple-options-framework-options (fields)
+exopite-simple-options-framework-menu-get-options (options, unique)
+exopite-simple-options-framework-save-options (valid, unique)
+exopite-simple-options-framework-save-menu-options (valid, unique)
+exopite-simple-options-framework-save-meta-options (valid, unique)
+exopite-simple-options-framework-sanitize-value (value, config)
+exopite-simple-options-framework-add-field (output, field, config )
+exopite-simple-options-framework-meta-get-options (meta_options, unique, post_id )
+
+#### Actions
+exopite-simple-options-framework-do-save-options (valid, unique)
+exopite-simple-options-framework-do-save-menu-options (value, unique)
+exopite-simple-options-framework-do-save-meta-options (valid, unique, post_id)
+exopite-simple-options-framework-before-generate-field (field, config)
+exopite-simple-options-framework-before-add-field (field, config)
+exopite-simple-options-framework-after-generate-field (field, config)
+exopite-simple-options-framework-after-add-field (field, config)
+exopite-simple-options-framework-form-menu-before (unique)
+exopite-simple-options-framework-form-meta-before (unique)
+exopite-simple-options-framework-display-page-header (config)
+exopite-simple-options-framework-display-page-footer (config)
+exopite-simple-options-framework-form-menu-after (unique)
+exopite-simple-options-framework-form-meta-after (unique)
+
 ### CHANGELOG
+
+= 20180219 - 2018-05-11 =
+* Add loading class and hooks
 
 = 20180429 - 2018-04-29 =
 * add Trumbowyg editor to editor field
 * allow TinyMCE in group field
 * improve JavaScripts
+
+= 20180219 - 2018-02-19 =
+* Add SweetAlert (https://sweetalert.js.org/docs/)
+
+= 20180114 - 2018-01-14 =
+* Add backup and group/repeater field.
 
 = 20180113 - 2018-01-13 =
 * Add meta field.
