@@ -56,11 +56,11 @@ Exopite Simple Options is free and available on Github. Feel free to submit patc
 - button_bar
 - card
 - checkbox
-- color (rgb/rgba/html5)
+- color  (rgb/rgba/html5)
 - content
-- date (datepicker/html5)
+- date   (datepicker/html5)
 - editor (Trumbowyg or WYSIWYG WordPress Editor)
-- group (Dynamically add groups. All fields are valid, except: group itself)
+- group  (Dynamically add groups. Repeatable and sortable (on/off). All fields are valid, except: group itself)
 - hidden
 - image
 - image_select
@@ -103,24 +103,26 @@ https://github.com/JoeSz/WordPress-Plugin-Boilerplate-Tutorial/blob/f8b70137c1be
 
 #### Example:
 ```php
-/*
- * Create a submenu page under Plugins and metabox for seleted post type(s).
- * Framework also add "Settings" link to your plugin in plugins list.
+/**
+ * Create a submenu page under Plugins.
+ * Framework also add "Settings" to your plugin in plugins list.
+ * @link https://github.com/JoeSz/Exopite-Simple-Options-Framework
  */
 $config_submenu = array(
-    'type'              => 'menu',                // Required, menu or metabox
-    'id'                => $this->plugin_name,    // Required, meta box id,
-                                                  // unique per page, to save:
-                                                  // get_option( id )
-    'menu'              => 'plugins.php',         // Required, sub page to your options page
-    'submenu'           => true,                  // Required for submenu
-    'title'             => 'Demo Admin Page',     //The name of this page
-    'capability'        => 'manage_options',      // The capability needed to view the page
+    'type'              => 'menu',                          // Required, menu or metabox
+    'id'                => $this->plugin_name,              // Required, meta box id,
+                                                            // unique per page, to save:
+                                                            // get_option( id )
+    'menu'              => 'plugins.php',                   // Required, sub page to your options page
+    'submenu'           => true,                            // Required for submenu
+    'title'             => 'Demo Admin Page',               //The name of this page
+    'capability'        => 'manage_options',                // The capability needed to view the page
     'plugin_basename'   =>  plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_name . '.php' ),
-    // 'tabbed'            => false,              // is tabbed or not
-                                                  // Note: if only one section then
-                                                  // Tabs are disabled.
+    // 'tabbed'            => false,                        // is tabbed or not
+                                                            // Note: if only one section then
+                                                            // Tabs are disabled.
 );
+
 /*
  * To add a metabox.
  * This normally go to your functions.php or another hook
@@ -217,6 +219,7 @@ exopite-simple-options-framework-form-meta-after (unique)
 * add Trumbowyg editor to editor field
 * allow TinyMCE in group field
 * improve JavaScripts
+* group can be sortable
 
 = 20180219 - 2018-02-19 =
 * Add SweetAlert (https://sweetalert.js.org/docs/)

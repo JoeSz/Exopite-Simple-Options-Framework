@@ -607,6 +607,8 @@ if (typeof throttle !== "function") {
     // The actual plugin constructor
     function Plugin( element, options ) {
 
+        if (typeof tinyMCE == 'undefined') return;
+
         this.element = element;
         this._name = pluginName;
         this.$element = $( element );
