@@ -3,7 +3,7 @@
 ## Fast, easy and lightweight option/metabox form generator.
 
 - Author: Joe Szalai
-- Version: 20180406
+- Version: 20180511
 - Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 - GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 - Author URL: https://joe.szalai.org
@@ -185,34 +185,34 @@ $metabox_panel = new Exopite_Simple_Options_Framework( $config_metabox, $fields 
 ### HOOKS
 
 #### Filters
-exopite-simple-options-framework-config (config)
-exopite-simple-options-framework-options (fields)
-exopite-simple-options-framework-menu-get-options (options, unique)
-exopite-simple-options-framework-save-options (valid, unique)
-exopite-simple-options-framework-save-menu-options (valid, unique)
-exopite-simple-options-framework-save-meta-options (valid, unique)
-exopite-simple-options-framework-sanitize-value (value, config)
-exopite-simple-options-framework-add-field (output, field, config )
-exopite-simple-options-framework-meta-get-options (meta_options, unique, post_id )
+* exopite-simple-options-framework-config (config)
+* exopite-simple-options-framework-options (fields)
+* exopite-simple-options-framework-menu-get-options (options, unique)
+* exopite-simple-options-framework-save-options (valid, unique)
+* exopite-simple-options-framework-save-menu-options (valid, unique)
+* exopite-simple-options-framework-save-meta-options (valid, unique)
+* exopite-simple-options-framework-sanitize-value (value, config)
+* exopite-simple-options-framework-add-field (output, field, config )
+* exopite-simple-options-framework-meta-get-options (meta_options, unique, post_id )
 
 #### Actions
-exopite-simple-options-framework-do-save-options (valid, unique)
-exopite-simple-options-framework-do-save-menu-options (value, unique)
-exopite-simple-options-framework-do-save-meta-options (valid, unique, post_id)
-exopite-simple-options-framework-before-generate-field (field, config)
-exopite-simple-options-framework-before-add-field (field, config)
-exopite-simple-options-framework-after-generate-field (field, config)
-exopite-simple-options-framework-after-add-field (field, config)
-exopite-simple-options-framework-form-menu-before (unique)
-exopite-simple-options-framework-form-meta-before (unique)
-exopite-simple-options-framework-display-page-header (config)
-exopite-simple-options-framework-display-page-footer (config)
-exopite-simple-options-framework-form-menu-after (unique)
-exopite-simple-options-framework-form-meta-after (unique)
+* exopite-simple-options-framework-do-save-options (valid, unique)
+* exopite-simple-options-framework-do-save-menu-options (value, unique)
+* exopite-simple-options-framework-do-save-meta-options (valid, unique, post_id)
+* exopite-simple-options-framework-before-generate-field (field, config)
+* exopite-simple-options-framework-before-add-field (field, config)
+* exopite-simple-options-framework-after-generate-field (field, config)
+* exopite-simple-options-framework-after-add-field (field, config)
+* exopite-simple-options-framework-form-menu-before (unique)
+* exopite-simple-options-framework-form-meta-before (unique)
+* exopite-simple-options-framework-display-page-header (config)
+* exopite-simple-options-framework-display-page-footer (config)
+* exopite-simple-options-framework-form-menu-after (unique)
+* exopite-simple-options-framework-form-meta-after (unique)
 
 ### CHANGELOG
 
-= 20180219 - 2018-05-11 =
+= 20180511 - 2018-05-11 =
 * Add loading class and hooks
 
 = 20180429 - 2018-04-29 =
