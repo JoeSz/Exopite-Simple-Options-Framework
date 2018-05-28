@@ -163,6 +163,10 @@ Actions
 
 == Changelog ==
 
+= 20180528 - 2018-05-28 =
+* Fix footer displayed twice
+* Add save form on CTRL+S
+
 = 20180511 - 2018-05-11 =
 * Add loading class and hooks
 
