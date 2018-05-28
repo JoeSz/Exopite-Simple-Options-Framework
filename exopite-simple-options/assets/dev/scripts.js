@@ -138,6 +138,25 @@ if (typeof throttle !== "function") {
                 plugin.submitOptions.call( this, event );
             });
 
+            /**
+             * Save on CRTL+S
+             * @link https://stackoverflow.com/questions/93695/best-cross-browser-method-to-capture-ctrls-with-jquery/14180949#14180949
+             */
+            $( window ).on( 'keydown' + '.' + plugin._name, function( event ) {
+
+                if (plugin.$element.find('.exopite-sof-form-js').length) {
+                    if (event.ctrlKey || event.metaKey) {
+                        switch (String.fromCharCode(event.which).toLowerCase()) {
+                            case 's':
+                                event.preventDefault();
+                                var $form = plugin.$element.find('.exopite-sof-form-js');
+                                plugin.submitOptions.call( $form, event );
+                                break;
+                        }
+                    }
+                }
+            });
+
             $(window).on( 'scroll'+'.'+plugin._name, throttle(plugin.checkFixed, 100, ''));
 
         },
