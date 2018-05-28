@@ -109,7 +109,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                 return;
             }
 
-            $this->version = '20180511';
+            $this->version = '20180528';
 
             // Filter for override
             $this->config  = apply_filters( 'exopite-simple-options-framework-config', $config );
@@ -1001,12 +1001,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
             echo '</div>'; // sections
             echo '</div>'; // content
-
             if ( $this->config['type'] == 'menu' ) {
 
                 add_action( 'exopite-simple-options-framework-display-page-footer', array( $this, 'display_options_page_footer' ), 10, 1 );
                 do_action( 'exopite-simple-options-framework-display-page-footer', $this->config );
-                $this->display_options_page_footer();
 
             }
 
