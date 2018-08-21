@@ -1,5 +1,5 @@
 <?php if ( ! defined( 'ABSPATH' ) ) { die; } // Cannot access pages directly.
-/*
+/**
  * Available fields:
  * - ACE field
  * - attached
@@ -31,7 +31,7 @@
  * - video mp4/oembed
  */
 
-/*
+/**
  * Standard args for all field:
  * - type
  * - id
@@ -42,6 +42,13 @@
  * - before
  * - after
  */
+
+ /**
+  * ToDo:
+  * - remove all CDN
+  * - possibility to override indluded files from path
+  * - complatibility with WPML/qTranslate and Polylang
+  */
 if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
     class Exopite_Simple_Options_Framework {
