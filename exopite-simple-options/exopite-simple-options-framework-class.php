@@ -590,13 +590,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
         }
 
         //DEGUB
-        // public function write_log( $type, $log_line ) {
+        public function write_log( $type, $log_line ) {
 
-        //     $hash = 'ee0b589bc9c7a7ba65c46cd960764e52ca37e0ae';
-        //     $fn = EXOPITE_NOTIFICATOR_PLUGIN_DIR . 'logs/' . $type . '-' . $hash . '.log';
-        //     $log_in_file = file_put_contents( $fn, date('Y-m-d H:i:s') . ' - ' . $log_line . PHP_EOL, FILE_APPEND );
+            $hash = 'ee0b589bc9c7a7ba65c46cd960764e52ca37e0ae';
+            $fn = plugin_dir_path( __FILE__ ) . 'logs/' . $type . '-' . $hash . '.log';
+            $log_in_file = file_put_contents( $fn, date('Y-m-d H:i:s') . ' - ' . $log_line . PHP_EOL, FILE_APPEND );
 
-        // }
+        }
         // DEBUG
 
         /*
@@ -629,13 +629,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                     // no break
                 case 'tap_list':
                     // no break
+                case 'editor':
+                    // no break
                 case 'textarea':
                     // HTML and array are allowed
+                    //     $value = sanitize_text_field( $value );
                     break;
-
-                // case 'textarea':
-                //     $value = sanitize_text_field( $value );
-                //     break;
 
                 case 'ace_editor':
                     // $value = base64_encode( $value );
