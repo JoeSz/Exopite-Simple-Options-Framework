@@ -900,7 +900,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
             if ( isset( $section['title'] ) && ! empty( $section['title'] ) ) {
 
-                echo '<h2 class="exopite-sof-section-header"><span class="dashicons-before dashicons-email"></span>' . $section['title'] . '</h2>';
+                echo '<h2 class="exopite-sof-section-header"><span class="dashicons-before ' . $section['icon'] . '"></span>' . $section['title'] . '</h2>';
 
 
             }
