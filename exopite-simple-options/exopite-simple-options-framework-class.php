@@ -648,7 +648,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
                 case 'range':
                     // no break
-                case 'numeric':
+                case 'number':
                     if ( isset( $field['min'] ) && $value < $field['min'] ) {
                         $value = $field['min'];
                     }
