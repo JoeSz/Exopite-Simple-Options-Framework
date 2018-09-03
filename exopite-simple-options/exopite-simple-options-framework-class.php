@@ -680,7 +680,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			endif; //$this->is_menu_page_loaded() || $this->is_metabox_enabled_post_type()
 
 
-
 		}
 
 		/*
