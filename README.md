@@ -102,6 +102,7 @@ Browsers
 https://github.com/JoeSz/WordPress-Plugin-Boilerplate-Tutorial/blob/436ddfa388f0a99c6a6756fc3f8ba7a4e84d22f7/plugin-name/admin/class-plugin-name-admin.php#L117
 
 #### Example:
+##### Crete a menu or meta
 ```php
 /**
  * Create a submenu page under Plugins.
@@ -177,6 +178,25 @@ $fields[] = array(
 
 $options_panel = new Exopite_Simple_Options_Framework( $config_submenu, $fields );
 $metabox_panel = new Exopite_Simple_Options_Framework( $config_metabox, $fields );
+```
+
+##### Get options:
+* for "menu" use:
+Eg.:
+```php
+$my_options = get_option('my-plugin-slug');
+if ( $my_options['my-option-name'] ) {
+    // code...
+}
+```
+You can check if you get the right options with:
+```php
+var_export( $my_options, true );
+```
+
+* for "meta" use:
+```php
+$my_meta_options = get_post_meta( get_the_ID(), 'my-plugin-slug', true );
 ```
 
 ![](assets/screenshot-1.jpg)
