@@ -99,7 +99,7 @@ Browsers
 * Create options and fields nad hook to 'init'.
 
 #### Complete example with all available fields:
-https://github.com/JoeSz/WordPress-Plugin-Boilerplate-Tutorial/blob/f8b70137c1beb3fc6f087f185418d51bef85a1bc/plugin-name/admin/class-plugin-name-admin.php#L117
+https://github.com/JoeSz/WordPress-Plugin-Boilerplate-Tutorial/blob/436ddfa388f0a99c6a6756fc3f8ba7a4e84d22f7/plugin-name/admin/class-plugin-name-admin.php#L117
 
 #### Example:
 ```php
