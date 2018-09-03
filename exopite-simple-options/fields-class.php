@@ -94,7 +94,7 @@ if( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
                 if( is_array( $default ) ) {
 
-                    if( is_callable( $default['function'] ) ) {
+                    if( isset($default['function']) && is_callable( $default['function'] ) ) {
                         $args = ( isset( $default['args'] ) ) ? $default['args'] : '';
                         return call_user_func( $default['function'], $args );
                     }

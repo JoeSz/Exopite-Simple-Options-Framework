@@ -930,7 +930,7 @@ if (typeof throttle !== "function") {
                     buttons: true,
                     dangerMode: true,
 
-                }).then(( willImport ) => {
+                }).then(( willImport ) = {
 
                     if ( willImport ) {
 
@@ -963,7 +963,7 @@ if (typeof throttle !== "function") {
                     buttons: true,
                     dangerMode: true,
 
-                }).then(( willDelete ) => {
+                }).then(( willDelete ) = {
 
                     if (willDelete) {
 

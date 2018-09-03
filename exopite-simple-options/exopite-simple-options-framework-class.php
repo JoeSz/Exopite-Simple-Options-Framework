@@ -587,10 +587,15 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
                     break;
 
                 case 'metabox':
+				// When we clonk on "New Post" (CPT), then $post is not available, so we need to check if it is set
+                if ( isset( $post ) ) {
                     $valid = apply_filters( 'exopite-simple-options-framework-save-meta-options', $valid, $this->unique, $post->ID );
                     do_action( 'exopite-simple-options-framework-do-save-meta-options', $valid, $this->unique, $post->ID );
                     update_post_meta( $post->ID, $this->unique, $valid );
                     break;
+                }
+
+
             }
 
         }
