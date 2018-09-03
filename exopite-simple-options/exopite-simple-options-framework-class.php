@@ -240,6 +240,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 * Register all of the hooks shared by all $type  metabox | menu
 		 */
 		protected function define_shared_hooks() {
+
+            // Upload hooks are only required for both,
+            Exopite_Simple_Options_Framework_Upload::add_hooks();
+
 			//scripts and styles
 			add_action( 'admin_enqueue_scripts', array( $this, 'load_scripts_styles' ) );
 
@@ -288,9 +292,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		protected function define_metabox_hooks() {
 
 			if ( $this->is_metabox() ) {
-
-				// Upload hooks are only required for meta,
-				Exopite_Simple_Options_Framework_Upload::add_hooks();
 
 				/**
 				 * Add metabox and register custom fields
@@ -770,7 +771,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 									$valid[ $field['id'] ][ $i ][ $sub_field['id'] ] = $this->sanitize( $sub_field, $value );
 								}
-								$i ++;
+								$i++;
 
 							}
 
