@@ -111,6 +111,35 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public $db_options = array();
 
+
+		/*
+		 * Sets the type to  metabox|menu
+		 * @var string
+		 */
+		private $type;
+
+		/*
+		 * @var object WP_Error
+		 */
+		protected $errors;
+
+		/*
+		 * @var array required fields for $type = menu
+		 */
+		protected $required_keys_all_types = array( 'type' );
+
+
+		/*
+		 * @var array required fields for $type = menu
+		 */
+		protected $required_keys_menu = array( 'id', 'menu' );
+
+		/*
+		 * @var array required fields for $type = metabox
+		 */
+		protected $required_keys_metabox = array( 'id', 'post_types', 'title', 'capability' );
+
+
 		public function __construct( $config, $fields ) {
 
 			// If we are not in admin area exit.
@@ -124,27 +153,93 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			$this->config = apply_filters( 'exopite-simple-options-framework-config', $config );
 			$this->fields = apply_filters( 'exopite-simple-options-framework-options', $fields );
 
-			$this->dirname = wp_normalize_path( dirname( __FILE__ ) );
-			$this->unique  = $this->config['id'];
-
-			if ( ! isset( $this->config['type'] ) ) {
-				$this->config['type'] = '';
+			if ( isset( $this->config['type'] ) ) {
+				$this->set_type( $this->config['type'] );
 			}
 
-			/**
-			 * Load options only if menu
-			 * on metabox, page id is not yet available
-			 */
-			if ( $this->config['type'] == 'menu' ) {
+			$this->check_required_configuration_keys();
 
-				$this->db_options = apply_filters( 'exopite-simple-options-framework-menu-get-options', get_option( $this->unique ), $this->unique );
-
-			}
+			$this->set_properties();
 
 			$this->load_classes();
 
-			Exopite_Simple_Options_Framework_Upload::add_hooks();
+			$this->define_shared_hooks();
 
+			$this->define_menu_hooks();
+
+			$this->define_metabox_hooks();
+
+		}
+
+		/*
+		 * Checks for required keys in configuration array
+		 * and throw admin error if a required key is missing
+		 */
+		protected function check_required_configuration_keys() {
+			// instantiate the Wp_Error for $this->errors
+			$this->errors = new WP_Error();
+
+			$required_key_array = $this->required_keys_all_types;
+
+			if ( $this->is_menu() ) {
+				$required_key_array = $this->required_keys_menu;
+			}
+
+			if ( $this->is_metabox() ) {
+				$required_key_array = $this->required_keys_metabox;
+			}
+
+
+			if ( ! empty( $required_key_array ) ) {
+
+				foreach ( $required_key_array as $key ) :
+
+					if ( ! array_key_exists( $key, $this->config ) ) {
+
+						$this->errors->add( "missing_config_key_{$key}", sprintf( __( "%s is missing in the configuration array", 'exopite-simple-options' ), $key ) );
+
+						add_action( 'admin_notices', array( $this, 'display_admin_error' ) );
+
+					}
+
+				endforeach;
+			} // ! empty( $required_key_array )
+
+		} //check_required_keys()
+
+		/*
+		 * Set Properties of the class
+		 */
+		protected function set_properties() {
+
+			$this->dirname = wp_normalize_path( dirname( __FILE__ ) );
+
+			$this->unique = $this->config['id'];
+
+		}
+
+		public function display_admin_error() {
+
+			$class        = 'notice notice-error';
+			$message      = '';
+			$errors_array = $this->errors->get_error_messages();
+
+
+			if ( ! empty( $errors_array ) ) {
+				// Get the error messages from the array
+				$message .= esc_html( implode( ', ', $errors_array ) );
+			} else {
+				// if no message is set, throw generic error message
+				$message .= __( 'Irks! An un-known error has occurred.', 'exopite-simple-options' );
+			}
+
+			printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+		}
+
+		/*
+		 * Register all of the hooks shared by all $type  metabox | menu
+		 */
+		protected function define_shared_hooks() {
 			//scripts and styles
 			add_action( 'admin_enqueue_scripts', array( $this, 'load_scripts_styles' ) );
 
@@ -153,36 +248,133 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			 * @link https://www.tinymce.com/docs/plugins/code/
 			 */
 			add_filter( 'mce_external_plugins', array( $this, 'mce_external_plugins' ) );
+		}
 
-			switch ( $this->config['type'] ) {
-				case 'menu':
-					add_action( 'admin_init', array( $this, 'register_setting' ) );
-					add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
-					add_action( 'wp_ajax_exopite-sof-export-options', array( $this, 'export_options' ) );
-					add_action( 'wp_ajax_exopite-sof-import-options', array( $this, 'import_options' ) );
-					add_action( 'wp_ajax_exopite-sof-reset-options', array( $this, 'reset_options' ) );
+		/**
+		 * Register all of the hooks related to 'menu' functionality
+		 *
+		 * @access   protected
+		 */
+		protected function define_menu_hooks() {
 
-					if ( ! empty( $this->config['plugin_basename'] ) ) {
-						add_filter( 'plugin_action_links_' . $this->config['plugin_basename'], array(
-							$this,
-							'plugin_action_links'
-						) );
-					}
+			if ( $this->is_menu() ) {
+				/**
+				 * Load options only if menu
+				 * on metabox, page id is not yet available
+				 */
+				$this->db_options = apply_filters( 'exopite-simple-options-framework-menu-get-options', get_option( $this->unique ), $this->unique );
 
-					break;
 
-				case 'metabox':
-					/**
-					 * Add metabox and register custom fields
-					 *
-					 * @link https://code.tutsplus.com/articles/rock-solid-wordpress-30-themes-using-custom-post-types--net-12093
-					 */
-					add_action( 'admin_init', array( $this, 'add_meta_box' ) );
-					add_action( 'save_post', array( $this, 'save' ) );
-					break;
+				add_action( 'admin_init', array( $this, 'register_setting' ) );
+				add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
+				add_action( 'wp_ajax_exopite-sof-export-options', array( $this, 'export_options' ) );
+				add_action( 'wp_ajax_exopite-sof-import-options', array( $this, 'import_options' ) );
+				add_action( 'wp_ajax_exopite-sof-reset-options', array( $this, 'reset_options' ) );
+
+				if ( isset( $this->config['plugin_basename'] ) && ! empty( $this->config['plugin_basename'] ) ) {
+					add_filter( 'plugin_action_links_' . $this->config['plugin_basename'], array(
+						$this,
+						'plugin_action_links'
+					) );
+				}
+			}
+		}
+
+		/**
+		 * Register all of the hooks related to 'metabox' functionality
+		 *
+		 * @access   protected
+		 */
+		protected function define_metabox_hooks() {
+
+			if ( $this->is_metabox() ) {
+
+				// Upload hooks are only required for meta,
+				Exopite_Simple_Options_Framework_Upload::add_hooks();
+
+				/**
+				 * Add metabox and register custom fields
+				 *
+				 * @link https://code.tutsplus.com/articles/rock-solid-wordpress-30-themes-using-custom-post-types--net-12093
+				 */
+				add_action( 'admin_init', array( $this, 'add_meta_box' ) );
+				add_action( 'save_post', array( $this, 'save' ) );
+
 			}
 
 		}
+
+		/*
+		 * Sets the $type property
+		 *
+		 * @param string  $config_type
+		 */
+		protected function set_type( $config_type ) {
+
+			$config_type = sanitize_key( $config_type );
+
+			switch ( $config_type ) {
+				case ( 'menu' ):
+					$this->type = 'menu';
+					break;
+
+				case ( 'metabox' ):
+					$this->type = 'metabox';
+					break;
+
+				default:
+					$this->type = '';
+			}
+
+		}
+
+		/*
+		 * @return bool true if its a metabox type
+		 */
+		protected function is_metabox() {
+
+			return ( $this->type === 'metabox' ) ? true : false;
+		}
+
+		/*
+		 * @return bool true if its a metabox type
+		 */
+		protected function is_menu() {
+
+			return ( $this->type === 'menu' ) ? true : false;
+		}
+
+		/*
+		 * @return bool true if its menu options
+		 */
+		protected function is_menu_page_loaded() {
+
+
+			$current_screen = get_current_screen();
+
+			return substr( $current_screen->id, - strlen( $this->config['id'] ) ) === $this->config['id'];
+
+		}
+
+		/*
+		 * check if the admin screen is of the post_type defined in config
+		 * @return bool true if its menu options
+		 */
+		protected function is_metabox_enabled_post_type() {
+
+			//
+			if ( ! isset( $this->config['post_types'] ) ) {
+				return false;
+			}
+
+			$current_screen = get_current_screen();
+
+			$post_type_loaded = $current_screen->id;
+
+			return ( in_array( $post_type_loaded, $this->config['post_types'] ) ) ? true : false;
+
+		}
+
 
 		// for TinyMCE Code Plugin
 		public function mce_external_plugins( $plugins ) {
@@ -231,7 +423,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			die();
 		}
 
-		function reset_options() {
+		public function reset_options() {
 
 			$retval = 'error';
 
@@ -412,64 +604,81 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			 * - proper versioning based on file timestamp?
 			 */
 
-			if ( is_admin() ) { // for Admin Dashboard Only
+			// return if not admin
+			if ( ! is_admin() ) {
+				return;
+			}
 
-				$page_post_hooks = array( 'post-new.php', 'post.php' );
+			/*
+			 * Load Scripts for only Menu page
+			 */
+			if ( $this->is_menu_page_loaded() ):
+				// TODO: Shift Scripts from all $type to this section
 
-				$post_type = ( isset( $this->config['post_types'] ) ) ? $this->config['post_types'] : array();
+			endif; //$this->is_menu_page_loaded()
 
-				global $post;
 
-				// Embed the Script on our Plugin's Option Page Only, or if metabox, on the requested post types only
-				if ( ( isset( $_GET['page'] ) && $_GET['page'] == $this->unique ) ||
-				     ( in_array( $hook, $page_post_hooks ) && in_array( $post->post_type, $post_type ) )
-				) {
+			/*
+			 * Load Scripts for metabox that have enabled metabox using Exopite framework
+			 */
+			if ( $this->is_metabox_enabled_post_type() ):
+				// TODO: Shift Scripts from all $type to this section
 
-					if ( ! wp_style_is( 'font-awesome' ) || ! wp_style_is( 'font-awesome-470' ) || ! wp_style_is( 'FontAwesome' ) ) {
+			endif; // $this->is_metabox_enabled_post_type()
 
-						/* Get font awsome */
-						wp_register_style( 'font-awesome-470', "//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css", false, '470' );
-						wp_enqueue_style( 'font-awesome-470' );
 
-					}
+			/*
+			 * Load Scripts shared by all $type
+			 */
+			if ( $this->is_menu_page_loaded() || $this->is_metabox_enabled_post_type() ) :
 
-					// Add jQuery form scripts for menu options AJAX save
-					wp_enqueue_script( 'jquery-form' );
+				if ( ! wp_style_is( 'font-awesome' ) || ! wp_style_is( 'font-awesome-470' ) || ! wp_style_is( 'FontAwesome' ) ) {
 
-					wp_register_style( 'jquery-ui', '//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css' );
-					wp_enqueue_style( 'jquery-ui' );
-
-					// Add the date picker script
-					wp_enqueue_script( 'jquery-ui-datepicker' );
-
-					wp_enqueue_script( 'jquery-ui-sortable' );
-
-					$url  = $this->get_url( $this->dirname );
-					$base = trailingslashit( join( '/', array( $url, 'assets' ) ) );
-
-					wp_enqueue_style( 'exopite-simple-options-framework', $base . 'styles.css', array(), $this->version, 'all' );
-
-					wp_enqueue_script( 'jquery-interdependencies', $base . 'jquery.interdependencies.min.js', array(
-						'jquery',
-						'jquery-ui-datepicker',
-						'wp-color-picker'
-					), $this->version, true );
-
-					/**
-					 * Load classes and enqueue class scripts
-					 * with this, only enqueue scripts if class/field is used
-					 */
-					$this->include_enqueue_field_classes();
-
-					wp_enqueue_script( 'exopite-simple-options-framework-js', $base . 'scripts.min.js', array(
-						'jquery',
-						'jquery-ui-datepicker',
-						'wp-color-picker',
-						'jquery-interdependencies'
-					), $this->version, true );
+					/* Get font awsome */
+					wp_register_style( 'font-awesome-470', "//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css", false, '470' );
+					wp_enqueue_style( 'font-awesome-470' );
 
 				}
-			}
+
+				// Add jQuery form scripts for menu options AJAX save
+				wp_enqueue_script( 'jquery-form' );
+
+				wp_register_style( 'jquery-ui', '//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css' );
+
+
+				wp_enqueue_style( 'jquery-ui' );
+
+				// Add the date picker script
+				wp_enqueue_script( 'jquery-ui-datepicker' );
+
+				wp_enqueue_script( 'jquery-ui-sortable' );
+
+				$url  = $this->get_url( $this->dirname );
+				$base = trailingslashit( join( '/', array( $url, 'assets' ) ) );
+
+				wp_enqueue_style( 'exopite-simple-options-framework', $base . 'styles.css', array(), $this->version, 'all' );
+
+				wp_enqueue_script( 'jquery-interdependencies', $base . 'jquery.interdependencies.min.js', array(
+					'jquery',
+					'jquery-ui-datepicker',
+					'wp-color-picker'
+				), $this->version, true );
+
+				/**
+				 * Load classes and enqueue class scripts
+				 * with this, only enqueue scripts if class/field is used
+				 */
+				$this->include_enqueue_field_classes();
+
+				wp_enqueue_script( 'exopite-simple-options-framework-js', $base . 'scripts.min.js', array(
+					'jquery',
+					'jquery-ui-datepicker',
+					'wp-color-picker',
+					'jquery-interdependencies'
+				), $this->version, true );
+
+			endif; //$this->is_menu_page_loaded() || $this->is_metabox_enabled_post_type()
+
 
 		}
 
@@ -478,7 +687,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function save( $fields ) {
 
-			if ( ! current_user_can( $this->config['capability'] ) ) {
+			$capability = isset( $this->config['capability'] ) ? sanitize_key( $this->config['capability'] ) : 'edit_posts';
+
+			if ( ! current_user_can( $capability ) ) {
 				return;
 			}
 
@@ -486,9 +697,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			 * If fields is post id then check post type
 			 * and if not the post types in settings, then return.
 			 */
-			if ( ! is_array( $fields ) ) {
+			if ( ! is_array( $fields ) && is_array( $this->config['post_types'] ) ) {
 
-				$post_type = get_post_type( $fields );
+				// Make sure its post id
+				$fields = absint( $fields );
 
 				if ( ! in_array( get_post_type( $fields ), $this->config['post_types'] ) ) {
 					return;
@@ -636,6 +848,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			$log_in_file = file_put_contents( $fn, date( 'Y-m-d H:i:s' ) . ' - ' . $log_line . PHP_EOL, FILE_APPEND );
 
 		}
+
 		// DEBUG
 
 		/**
