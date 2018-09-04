@@ -132,7 +132,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		/*
 		 * @var array required fields for $type = menu
 		 */
-		protected $required_keys_menu = array( 'id', 'menu', 'plugin_basename' );
+		protected $required_keys_menu = array( 'id', 'menu_title', 'plugin_basename' );
 
 		/*
 		 * @var array required fields for $type = metabox
@@ -234,6 +234,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$this->config           = wp_parse_args( $this->config, $default_metabox_config );
 			}
 
+		}
+
+		public function display_error() {
+			add_action( 'admin_notices', array( $this, 'display_admin_error' ) );
 		}
 
 		public function display_admin_error() {
@@ -573,7 +577,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 				// TRUE: if Settings link is not defined, lets create one
 				if ( $this->config['settings_link'] ) {
-					$options_base_file_name = sanitize_file_name( $this->config['menu'] );
+
+					$options_base_file_name = sanitize_file_name( $this->config['parent'] );
 
 					$options_page_id = $this->unique;
 
@@ -605,11 +610,46 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 					$link_text         = isset( $link['text'] ) ? sanitize_text_field( $link['text'] ) : __( 'Settings', '' );
 					$link_url_un_clean = isset( $link['url'] ) ? $link['url'] : '#';
-					$link_external     = isset( $link['external'] ) ? (bool) $link['external'] : false;
 
-					$link_url = ( $link_external )
-						? esc_url_raw( $link_url_un_clean )  // its external link, clean it
-						: admin_url( sanitize_file_name( $link_url_un_clean ) ); // its link to php filename of plugin
+					$link_type = isset( $link['type'] ) ? sanitize_key( $link['type'] ) : 'default';
+
+					switch ( $link_type ) {
+						case ( 'external' ):
+							$link_url = esc_url_raw( $link_url_un_clean );
+							break;
+
+						case ( 'file' ):
+							$link_url = admin_url( sanitize_file_name( $link_url_un_clean ) );
+							break;
+
+						default:
+
+							if ( $this->config['submenu'] ) {
+
+								$options_base_file_name = sanitize_file_name( $this->config['parent'] );
+
+								$options_base_file_name_extension = pathinfo( parse_url( $options_base_file_name )['path'], PATHINFO_EXTENSION );
+
+//								var_dump( $options_base_file_name_extension); die();
+
+								if ( $options_base_file_name_extension === 'php' ) {
+									$options_base = $options_base_file_name;
+								} else {
+									$options_base = 'admin.php';
+								}
+								$options_page_id = $this->unique;
+
+								$settings_link = "{$options_base}?page={$options_page_id}";
+
+								$link_url = admin_url( $settings_link );
+
+							} else {
+								$settings_link = "?page={$this->unique}";
+								$link_url      = admin_url( $settings_link );
+							}
+
+
+					}
 
 					$settings_link_array[] = '<a href="' . $link_url . '">' . $link_text . '</a>';
 
@@ -652,12 +692,15 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		public function get_config_default_menu() {
 
 			$default = array(
-				'menu'          => 'plugins.php',
+				//
+				'parent'        => 'options-general.php',
+				'menu'          => 'plugins.php', // For backward compatibility
+				'menu_title'    => __( 'Plugin Options', 'exopite-options-framework' ),
 				// Required for submenu
 				'submenu'       => false,
 				//The name of this page
-				'title'         => __( 'Options', 'exopite-options-framework' ),
-				'menu_title'    => __( 'Plugin Options', 'exopite-options-framework' ),
+				'title'         => __( 'Plugin Options', 'exopite-options-framework' ),
+//				'menu_title'    => __( 'Plugin Options', 'exopite-options-framework' ),
 				// The capability needed to view the page
 				'capability'    => 'manage_options',
 				'settings_link' => true,
@@ -726,10 +769,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			} else {
 
-				$this->config = wp_parse_args( $this->config, $default );
+//				$this->config = wp_parse_args( $this->config, $default );
 
 				$submenu = add_submenu_page(
-					$this->config['menu'],
+					$this->config['parent'],
 					$this->config['title'],
 					$this->config['title'],
 					$this->config['capability'],
@@ -862,15 +905,15 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			}
 
-			$menu = ( $this->config['type'] == 'menu' );
+//			$menu = ( $this->config['type'] == 'menu' );
 
-			if ( ! $menu ) {
+			if ( ! $this->is_menu() ) {
 				global $post;
 			}
 
 			$valid = array();
 
-			if ( $menu ) {
+			if ( $this->is_menu() ) {
 				// Preserve values start with "_".
 				$options = get_option( $this->unique );
 				foreach ( $options as $key => $value ) {
