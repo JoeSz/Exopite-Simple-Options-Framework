@@ -1248,7 +1248,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			do_action( 'exopite_sof_after_generate_field', $field, $this->config );
 
-			echo apply_filters( 'exopite_sof_add_field ', $output, $field, $this->config );
+			echo apply_filters( 'exopite_sof_add_field', $output, $field, $this->config );
 
 			do_action( 'exopite_sof_after_add_field', $field, $this->config );
 
@@ -1337,11 +1337,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			switch ( $this->config['type'] ) {
 				case 'menu':
-					add_action( 'exopite-simple-options-framework-display-page-header', array(
+					add_action( 'exopite_sof_display_page_header', array(
 						$this,
 						'display_options_page_header'
 					), 10, 1 );
-					do_action( 'exopite_simple_options_framework_display_page_header', $this->config );
+					do_action( 'exopite_sof_display_page_header', $this->config );
 					break;
 
 				case 'metabox':
