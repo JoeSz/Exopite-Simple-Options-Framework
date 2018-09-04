@@ -559,52 +559,69 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 * @return array possibly modified $links
 		 */
 		public function plugin_action_links( $links ) {
-
-
-//			if ( ! $this->config['settings_link'] ) {
-//				return $links;
-//			}
-
 			/**
 			 *  Documentation : https://codex.wordpress.org/Plugin_API/Filter_Reference/plugin_action_links_(plugin_file_name)
 			 */
-			$settings_link = '';
-//
 
-			if ( ! is_bool( $this->config['settings_link'] ) ) {
+			// BOOL of settings is given true | false
+			if ( is_bool( $this->config['settings_link'] ) ) {
+
+				// FALSE: If it is false, no need to go further
+				if ( ! $this->config['settings_link'] ) {
+					return $links;
+				}
+
+				// TRUE: if Settings link is not defined, lets create one
+				if ( $this->config['settings_link'] ) {
+					$options_base_file_name = sanitize_file_name( $this->config['menu'] );
+
+					$options_page_id = $this->unique;
+
+					$settings_link = "{$options_base_file_name}?page={$options_page_id}";
+
+					$settings_link_array = array(
+						'<a href="' . admin_url( $settings_link ) . '">' . __( 'Settings', '' ) . '</a>',
+					);
+
+					return array_merge( $settings_link_array, $links );
+				}
+			} // if ( is_bool( $this->config['settings_link'] ) )
+
+			// URL of settings is given
+			if ( ! is_bool( $this->config['settings_link'] ) && ! is_array( $this->config['settings_link'] ) ) {
 				$settings_link = esc_url( $this->config['settings_link'] );
+
+				return array_merge( $settings_link, $links );
 			}
 
-			// if Settings link is not defined, lets create one
-			if ( empty( $settings_link ) ) {
-
-				$options_base_file_name = ( isset( $this->config['menu'] ) ) ? sanitize_file_name( $this->config['menu'] ) : 'plugins.php';
-
-				$options_page_id = $this->unique;
-
-				$settings_link = "{$options_base_file_name}?page={$options_page_id}";
-
-			}
-
-//
-//			if ( isset( $this->config['submenu'] ) && $this->config['submenu'] == true && isset( $this->config['menu'] ) && $this->config['menu'] == 'plugins.php' && ( ! isset( $this->config['settings-link'] ) || empty( $this->config['settings-link'] ) ) ) {
-//				$settings_link = 'plugins.php?page=' . $this->unique;
-//			}
-//
-//			if ( isset( $this->config['settings-link'] ) && ! empty( $this->config['settings-link'] ) ) {
-//				$settings_link = esc_url( $this->config['settings-link'] );
-//			}
-//
-//			if ( empty( $settings_link ) ) {
-//				return $links;
-//			}
+			// Array of settings_link is given
+			if ( is_array( $this->config['settings_link'] ) ) {
 
 
-			$settings_link = array(
-				'<a href="' . admin_url( $settings_link ) . '">' . __( 'Settings', '' ) . '</a>',
-			);
+				$settings_links_config_array = $this->config['settings_link'];
+				$settings_link_array         = array();
 
-			return array_merge( $settings_link, $links );
+				foreach ( $settings_links_config_array as $link ) {
+
+					$link_text         = isset( $link['text'] ) ? sanitize_text_field( $link['text'] ) : __( 'Settings', '' );
+					$link_url_un_clean = isset( $link['url'] ) ? $link['url'] : '#';
+					$link_external     = isset( $link['external'] ) ? (bool) $link['external'] : false;
+
+					$link_url = ( $link_external )
+						? esc_url_raw( $link_url_un_clean )  // its external link, clean it
+						: admin_url( sanitize_file_name( $link_url_un_clean ) ); // its link to php filename of plugin
+
+					$settings_link_array[] = '<a href="' . $link_url . '">' . $link_text . '</a>';
+
+				}
+
+				return array_merge( $settings_link_array, $links );
+
+
+			} // if ( is_array( $this->config['settings_link'] ) )
+
+			// if nothing is returned so far, return original $links
+			return $links;
 
 		}
 
@@ -640,6 +657,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				'submenu'       => false,
 				//The name of this page
 				'title'         => __( 'Options', 'exopite-options-framework' ),
+				'menu_title'    => __( 'Plugin Options', 'exopite-options-framework' ),
 				// The capability needed to view the page
 				'capability'    => 'manage_options',
 				'settings_link' => true,
@@ -698,7 +716,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 				$menu = add_menu_page(
 					$this->config['title'],
-					$this->config['title'],
+					$this->config['menu_title'],
 					$this->config['capability'],
 					$this->unique, //slug
 					array( $this, 'display_page' ),
