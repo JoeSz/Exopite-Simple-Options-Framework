@@ -266,7 +266,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				 * Load options only if menu
 				 * on metabox, page id is not yet available
 				 */
-				$this->db_options = apply_filters( 'exopite-simple-options-framework-menu-get-options', get_option( $this->unique ), $this->unique );
+				$this->db_options = apply_filters( 'exopite_sof_menu_get_options', get_option( $this->unique ), $this->unique );
 
 
 				add_action( 'admin_init', array( $this, 'register_setting' ) );
@@ -817,12 +817,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			}
 
-			do_action( 'exopite-simple-options-framework-do-save-options', $valid, $this->unique );
-			$valid = apply_filters( 'exopite-simple-options-framework-save-options', $valid, $this->unique );
+			do_action( 'exopite_sof_do_save_options', $valid, $this->unique );
+			$valid = apply_filters( 'exopite_sof_save_options', $valid, $this->unique );
 			switch ( $this->config['type'] ) {
 				case 'menu':
-					$valid = apply_filters( 'exopite-simple-options-framework-save-menu-options', $valid, $this->unique );
-					do_action( 'exopite-simple-options-framework-do-save-menu-options', $value, $this->unique );
+					$valid = apply_filters( 'exopite_sof_save_menu_options', $valid, $this->unique );
+					do_action( 'exopite_sof_do_save_menu_options', $value, $this->unique );
 
 					return $valid;
 					break;
@@ -830,8 +830,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				case 'metabox':
 					// When we click on "New Post" (CPT), then $post is not available, so we need to check if it is set
 					if ( isset( $post ) ) {
-						$valid = apply_filters( 'exopite-simple-options-framework-save-meta-options', $valid, $this->unique, $post->ID );
-						do_action( 'exopite-simple-options-framework-do-save-meta-options', $valid, $this->unique, $post->ID );
+						$valid = apply_filters( 'exopite_sof_save_meta_options', $valid, $this->unique, $post->ID );
+						do_action( 'exopite_sof_do_save_meta_options', $valid, $this->unique, $post->ID );
 						update_post_meta( $post->ID, $this->unique, $valid );
 						break;
 					}
@@ -918,7 +918,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					break;
 			}
 
-			return apply_filters( 'exopite-simple-options-framework-sanitize-value', $value, $this->config );
+			return apply_filters( 'exopite_sof_sanitize_value', $value, $this->config );
 
 		}
 
@@ -1033,8 +1033,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function add_field( $field, $value = '' ) {
 
-			do_action( 'exopite-simple-options-framework-before-generate-field', $field, $this->config );
-			do_action( 'exopite-simple-options-framework-before-add-field', $field, $this->config );
+			do_action( 'exopite_sof_before_generate_field', $field, $this->config );
+			do_action( 'exopite_sof_before_add_field', $field, $this->config );
 
 			$output     = '';
 			$class      = 'Exopite_Simple_Options_Framework_Field_' . $field['type'];
@@ -1105,11 +1105,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			$output .= '</div>'; // exopite-sof-field
 
-			do_action( 'exopite-simple-options-framework-after-generate-field', $field, $this->config );
+			do_action( 'exopite_sof_after_generate_field', $field, $this->config );
 
-			echo apply_filters( 'exopite-simple-options-framework-add-field', $output, $field, $this->config );
+			echo apply_filters( 'exopite_sof_add_field', $output, $field, $this->config );
 
-			do_action( 'exopite-simple-options-framework-after-add-field', $field, $this->config );
+			do_action( 'exopite_sof_after_add_field', $field, $this->config );
 
 		}
 
@@ -1188,7 +1188,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function display_page() {
 
-			do_action( 'exopite-simple-options-framework-form-' . $this->config['type'] . '-before' );
+			do_action( 'exopite_sof_form_' . $this->config['type'] . '_before' );
 
 			settings_errors();
 
@@ -1196,11 +1196,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			switch ( $this->config['type'] ) {
 				case 'menu':
-					add_action( 'exopite-simple-options-framework-display-page-header', array(
+					add_action( 'exopite_sof_display_page_header', array(
 						$this,
 						'display_options_page_header'
 					), 10, 1 );
-					do_action( 'exopite-simple-options-framework-display-page-header', $this->config );
+					do_action( 'exopite_sof_display_page_header', $this->config );
 					break;
 
 				case 'metabox':
@@ -1209,7 +1209,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					 * Can not get options in __consturct, because there, the_ID is not yet available.
 					 */
 					$meta_options     = get_post_meta( get_the_ID(), $this->unique, true );
-					$this->db_options = apply_filters( 'exopite-simple-options-framework-meta-get-options', $meta_options, $this->unique, get_the_ID() );
+					$this->db_options = apply_filters( 'exopite_sof_meta_get_options', $meta_options, $this->unique, get_the_ID() );
 					// $this->db_options = json_decode( get_post_meta( get_the_ID(), $this->unique, true ), true );
 					break;
 			}
@@ -1286,13 +1286,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					$this,
 					'display_options_page_footer'
 				), 10, 1 );
-				do_action( 'exopite-simple-options-framework-display-page-footer', $this->config );
+				do_action( 'exopite_sof_display_page_footer', $this->config );
 
 			}
 
 			echo '</div>';
 
-			do_action( 'exopite-simple-options-framework-form-' . $this->config['type'] . '-after' );
+			do_action( 'exopite_sof_form_' . $this->config['type'] . '_after' );
 
 		}
 
