@@ -149,7 +149,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			$this->version = '20180901';
 
-			$this->unique = sanitize_key( $this->config['id'] );
+			$this->unique = sanitize_key( $config['id'] );
 
 			// Filter for override every exopite $config and $fields
 			$this->config = apply_filters( 'exopite_sof_config', $config );
@@ -639,10 +639,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				// Required for submenu
 				'submenu'       => false,
 				//The name of this page
-				'title'         => __( 'Exopite Options Framework', 'exopite-options-framework' ),
+				'title'         => __( 'Options', 'exopite-options-framework' ),
 				// The capability needed to view the page
 				'capability'    => 'manage_options',
-				'settings_link' => true
+				'settings_link' => true,
+				'tabbed'        => true,
+				'position'      => 100,
+				'icon'          => ''
 			);
 
 			return apply_filters( 'exopite_sof_filter_config_default_menu_array', $default );
@@ -676,24 +679,26 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function add_admin_menu() {
 
-			$default = array(
-				'title'      => 'Options',
-				'capability' => 'manage_options',
-				'tabbed'     => true,
+//			$default = array(
+//				'title'      => 'Options',
+//				'capability' => 'manage_options',
+//				'tabbed'     => true,
+//
+//			);
 
-			);
 
-			if ( empty( $this->config['submenu'] ) ) {
+			// Is it a main menu or sub_menu
+			if ( ! (bool) $this->config['submenu'] ) {
 
-				$default['icon']     = '';
-				$default['position'] = 100;
-				$default['menu']     = 'Plugin menu';
+//				$default['icon']     = '';
+//				$default['position'] = 100;
+//				$default['menu']     = 'Plugin menu';
 
-				$this->config = wp_parse_args( $this->config, $default );
+//				$this->config = wp_parse_args( $this->config, $default );
 
 				$menu = add_menu_page(
 					$this->config['title'],
-					$this->config['menu'],
+					$this->config['title'],
 					$this->config['capability'],
 					$this->unique, //slug
 					array( $this, 'display_page' ),
