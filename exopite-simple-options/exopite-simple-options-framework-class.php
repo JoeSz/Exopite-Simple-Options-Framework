@@ -132,7 +132,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		/*
 		 * @var array required fields for $type = menu
 		 */
-		protected $required_keys_menu = array( 'id', 'menu' );
+		protected $required_keys_menu = array( 'id', 'menu', 'plugin_basename' );
 
 		/*
 		 * @var array required fields for $type = metabox
@@ -149,9 +149,15 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			$this->version = '20180901';
 
-			// Filter for override
-			$this->config = apply_filters( 'exopite-simple-options-framework-config', $config );
-			$this->fields = apply_filters( 'exopite-simple-options-framework-options', $fields );
+			$this->unique = sanitize_key( $this->config['id'] );
+
+			// Filter for override every exopite $config and $fields
+			$this->config = apply_filters( 'exopite_sof_config', $config );
+			$this->fields = apply_filters( 'exopite_sof_options', $fields );
+
+			// Filter for override $config and $fields with respect to $config and $fields
+			$this->config = apply_filters( 'exopite_sof_config_' . $this->unique, $config );
+			$this->fields = apply_filters( 'exopite_sof_options_' . $this->unique, $fields );
 
 			if ( isset( $this->config['type'] ) ) {
 				$this->set_type( $this->config['type'] );
@@ -189,20 +195,23 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$required_key_array = $this->required_keys_metabox;
 			}
 
-
-			if ( ! empty( $required_key_array ) ) {
+			// Loop through all required keys array to check if every required key is set.
+			if ( ! empty( $required_key_array ) && ! empty( $this->config ) ) {
 
 				foreach ( $required_key_array as $key ) :
 
 					if ( ! array_key_exists( $key, $this->config ) ) {
-
+						// Add error message to the WP_Error object
 						$this->errors->add( "missing_config_key_{$key}", sprintf( __( "%s is missing in the configuration array", 'exopite-simple-options' ), $key ) );
-
-						add_action( 'admin_notices', array( $this, 'display_admin_error' ) );
-
 					}
 
 				endforeach;
+
+				// if the errors are logged, add the admin display hook
+				if ( ! empty( $this->errors->get_error_messages() ) ) {
+					add_action( 'admin_notices', array( $this, 'display_admin_error' ) );
+				}
+
 			} // ! empty( $required_key_array )
 
 		} //check_required_keys()
@@ -214,7 +223,16 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			$this->dirname = wp_normalize_path( dirname( __FILE__ ) );
 
-			$this->unique = $this->config['id'];
+
+			if ( $this->is_menu() ) {
+				$default_menu_config = $this->get_config_default_menu();
+				$this->config        = wp_parse_args( $this->config, $default_menu_config );
+			}
+
+			if ( $this->is_metabox() ) {
+				$default_metabox_config = $this->get_config_default_metabox();
+				$this->config           = wp_parse_args( $this->config, $default_metabox_config );
+			}
 
 		}
 
@@ -241,8 +259,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		protected function define_shared_hooks() {
 
-            // Upload hooks are only required for both,
-            Exopite_Simple_Options_Framework_Upload::add_hooks();
+			// Upload hooks are only required for both,
+			Exopite_Simple_Options_Framework_Upload::add_hooks();
 
 			//scripts and styles
 			add_action( 'admin_enqueue_scripts', array( $this, 'load_scripts_styles' ) );
@@ -252,7 +270,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			 * @link https://www.tinymce.com/docs/plugins/code/
 			 */
 			add_filter( 'mce_external_plugins', array( $this, 'mce_external_plugins' ) );
-		}
+
+		}//define_shared_hooks()
 
 		/**
 		 * Register all of the hooks related to 'menu' functionality
@@ -353,7 +372,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			$current_screen = get_current_screen();
 
-			return substr( $current_screen->id, - strlen( $this->config['id'] ) ) === $this->config['id'];
+			return substr( $current_screen->id, - strlen( $this->unique ) ) === $this->unique;
 
 		}
 
@@ -392,14 +411,29 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			if ( isset( $_POST['unique'] ) && ! empty( $_POST['value'] ) && isset( $_POST['wpnonce'] ) && wp_verify_nonce( $_POST['wpnonce'], 'exopite_sof_backup' ) ) {
 
+				$option_key = sanitize_key( $_POST['unique'] );
+
+				// Using base_64_decode
 				$value = unserialize( gzuncompress( stripslashes( call_user_func( 'base' . '64' . '_decode', rtrim( strtr( $_POST['value'], '-_', '+/' ), '=' ) ) ) ) );
+
 
 				if ( is_array( $value ) ) {
 
-					update_option( $_POST['unique'], $value );
+					update_option( $option_key, $value );
 					$retval = 'success';
 
 				}
+
+
+				//Using json_decode
+//				$value = json_decode( $_POST['value']);
+//
+//				if ( is_array( $value ) ) {
+//
+//					update_option( $_POST['unique'], $value );
+//					$retval = 'success';
+//
+//				}
 
 			}
 
@@ -411,13 +445,21 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			if ( isset( $_GET['export'] ) && isset( $_GET['wpnonce'] ) && wp_verify_nonce( $_GET['wpnonce'], 'exopite_sof_backup' ) ) {
 
+				$option_key = sanitize_key( $_GET['export'] );
+
 				header( 'Content-Type: plain/text' );
 				header( 'Content-disposition: attachment; filename=exopite-sof-options-' . gmdate( 'd-m-Y' ) . '.txt' );
 				header( 'Content-Transfer-Encoding: binary' );
 				header( 'Pragma: no-cache' );
 				header( 'Expires: 0' );
 
-				echo rtrim( strtr( call_user_func( 'base' . '64' . '_encode', addslashes( gzcompress( serialize( get_option( $_GET['export'] ) ), 9 ) ) ), '+/', '-_' ), '=' );
+				// Using base64_encode
+				echo rtrim( strtr( call_user_func( 'base' . '64' . '_encode', addslashes( gzcompress( serialize( get_option( $option_key ) ), 9 ) ) ), '+/', '-_' ), '=' );
+				// Why we are using base64_encode to hide the options? We should use the standard json to transfer/save settings between . It is suspicious always.
+
+
+				// Using json_encode()
+				//echo json_encode( $options_array );
 
 			}
 
@@ -430,7 +472,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			if ( isset( $_POST['unique'] ) && isset( $_POST['wpnonce'] ) && wp_verify_nonce( $_POST['wpnonce'], 'exopite_sof_backup' ) ) {
 
-				delete_option( $_POST['unique'] );
+				delete_option( sanitize_key( $_POST['unique'] ) );
 
 				$retval = 'success';
 
@@ -455,7 +497,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 *
 		 * @param  string $path the path
 		 *
-		 * @return string       the generated url
+		 * @return string   the generated url
 		 */
 		public function get_url( $path = '' ) {
 
@@ -474,34 +516,89 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			 * Ideas:
 			 * - May extend this with override.
 			 */
+			// This should be the name of directory in theme/ child theme
+			$override_dir_name = 'exopite';
+			$fields_dir_name   = 'fields';
 
-			$path = join( DIRECTORY_SEPARATOR, array( $this->dirname, 'fields', $type . '.php' ) );
+			$template = join( DIRECTORY_SEPARATOR, array( $this->dirname, $fields_dir_name, $type . '.php' ) );
 
-			return $path;
+
+			/* TODO: check why its not overriding
+
+			$locations[] = join( DIRECTORY_SEPARATOR, array(
+				$override_dir_name,
+				$fields_dir_name,
+				$type . '.php'
+			) );
+
+
+			/// Filter the locations to search for a template file
+
+			$locations = apply_filters( 'exopite_template_paths', $locations );
+
+			$template = locate_template( $locations, false );
+
+			// If we cannot find template path in theme, then load from our framework
+			if ( empty( $template ) ) {
+
+				$template = join( DIRECTORY_SEPARATOR, array( $this->dirname, $fields_dir_name, $type . '.php' ) );
+
+			}
+
+			*/
+
+			return $template;
 
 		}
 
 		/**
 		 * Register "settings" for plugin option page in plugins list
+		 *
+		 * @param array $links plugin links
+		 *
+		 * @return array possibly modified $links
 		 */
 		public function plugin_action_links( $links ) {
+
+
+//			if ( ! $this->config['settings_link'] ) {
+//				return $links;
+//			}
 
 			/**
 			 *  Documentation : https://codex.wordpress.org/Plugin_API/Filter_Reference/plugin_action_links_(plugin_file_name)
 			 */
 			$settings_link = '';
+//
 
-			if ( isset( $this->config['submenu'] ) && $this->config['submenu'] == true && isset( $this->config['menu'] ) && $this->config['menu'] == 'plugins.php' && ( ! isset( $this->config['settings-link'] ) || empty( $this->config['settings-link'] ) ) ) {
-				$settings_link = 'plugins.php?page=' . $this->unique;
+			if ( ! is_bool( $this->config['settings_link'] ) ) {
+				$settings_link = esc_url( $this->config['settings_link'] );
 			}
 
-			if ( isset( $this->config['settings-link'] ) && ! empty( $this->config['settings-link'] ) ) {
-				$settings_link = esc_url( $this->config['settings-link'] );
-			}
-
+			// if Settings link is not defined, lets create one
 			if ( empty( $settings_link ) ) {
-				return $links;
+
+				$options_base_file_name = ( isset( $this->config['menu'] ) ) ? sanitize_file_name( $this->config['menu'] ) : 'plugins.php';
+
+				$options_page_id = $this->unique;
+
+				$settings_link = "{$options_base_file_name}?page={$options_page_id}";
+
 			}
+
+//
+//			if ( isset( $this->config['submenu'] ) && $this->config['submenu'] == true && isset( $this->config['menu'] ) && $this->config['menu'] == 'plugins.php' && ( ! isset( $this->config['settings-link'] ) || empty( $this->config['settings-link'] ) ) ) {
+//				$settings_link = 'plugins.php?page=' . $this->unique;
+//			}
+//
+//			if ( isset( $this->config['settings-link'] ) && ! empty( $this->config['settings-link'] ) ) {
+//				$settings_link = esc_url( $this->config['settings-link'] );
+//			}
+//
+//			if ( empty( $settings_link ) ) {
+//				return $links;
+//			}
+
 
 			$settings_link = array(
 				'<a href="' . admin_url( $settings_link ) . '">' . __( 'Settings', '' ) . '</a>',
@@ -511,8 +608,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		}
 
-		/* Create a meta box for our custom fields */
-		public function add_meta_box() {
+		/*
+		 * Get default config for metabox
+		 * @return array $default
+		 */
+		public function get_config_default_metabox() {
 
 			$default = array(
 
@@ -525,7 +625,31 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			);
 
-			$this->config = wp_parse_args( $this->config, $default );
+			return apply_filters( 'exopite_sof_filter_config_default_metabox_array', $default );
+		}
+
+		/*
+		 * Get default config for menu
+		 * @return array $default
+		 */
+		public function get_config_default_menu() {
+
+			$default = array(
+				'menu'          => 'plugins.php',
+				// Required for submenu
+				'submenu'       => false,
+				//The name of this page
+				'title'         => __( 'Exopite Options Framework', 'exopite-options-framework' ),
+				// The capability needed to view the page
+				'capability'    => 'manage_options',
+				'settings_link' => true
+			);
+
+			return apply_filters( 'exopite_sof_filter_config_default_menu_array', $default );
+		}
+
+		/* Create a meta box for our custom fields */
+		public function add_meta_box() {
 
 			add_meta_box(
 				$this->unique,
@@ -596,6 +720,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		/**
 		 * Load scripts and styles
+		 *
+		 * @hooked  admin_enqueue_scripts
+		 *
+		 * @param string hook name
 		 */
 		public function load_scripts_styles( $hook ) {
 
@@ -685,13 +813,15 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		/*
 		 * Save options or metabox to meta
+		 *
+		 * @return mixed
 		 */
 		public function save( $fields ) {
 
 			$capability = isset( $this->config['capability'] ) ? sanitize_key( $this->config['capability'] ) : 'edit_posts';
 
 			if ( ! current_user_can( $capability ) ) {
-				return;
+				return null;
 			}
 
 			/**
@@ -704,7 +834,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$fields = absint( $fields );
 
 				if ( ! in_array( get_post_type( $fields ), $this->config['post_types'] ) ) {
-					return;
+					return null;
 				}
 
 			}
@@ -771,7 +901,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 									$valid[ $field['id'] ][ $i ][ $sub_field['id'] ] = $this->sanitize( $sub_field, $value );
 								}
-								$i++;
+								$i ++;
 
 							}
 
@@ -833,8 +963,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 						$valid = apply_filters( 'exopite_sof_save_meta_options', $valid, $this->unique, $post->ID );
 						do_action( 'exopite_sof_do_save_meta_options', $valid, $this->unique, $post->ID );
 						update_post_meta( $post->ID, $this->unique, $valid );
+
 						break;
 					}
+
+				case 'default':
+					return null;
 
 
 			}
@@ -854,6 +988,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		/**
 		 * Validate and sanitize values
+		 *
+		 * @param $field
+		 * @param $value
+		 *
+		 * @return mixed|void
 		 */
 		public function sanitize( $field, $value ) {
 
@@ -924,6 +1063,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		/**
 		 * Loop fileds based on field from user
+		 *
+		 * @param $callbacks
 		 */
 		public function loop_fields( $callbacks ) {
 
@@ -1107,7 +1248,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			do_action( 'exopite_sof_after_generate_field', $field, $this->config );
 
-			echo apply_filters( 'exopite_sof_add_field', $output, $field, $this->config );
+			echo apply_filters( 'exopite_sof_add_field ', $output, $field, $this->config );
 
 			do_action( 'exopite_sof_after_add_field', $field, $this->config );
 
@@ -1188,7 +1329,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function display_page() {
 
-			do_action( 'exopite_sof_form_' . $this->config['type'] . '_before' );
+			do_action( 'exopite_simple_options_framework_form_' . $this->config['type'] . '_before' );
 
 			settings_errors();
 
@@ -1196,11 +1337,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			switch ( $this->config['type'] ) {
 				case 'menu':
-					add_action( 'exopite_sof_display_page_header', array(
+					add_action( 'exopite-simple-options-framework-display-page-header', array(
 						$this,
 						'display_options_page_header'
 					), 10, 1 );
-					do_action( 'exopite_sof_display_page_header', $this->config );
+					do_action( 'exopite_simple_options_framework_display_page_header', $this->config );
 					break;
 
 				case 'metabox':
@@ -1282,7 +1423,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			echo '</div>'; // content
 			if ( $this->config['type'] == 'menu' ) {
 
-				add_action( 'exopite-simple-options-framework-display-page-footer', array(
+				add_action( 'exopite_sof_display_page_footer', array(
 					$this,
 					'display_options_page_footer'
 				), 10, 1 );
