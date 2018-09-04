@@ -3,7 +3,7 @@
 ## Fast, easy and lightweight option/metabox form generator.
 
 - Author: Joe Szalai
-- Version: 20180511
+- Version: 20180904
 - Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 - GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 - Author URL: https://joe.szalai.org
@@ -17,6 +17,10 @@
 >
 > The Framework based on some CodeStar Framework, MetaBox.io code and design. The fields configs desgin also based on CodeStar Framework.
 I created this framework for plugins and metaboxes. Not for Themes. For Themes I recommend CodeStar Framework.
+
+### IMPORTANT
+* As 2018-09-04 we have a new hooks name to meet WordPress standards.
+* After multilanguage compatibility the options array will also change.
 
 ### DESCRIPTION
 
@@ -205,32 +209,38 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-plugin-slug', true );
 ### HOOKS
 
 #### Filters
-* exopite-simple-options-framework-config (config)
-* exopite-simple-options-framework-options (fields)
-* exopite-simple-options-framework-menu-get-options (options, unique)
-* exopite-simple-options-framework-save-options (valid, unique)
-* exopite-simple-options-framework-save-menu-options (valid, unique)
-* exopite-simple-options-framework-save-meta-options (valid, unique)
-* exopite-simple-options-framework-sanitize-value (value, config)
-* exopite-simple-options-framework-add-field (output, field, config )
-* exopite-simple-options-framework-meta-get-options (meta_options, unique, post_id )
+* exopite_sof_config (config)
+* exopite_sof_options (fields)
+* exopite_sof_menu_get_options (options, unique)
+* exopite_sof_save_options (valid, unique)
+* exopite_sof_save_menu_options (valid, unique)
+* exopite_sof_save_meta_options (valid, unique)
+* exopite_sof_sanitize_value (value, config)
+* exopite_sof_add_field (output, field, config )
+* exopite_sof_meta_get_options (meta_options, unique, post_id )
 
 #### Actions
-* exopite-simple-options-framework-do-save-options (valid, unique)
-* exopite-simple-options-framework-do-save-menu-options (value, unique)
-* exopite-simple-options-framework-do-save-meta-options (valid, unique, post_id)
-* exopite-simple-options-framework-before-generate-field (field, config)
-* exopite-simple-options-framework-before-add-field (field, config)
-* exopite-simple-options-framework-after-generate-field (field, config)
-* exopite-simple-options-framework-after-add-field (field, config)
-* exopite-simple-options-framework-form-menu-before (unique)
-* exopite-simple-options-framework-form-meta-before (unique)
-* exopite-simple-options-framework-display-page-header (config)
-* exopite-simple-options-framework-display-page-footer (config)
-* exopite-simple-options-framework-form-menu-after (unique)
-* exopite-simple-options-framework-form-meta-after (unique)
+* exopite_sof_do_save_options (valid, unique)
+* exopite_sof_do_save_menu_options (value, unique)
+* exopite_sof_do_save_meta_options (valid, unique, post_id)
+* exopite_sof_before_generate_field (field, config)
+* exopite_sof_before_add_field (field, config)
+* exopite_sof_after_generate_field (field, config)
+* exopite_sof_after_add_field (field, config)
+* exopite_sof_form_menu_before (unique)
+* exopite_sof_form_meta_before (unique)
+* exopite_sof_display_page_header (config)
+* exopite_sof_display_page_footer (config)
+* exopite_sof_form_menu_after (unique)
+* exopite_sof_form_meta_after (unique)
 
 ### CHANGELOG
+
+= 20180904 - 2018-09-04 =
+* Dashes in Filter and Action names to meet WordPress standars (thanks to raoabid GitHub)
+
+= 20180903 - 2018-09-03 =
+* Refactoring main class to include some helper functions (thanks to raoabid GitHub)
 
 = 20180528 - 2018-05-28 =
 * Fix footer displayed twice
