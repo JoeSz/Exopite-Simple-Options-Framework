@@ -100,7 +100,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public $fields = array();
 
+		public $multilang = false;
+
 		public $version = '1.0';
+
+		public $debug = false;
 
 		/**
 		 *
@@ -147,10 +151,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				return;
 			}
 
-			$this->version = '20180901';
+			$this->version = '20180608';
 
-			$this->unique = sanitize_key( $config['id'] );
-
+			// TODO: Do sanitization
+			$this->unique = $config['id'];
 			// Filter for override every exopite $config and $fields
 			$this->config = apply_filters( 'exopite_sof_config', $config );
 			$this->fields = apply_filters( 'exopite_sof_options', $fields );
@@ -168,6 +172,18 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			$this->set_properties();
 
 			$this->load_classes();
+
+			/**
+			 * Set multilang default true.
+			 *
+			 * In metabox there is no "multilang", because there are no need for that,
+			 * WPML and others will handle mulitlang on their own.
+			 * Meta will be saved for each language "copy" separately.
+			 */
+			$multilang_enabled = ( $this->config['type'] == 'metabox' || isset( $this->config['multilang'] ) && $this->config['multilang'] === false ) ? false : true;
+
+			$this->config['multilang'] = Exopite_Simple_Options_Framework_Helper::get_language_defaults( $multilang_enabled );
+
 
 			$this->define_shared_hooks();
 
@@ -490,6 +506,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function load_classes() {
 
+			require_once 'helper-class.php';
 			require_once 'fields-class.php';
 			require_once 'upload-class.php';
 
@@ -884,30 +901,41 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function save( $fields ) {
 
-			$capability = isset( $this->config['capability'] ) ? sanitize_key( $this->config['capability'] ) : 'edit_posts';
+			/**
+			 * Import options sould not be checked.
+			 */
+			if ( $_POST['action'] == 'exopite-sof-import-options' ) {
+				return apply_filters( 'exopite-simple-options-framework-import-options', $fields, $this->unique );
+			}
 
-			if ( ! current_user_can( $capability ) ) {
-				return null;
+			/**
+			 * For some reason, if user select "All languages" here WPML report the default language
+			 */
+			if ( is_array( $this->config['multilang'] ) ) {
+				$current_language = ( isset( $_POST['_language'] ) && ! empty( $_POST['_language'] ) ) ? $_POST['_language'] : $this->config['multilang']['current'];
+			}
+
+			if ( ! current_user_can( $this->config['capability'] ) ) {
+				return;
 			}
 
 			/**
 			 * If fields is post id then check post type
 			 * and if not the post types in settings, then return.
 			 */
-			if ( ! is_array( $fields ) && is_array( $this->config['post_types'] ) ) {
+			if ( ! is_array( $fields ) ) {
 
-				// Make sure its post id
-				$fields = absint( $fields );
+				$post_type = get_post_type( $fields );
 
 				if ( ! in_array( get_post_type( $fields ), $this->config['post_types'] ) ) {
-					return null;
+					return;
 				}
 
 			}
 
-//			$menu = ( $this->config['type'] == 'menu' );
+			$menu = ( $this->config['type'] == 'menu' );
 
-			if ( ! $this->is_menu() ) {
+			if ( ! $menu ) {
 				global $post;
 			}
 
@@ -934,6 +962,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 				foreach ( $section['fields'] as $field ) {
 
+					// Get current field value, make sure we are not override other language values
+					if ( is_array( $this->config['multilang'] ) ) {
+						$valid[ $field['id'] ] = $this->db_options[ $field['id'] ];
+					}
+
 					if ( $field['type'] == 'group' ) {
 
 						if ( isset( $field['options']['repeater'] ) && $field['options']['repeater'] ) {
@@ -946,7 +979,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 									break;
 
 								case 'metabox':
-									$value_array = ( isset( $_POST[ $this->unique ][ $field['id'] ] ) ) ? $_POST[ $this->unique ][ $field['id'] ] : array();
+									if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
+										$value_array = ( isset( $_POST[ $field['id'] ] ) ) ? $_POST[ $field['id'] ] : array();
+									} else {
+										$value_array = ( isset( $_POST[ $this->unique ][ $field['id'] ] ) ) ? $_POST[ $this->unique ][ $field['id'] ] : array();
+									}
 									break;
 							}
 
@@ -960,12 +997,33 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 											break;
 
 										case 'metabox':
-											$value = ( isset( $_POST[ $this->unique ][ $field['id'] ][ $i ][ $sub_field['id'] ] ) ) ? $_POST[ $this->unique ][ $field['id'] ][ $i ][ $sub_field['id'] ] : '';
+											if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
+												$value = ( isset( $_POST[ $field['id'] ][ $i ][ $sub_field['id'] ] ) ) ? $_POST[ $field['id'] ][ $i ][ $sub_field['id'] ] : '';
+											} else {
+												$value = ( isset( $_POST[ $this->unique ][ $field['id'] ][ $i ][ $sub_field['id'] ] ) ) ? $_POST[ $this->unique ][ $field['id'] ][ $i ][ $sub_field['id'] ] : '';
+											};
 											break;
 									}
 
+									if ( is_array( $this->config['multilang'] ) ) {
 
-									$valid[ $field['id'] ][ $i ][ $sub_field['id'] ] = $this->sanitize( $sub_field, $value );
+										if ( is_array( $value ) ) {
+											$current_value = $this->sanitize( $sub_field, $value[ $current_language ] );
+										} else {
+											$current_value = $this->sanitize( $sub_field, $value );
+										}
+
+										if ( ! is_array( $valid[ $field['id'] ][ $i ][ $sub_field['id'] ] ) ) {
+											$valid[ $field['id'] ][ $i ][ $sub_field['id'] ] = array();
+										}
+
+										$valid[ $field['id'] ][ $i ][ $sub_field['id'] ][ $current_language ] = $current_value;
+										$valid[ $field['id'] ][ $i ][ $sub_field['id'] ]['multilang']         = true;
+
+									} else {
+										$valid[ $field['id'] ][ $i ][ $sub_field['id'] ] = $this->sanitize( $sub_field, $value );
+									}
+
 								}
 								$i ++;
 
@@ -981,11 +1039,32 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 										break;
 
 									case 'metabox':
-										$value = ( isset( $_POST[ $this->unique ][ $field['id'] ][ $sub_field['id'] ] ) ) ? $_POST[ $this->unique ][ $field['id'] ][ $sub_field['id'] ] : '';
+										if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
+											$value = ( isset( $_POST[ $field['id'] ][ $sub_field['id'] ] ) ) ? $_POST[ $field['id'] ][ $sub_field['id'] ] : '';
+										} else {
+											$value = ( isset( $_POST[ $this->unique ][ $field['id'] ][ $sub_field['id'] ] ) ) ? $_POST[ $this->unique ][ $field['id'] ][ $sub_field['id'] ] : '';
+										}
 										break;
 								}
 
-								$valid[ $field['id'] ][ $sub_field['id'] ] = $this->sanitize( $sub_field, $value );
+								if ( is_array( $this->config['multilang'] ) ) {
+
+									if ( is_array( $value ) ) {
+										$current_value = $this->sanitize( $sub_field, $value[ $current_language ] );
+									} else {
+										$current_value = $this->sanitize( $sub_field, $value );
+									}
+
+									if ( ! is_array( $valid[ $field['id'] ][ $sub_field['id'] ] ) ) {
+										$valid[ $field['id'] ][ $sub_field['id'] ] = array();
+									}
+
+									$valid[ $field['id'] ][ $sub_field['id'] ][ $current_language ] = $current_value;
+									$valid[ $field['id'] ][ $sub_field['id'] ]['multilang']         = true;
+
+								} else {
+									$valid[ $field['id'] ][ $sub_field['id'] ] = $this->sanitize( $sub_field, $value );
+								}
 
 							}
 
@@ -1001,11 +1080,39 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 								break;
 
 							case 'metabox':
-								$value = ( isset( $_POST[ $this->unique ][ $field['id'] ] ) ) ? $_POST[ $this->unique ][ $field['id'] ] : '';
+								if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
+									$value = ( isset( $_POST[ $field['id'] ] ) ) ? $_POST[ $field['id'] ] : '';
+								} else {
+									$value = ( isset( $_POST[ $this->unique ][ $field['id'] ] ) ) ? $_POST[ $this->unique ][ $field['id'] ] : '';
+								}
 								break;
 						}
 
-						$valid[ $field['id'] ] = $this->sanitize( $field, $value );
+						/**
+						 * Possibilities:
+						 * - no WMPL, qTranslate-X or Polilang activated -> single
+						 * - multilang plugin deactivated -> array but looking for single
+						 * - multilang plugin activated after settings -> single but looking for an array
+						 */
+						if ( is_array( $this->config['multilang'] ) ) {
+
+							if ( is_array( $value ) ) {
+								$current_value = $this->sanitize( $field, $value[ $current_language ] );
+							} else {
+								$current_value = $this->sanitize( $field, $value );
+							}
+
+							if ( ( is_array( $valid[ $field['id'] ] ) && $field['type'] == 'select' && key( $valid[ $field['id'] ] ) === 0 ) ||
+							     ! is_array( $valid[ $field['id'] ] ) ) {
+								$valid[ $field['id'] ] = array();
+							}
+
+							$valid[ $field['id'] ][ $current_language ] = $current_value;
+							$valid[ $field['id'] ]['multilang']         = true;
+
+						} else {
+							$valid[ $field['id'] ] = $this->sanitize( $field, $value );
+						}
 
 					}
 
@@ -1028,8 +1135,15 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					if ( isset( $post ) ) {
 						$valid = apply_filters( 'exopite_sof_save_meta_options', $valid, $this->unique, $post->ID );
 						do_action( 'exopite_sof_do_save_meta_options', $valid, $this->unique, $post->ID );
-						update_post_meta( $post->ID, $this->unique, $valid );
 
+
+						if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
+							foreach ( $valid as $key => $value ) {
+								update_post_meta( $post->ID, $key, $value );
+							}
+						} else {
+							update_post_meta( $post->ID, $this->unique, $valid );
+						}
 						break;
 					}
 
@@ -1044,12 +1158,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		//DEGUB
 		public function write_log( $type, $log_line ) {
 
-			$hash        = 'ee0b589bc9c7a7ba65c46cd960764e52ca37e0ae';
-			$fn          = plugin_dir_path( __FILE__ ) . 'logs/' . $type . '-' . $hash . '.log';
+			$hash        = '';
+			$fn          = plugin_dir_path( __FILE__ ) . '/' . $type . '-' . $hash . '.log';
 			$log_in_file = file_put_contents( $fn, date( 'Y-m-d H:i:s' ) . ' - ' . $log_line . PHP_EOL, FILE_APPEND );
 
 		}
-
 		// DEBUG
 
 		/**
@@ -1061,6 +1174,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 * @return mixed|void
 		 */
 		public function sanitize( $field, $value ) {
+
+			// $this->write_log( 'sanitize', var_export( $field, true) . PHP_EOL . var_export( $value, true) . PHP_EOL . PHP_EOL );
 
 			if ( ! empty( $field['sanitize'] ) ) {
 
@@ -1238,7 +1353,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 *
 		 * @return string   generated HTML for the field
 		 */
-		public function add_field( $field, $value = '' ) {
+		public function add_field( $field, $value = null ) {
 
 			do_action( 'exopite_sof_before_generate_field', $field, $this->config );
 			do_action( 'exopite_sof_before_add_field', $field, $this->config );
@@ -1279,26 +1394,45 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 					switch ( $this->config['type'] ) {
 						case 'menu':
-							$value = ( isset( $field['id'] ) && isset( $this->db_options[ $field['id'] ] ) ) ? $this->db_options[ $field['id'] ] : '';
+							$value = ( isset( $field['id'] ) && isset( $this->db_options[ $field['id'] ] ) ) ? $this->db_options[ $field['id'] ] : null;
 							break;
 
 						case 'metabox':
-							$value = ( isset( $field['id'] ) && isset( $this->db_options[ $field['id'] ] ) ) ? $this->db_options[ $field['id'] ] : '';
+							if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
+								$meta = get_post_meta( get_the_ID() );
+
+								/*
+								 * get_post_meta return empty on non existing meta
+								 * we need to check if meta key is exist to return null,
+								 * because default value can only display if value is null
+								 * on empty vlaue - may saved by the user - should display empty.
+								 */
+								if ( isset( $field['id'] ) && isset( $meta[ $field['id'] ] ) ) {
+									$value = get_post_meta( get_the_ID(), $field['id'], true );
+								} else {
+									$value = null;
+								}
+							} else {
+								$value = ( isset( $field['id'] ) && isset( $this->db_options[ $field['id'] ] ) ) ? $this->db_options[ $field['id'] ] : null;
+							}
+							// $meta = get_post_meta( get_the_ID(), $field['id'], true );
+							// $value = ( isset( $field['id'] ) ) ? $meta : null;
+							// $value = ( isset( $field['id'] ) && isset( $this->db_options[$field['id']] ) ) ? $this->db_options[$field['id']] : null;
 							break;
 					}
 
 				}
 
 				ob_start();
-				$element = new $class( $field, $value, $this->unique, $this->config['type'] );
+				$element = new $class( $field, $value, $this->unique, $this->config );
 				$element->output();
 				$output .= ob_get_clean();
 
 			} else {
 
 				$output .= '<div class="danger unknown">';
-				$output .= __( 'ERROR:', 'exopite-simple-options' ) . ' ';
-				$output .= __( 'This field class is not available!', 'exopite-simple-options' );
+				$output .= esc_attr__( 'ERROR:', 'exopite-simple-options' ) . ' ';
+				$output .= esc_attr__( 'This field class is not available!', 'exopite-simple-options' );
 				$output .= ' <i>(' . $field['type'] . ')</i>';
 				$output .= '</div>';
 
@@ -1326,17 +1460,18 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function display_options_page_header() {
 
-
-			echo '<form method="post" action="options.php" enctype="multipart/form-data" name="' . $this->unique . '" class="exopite-sof-form-js ' . $this->unique . '-form" data-save="' . __( 'Saving...', 'exopite-simple-options' ) . '" data-saved="' . __( 'Saved Successfully.', 'exopite-simple-options' ) . '">';
+			echo '<form method="post" action="options.php" enctype="multipart/form-data" name="' . $this->unique . '" class="exopite-sof-form-js ' . $this->unique . '-form" data-save="' . esc_attr__( 'Saving...', 'exopite-simple-options' ) . '" data-saved="' . esc_attr__( 'Saved Successfully.', 'exopite-simple-options' ) . '">';
 
 			settings_fields( $this->unique );
 			do_settings_sections( $this->unique );
 
+			$current_language = ( is_array( $this->config['multilang'] ) ) ? apply_filters( 'exopite-simple-options-framework-title-language-notice', ' [' . $this->config['multilang']['current'] . ']' ) : '';
+
 			echo '<header class="exopite-sof-header exopite-sof-header-js">';
-			echo '<h1>' . $this->config['title'] . '</h1>';
+			echo '<h1>' . $this->config['title'] . $current_language . '</h1>';
 
 			echo '<fieldset><span class="exopite-sof-ajax-message"></span>';
-			submit_button( __( 'Save Settings', 'exopite-simple-options' ), 'primary ' . 'exopite-sof-submit-button-js', $this->unique . '-save', false, array() );
+			submit_button( esc_attr__( 'Save Settings', 'exopite-simple-options' ), 'primary ' . 'exopite-sof-submit-button-js', $this->unique . '-save', false, array() );
 			echo '</fieldset>';
 			echo '</header>';
 
@@ -1351,7 +1486,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			echo '<footer class="exopite-sof-footer-js exopite-sof-footer">';
 
 			echo '<fieldset><span class="exopite-sof-ajax-message"></span>';
-			submit_button( __( 'Save Settings', 'exopite-simple-options' ), 'primary ' . 'exopite-sof-submit-button-js', '', false, array() );
+			submit_button( esc_attr__( 'Save Settings', 'exopite-simple-options' ), 'primary ' . 'exopite-sof-submit-button-js', '', false, array() );
 			echo '</fieldset>';
 
 			echo '</footer>';
@@ -1414,11 +1549,77 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					/**
 					 * Get options
 					 * Can not get options in __consturct, because there, the_ID is not yet available.
+					 *
+					 * Only if options is not simple, if yes, then value determinated when field are displayed.
+					 * Simple options is stored az induvidual meta key, value pair, otherwise it is stored in an array.
+					 *
+					 * I implemented this option because it is possible to search in serialized (array) post meta:
+					 * @link https://wordpress.stackexchange.com/questions/16709/meta-query-with-meta-values-as-serialize-arrays
+					 * @link https://stackoverflow.com/questions/15056407/wordpress-search-serialized-meta-data-with-custom-query
+					 * @link https://www.simonbattersby.com/blog/2013/03/querying-wordpress-serialized-custom-post-data/
+					 *
+					 * but there is no way to sort them with wp_query or SQL.
+					 * @link https://wordpress.stackexchange.com/questions/87265/order-by-meta-value-serialized-array/87268#87268
+					 * "Not in any reliable way. You can certainly ORDER BY that value but the sorting will use the whole serialized string,
+					 * which will give * you technically accurate results but not the results you want. You can't extract part of the string
+					 * for sorting within the query itself. Even if you wrote raw SQL, which would give you access to database functions like
+					 * SUBSTRING, I can't think of a dependable way to do it. You'd need a MySQL function that would unserialize the value--
+					 * you'd have to write it yourself.
+					 * Basically, if you need to sort on a meta_value you can't store it serialized. Sorry."
+					 *
+					 * It is possible to get all required posts and store them in an array and then sort them as an array,
+					 * but what if you want multiple keys/value pair to be sorted?
+					 *
+					 * UPDATE
+					 * it is maybe possible:
+					 * @link http://www.russellengland.com/2012/07/how-to-unserialize-data-using-mysql.html
+					 * but it is waaay more complicated and less documented as meta query sort and search.
+					 * It should be not an excuse to use it, but it is not as reliable as it should be.
+					 *
+					 * @link https://wpquestions.com/Order_by_meta_key_where_value_is_serialized/7908
+					 * "...meta info serialized is not a good idea. But you really are going to lose the ability to query your
+					 * data in any efficient manner when serializing entries into the WP database.
+					 *
+					 * The overall performance saving and gain you think you are achieving by serialization is not going to be noticeable to
+					 * any major extent. You might obtain a slightly smaller database size but the cost of SQL transactions is going to be
+					 * heavy if you ever query those fields and try to compare them in any useful, meaningful manner.
+					 *
+					 * Instead, save serialization for data that you do not intend to query in that nature, but instead would only access in
+					 * a passive fashion by the direct WP API call get_post_meta() - from that function you can unpack a serialized entry
+					 * to access its array properties too."
 					 */
-					$meta_options     = get_post_meta( get_the_ID(), $this->unique, true );
-					$this->db_options = apply_filters( 'exopite_sof_meta_get_options', $meta_options, $this->unique, get_the_ID() );
-					// $this->db_options = json_decode( get_post_meta( get_the_ID(), $this->unique, true ), true );
+					if ( $this->config['type'] == 'metabox' && ( ! isset( $this->config['options'] ) || $this->config['options'] != 'simple' ) ) {
+						$meta_options     = get_post_meta( get_the_ID(), $this->unique, true );
+						$this->db_options = apply_filters( 'exopite-simple-options-framework-meta-get-options', $meta_options, $this->unique, get_the_ID() );
+					}
+
+					if ( $this->debug ) {
+						echo '<pre>POST_META<br>';
+						var_export( get_post_meta( get_the_ID() ) );
+						echo '</pre>';
+					}
+
 					break;
+			}
+
+			if ( is_array( $this->config['multilang'] ) ) {
+
+				switch ( $this->config['type'] ) {
+					case 'menu':
+						$current_language = $this->config['multilang']['current'];
+						break;
+
+					case 'metabox':
+						// Pages/Posts can not have "All languages" displayed, then default will be displayed
+						$current_language = ( $this->config['multilang']['current'] == 'all' ) ? $this->config['multilang']['default'] : $this->config['multilang']['current'];
+						break;
+				}
+
+				/**
+				 * Current language need to pass to save function, if "All languages" seleted, WPML report default
+				 * on save hook.
+				 */
+				echo '<input type="hidden" name="_language" value="' . $current_language . '">';
 			}
 
 			$sections = 0;
@@ -1430,9 +1631,18 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			$tabbed = ( $sections > 1 && $this->config['tabbed'] ) ? ' exopite-sof-content-nav exopite-sof-content-js' : '';
 
 			// echo '<pre>';
-			// var_export( $this->db_options );
+			// var_export( $this->config['multilang'] );
 			// echo '</pre>';
 
+			// echo '<pre>';
+			// var_export( $this->config );
+			// echo '</pre>';
+
+			if ( $this->debug ) {
+				echo '<pre>DB_OPTIONS<br>';
+				var_export( $this->db_options );
+				echo '</pre>';
+			}
 			/**
 			 * Generate fields
 			 */
