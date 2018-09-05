@@ -13,13 +13,26 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 	abstract class Exopite_Simple_Options_Framework_Fields {
 
-		public function __construct( $field = array(), $value = '', $unique = '', $where = '' ) {
+		public $multilang;
+
+		public function __construct( $field = array(), $value = null, $unique = '', $config = array() ) {
 
 			$this->field     = $field;
 			$this->value     = $value;
 			$this->org_value = $value;
 			$this->unique    = $unique;
-			$this->where     = $where;
+			$this->config    = $config;
+			$this->where     = $this->config['type'];
+			$this->multilang = $this->config['multilang'];
+
+
+
+//			$this->multilang = $this->config['multilang'];
+//			$this->config['type'] = 'metabox';
+
+
+
+//			var_dump( $this->config['multilang']); die();
 
 		}
 
@@ -53,9 +66,77 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 		}
 
-		public function element_name( $extra_name = '' ) {
+		public function element_name( $extra_name = '', $multilang = false ) {
 
-			return ( ! empty( $this->unique ) ) ? $this->unique . '[' . $this->field['id'] . ']' . $extra_name : '';
+			$extra_multilang = ( ! $multilang && is_array( $this->multilang ) ) ? '[' . $this->multilang['current'] . ']' : '';
+
+			if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
+				$name = $this->field['id'] . $extra_multilang . $extra_name;
+			} else {
+				$name = $this->unique . '[' . $this->field['id'] . ']' . $extra_multilang . $extra_name;
+			}
+
+			return ( ! empty( $this->unique ) ) ? $name : '';
+
+		}
+
+		public function element_value( $value = null ) {
+
+			$value = $this->value;
+
+			/**
+			 * Set default if not exist
+			 */
+			if ( (
+				     // multilang activated and multilang set to value but not in the current language
+				     ( is_array( $this->multilang ) && isset( $this->value['multilang'] ) && ! isset( $value[ $this->multilang['current'] ] ) ) ||
+				     // multilang is activated but still "single language" value there and not current language (either current is set or next rule apply)
+				     ( is_array( $this->multilang ) && ! isset( $this->value['multilang'] ) && $this->multilang['current'] != $this->multilang['default'] ) ||
+				     // value is not set
+				     ! isset( $value )
+			     ) &&
+			     // and default value is set in options
+			     isset( $this->field['default'] ) && $this->field['default'] !== ''
+			) {
+
+				$default = $this->field['default'];
+
+				if ( is_array( $default ) ) {
+
+					if ( is_callable( $default['function'] ) ) {
+						$args = ( isset( $default['args'] ) ) ? $default['args'] : '';
+
+						return call_user_func( $default['function'], $args );
+					}
+
+				}
+
+				return $default;
+
+			}
+
+			if ( is_array( $this->multilang ) && isset( $this->value['multilang'] ) && is_array( $value ) ) {
+
+				$current = $this->multilang['current'];
+
+				if ( isset( $value[ $current ] ) ) {
+					$value = $value[ $current ];
+				} else if ( $this->multilang['current'] == $this->multilang['default'] && isset( $value[ $current ] ) ) {
+					$value = $this->value;
+				} else {
+					$value = '';
+				}
+
+			} else if ( is_array( $this->multilang ) && ! is_array( $value ) && ( $this->multilang['current'] != $this->multilang['default'] ) ) {
+				$value = '';
+			} else if ( ! is_array( $this->multilang ) && isset( $this->value['multilang'] ) && is_array( $this->value ) ) {
+
+				$value = array_values( $this->value );
+				$value = $value[0];
+
+			}
+
+			return $value;
 
 		}
 
@@ -88,37 +169,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 		}
 
-		public function element_value( $value = '' ) {
-
-			$value = $this->value;
-
-			if ( empty( $value ) && isset( $this->field['default'] ) && $this->field['default'] !== '' ) {
-
-				$default = $this->field['default'];
-
-				if ( is_array( $default ) ) {
-
-					if ( isset( $default['function'] ) && is_callable( $default['function'] ) ) {
-						$args = ( isset( $default['args'] ) ) ? $default['args'] : '';
-
-						return call_user_func( $default['function'], $args );
-					}
-
-				}
-
-				return $default;
-
-			}
-
-			return $this->value;
-
-		}
-
 		public function element_class( $el_class = '' ) {
 
 			$field_class = '';
-
-
 			$classes     = ( isset( $this->field['class'] ) ) ? array_merge( explode( ' ', $el_class ), explode( ' ', $this->field['class'] ) ) : explode( ' ', $el_class );
 			$classes     = array_filter( $classes );
 			$field_class = implode( ' ', $classes );
@@ -144,7 +197,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 			return $result;
 
 		}
-
 
 	}
 

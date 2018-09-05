@@ -30,6 +30,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 			}
 			$multilang = array();
 
+
+			// Fallbacks
+			$default                = mb_substr( get_locale(), 0, 2 );
+			$multilang['default']   = $default;
+			$multilang['current']   = $default;
+			$multilang['languages'] = array( $default );
+
+
 			if ( class_exists( 'SitePress' ) || class_exists( 'Polylang' ) || function_exists( 'qtrans_getSortedLanguages' ) ) {
 
 				if ( class_exists( 'SitePress' ) ) {
@@ -41,16 +49,31 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 
 				} else if ( class_exists( 'Polylang' ) ) {
 
-					global $polylang;
-					$current    = pll_current_language();
-					$default    = pll_default_language();
-					$current    = ( empty( $current ) ) ? $default : $current;
-					$poly_langs = $polylang->model->get_languages_list();
-					$languages  = array();
 
-					foreach ( $poly_langs as $p_lang ) {
-						$languages[ $p_lang->slug ] = $p_lang->slug;
+					// These checks of function_exists() and method_exists() added as deactivating polylang was giving fatal error
+
+					global $polylang;
+
+
+					if ( function_exists( 'pll_current_language' ) ) {
+						$current = pll_current_language();
 					}
+
+					if ( function_exists( 'pll_default_language' ) ) {
+						$default = pll_default_language();
+					}
+
+					if ( property_exists( $polylang, 'model' ) && method_exists( $polylang->model, 'get_languages_list' ) ) {
+						$poly_langs = $polylang->model->get_languages_list();
+					}
+
+
+					if ( isset( $poly_langs ) && is_array( $poly_langs ) ) {
+						foreach ( $poly_langs as $p_lang ) {
+							$languages[ $p_lang->slug ] = $p_lang->slug;
+						}
+					}
+
 
 					$multilang['default']   = $default;
 					$multilang['current']   = $current;
@@ -65,16 +88,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 
 				}
 
-			} else {
-
-				$default                = mb_substr( get_locale(), 0, 2 );
-				$multilang['default']   = $default;
-				$multilang['current']   = $default;
-				$multilang['languages'] = array( $default );
-
 			}
 
-			$multilang = apply_filters( 'exopite-simple-options-framework-language-defaults', $multilang );
+			$multilang = apply_filters( 'exopite_sof_language_defaults', $multilang );
 
 			return ( ! empty( $multilang ) ) ? $multilang : false;
 

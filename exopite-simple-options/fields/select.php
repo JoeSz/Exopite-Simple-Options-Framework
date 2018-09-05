@@ -50,7 +50,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_select' ) ) {
 
 			if ( isset( $this->field['options'] ) || isset( $this->field['query'] ) ) {
 
-				$options    = ( is_array( $this->field['options'] ) ) ? $this->field['options'] : array();
+				$options    = ( isset($this->field['options']) && is_array( $this->field['options'] ) ) ? $this->field['options'] : array();
 				$query      = ( isset( $this->field['query'] ) && isset( $this->field['query']['type'] ) ) ? $this->field['query'] : false;
 				$select     = ( $query ) ? $this->element_data( $query['type'] ) : $options;
 				$class      = $this->element_class();
