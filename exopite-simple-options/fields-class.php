@@ -14,25 +14,39 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 	abstract class Exopite_Simple_Options_Framework_Fields {
 
 		public $multilang;
+		public $current_lang;
+		public $lang_default;
+		public $lang_current;
+		public $languages;
 
-		public function __construct( $field = array(), $value = null, $unique = '', $config = array() ) {
+		public function __construct( $field = array(), $value = null, $unique = '', $config = array()) {
 
 			$this->field     = $field;
 			$this->value     = $value;
 			$this->org_value = $value;
 			$this->unique    = $unique;
 			$this->config    = $config;
-			$this->where     = $this->config['type'];
-			$this->multilang = $this->config['multilang'];
+			$this->where     = ( isset( $this->config['type'] ) ) ? $this->config['type'] : '';
+			$this->multilang = ( isset( $this->config['multilang'] ) ) ? $this->config['multilang'] : false;
 
+			$this->lang_default = ( $this->multilang && isset( $this->multilang['default'] ) ) ? $this->multilang['default'] : mb_substr( get_locale(), 0, 2 );
+			$this->lang_current = ( $this->multilang && isset( $this->multilang['current'] ) ) ? $this->multilang['current'] : $this->lang_default;
 
+			$this->languages = (
+				$this->multilang &&
+				isset( $this->multilang['languages'] ) &&
+				is_array( $this->multilang['languages'] )
+			) ? $this->multilang['current'] : array( $this->lang_default );
 
-//			$this->multilang = $this->config['multilang'];
-//			$this->config['type'] = 'metabox';
+		}
 
+		/*
+		 * @return bool true if multilang is set to true
+		*/
+		public function is_multilang() {
 
-
-//			var_dump( $this->config['multilang']); die();
+			// We should have received multilang as well together with $this->config['multilang']
+			return ( isset($this->config['multilang']) && $this->config['multilang'] && $this->multilang ) ? true : false;
 
 		}
 
@@ -66,15 +80,20 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 		}
 
-		public function element_name( $extra_name = '', $multilang = false ) {
+		public function element_name( $extra_name = '' ) {
 
-			$extra_multilang = ( ! $multilang && is_array( $this->multilang ) ) ? '[' . $this->multilang['current'] . ']' : '';
 
-			if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
-				$name = $this->field['id'] . $extra_multilang . $extra_name;
-			} else {
-				$name = $this->unique . '[' . $this->field['id'] . ']' . $extra_multilang . $extra_name;
-			}
+
+			$extra_multilang = ( $this->is_multilang() ) ? '[' . $this->lang_current . ']' : '';
+
+//			TODO: Accout for 'simple' options style
+//			if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
+//				$name = $this->field['id'] . $extra_multilang . $extra_name;
+//			} else {
+//				$name = $this->unique . '[' . $this->field['id'] . ']' . $extra_multilang . $extra_name;
+//			}
+
+			$name = $this->unique . $extra_multilang . '[' . $this->field['id'] . ']' . $extra_name;
 
 			return ( ! empty( $this->unique ) ) ? $name : '';
 
@@ -84,26 +103,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 			$value = $this->value;
 
-			/**
-			 * Set default if not exist
-			 */
-			if ( (
-				     // multilang activated and multilang set to value but not in the current language
-				     ( is_array( $this->multilang ) && isset( $this->value['multilang'] ) && ! isset( $value[ $this->multilang['current'] ] ) ) ||
-				     // multilang is activated but still "single language" value there and not current language (either current is set or next rule apply)
-				     ( is_array( $this->multilang ) && ! isset( $this->value['multilang'] ) && $this->multilang['current'] != $this->multilang['default'] ) ||
-				     // value is not set
-				     ! isset( $value )
-			     ) &&
-			     // and default value is set in options
-			     isset( $this->field['default'] ) && $this->field['default'] !== ''
-			) {
+			if ( empty( $value ) && isset( $this->field['default'] ) && !empty($this->field['default'] ) ) {
 
 				$default = $this->field['default'];
 
 				if ( is_array( $default ) ) {
 
-					if ( is_callable( $default['function'] ) ) {
+					if ( isset($default['function']) && is_callable( $default['function'] ) ) {
 						$args = ( isset( $default['args'] ) ) ? $default['args'] : '';
 
 						return call_user_func( $default['function'], $args );
@@ -115,28 +121,61 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 			}
 
-			if ( is_array( $this->multilang ) && isset( $this->value['multilang'] ) && is_array( $value ) ) {
-
-				$current = $this->multilang['current'];
-
-				if ( isset( $value[ $current ] ) ) {
-					$value = $value[ $current ];
-				} else if ( $this->multilang['current'] == $this->multilang['default'] && isset( $value[ $current ] ) ) {
-					$value = $this->value;
-				} else {
-					$value = '';
-				}
-
-			} else if ( is_array( $this->multilang ) && ! is_array( $value ) && ( $this->multilang['current'] != $this->multilang['default'] ) ) {
-				$value = '';
-			} else if ( ! is_array( $this->multilang ) && isset( $this->value['multilang'] ) && is_array( $this->value ) ) {
-
-				$value = array_values( $this->value );
-				$value = $value[0];
-
-			}
-
 			return $value;
+
+			/**
+			 * Set default if not exist
+			 */
+//			if ( (
+//				     // multilang activated and multilang set to value but not in the current language
+//				     ( is_array( $this->multilang ) && isset( $this->value['multilang'] ) && ! isset( $value[ $this->multilang['current'] ] ) ) ||
+//				     // multilang is activated but still "single language" value there and not current language (either current is set or next rule apply)
+//				     ( is_array( $this->multilang ) && ! isset( $this->value['multilang'] ) && $this->multilang['current'] != $this->multilang['default'] ) ||
+//				     // value is not set
+//				     ! isset( $value )
+//			     ) &&
+//			     // and default value is set in options
+//			     isset( $this->field['default'] ) && $this->field['default'] !== ''
+//			) {
+//
+//				$default = $this->field['default'];
+//
+//				if ( is_array( $default ) ) {
+//
+//					if ( is_callable( $default['function'] ) ) {
+//						$args = ( isset( $default['args'] ) ) ? $default['args'] : '';
+//
+//						return call_user_func( $default['function'], $args );
+//					}
+//
+//				}
+//
+//				return $default;
+//
+//			}
+//
+//			if ( is_array( $this->multilang ) && isset( $this->value['multilang'] ) && is_array( $value ) ) {
+//
+//				$current = $this->multilang['current'];
+//
+//				if ( isset( $value[ $current ] ) ) {
+//					$value = $value[ $current ];
+//				} else if ( $this->multilang['current'] == $this->multilang['default'] && isset( $value[ $current ] ) ) {
+//					$value = $this->value;
+//				} else {
+//					$value = '';
+//				}
+//
+//			} else if ( is_array( $this->multilang ) && ! is_array( $value ) && ( $this->multilang['current'] != $this->multilang['default'] ) ) {
+//				$value = '';
+//			} else if ( ! is_array( $this->multilang ) && isset( $this->value['multilang'] ) && is_array( $this->value ) ) {
+//
+//				$value = array_values( $this->value );
+//				$value = $value[0];
+//
+//			}
+//
+//			return $value;
 
 		}
 

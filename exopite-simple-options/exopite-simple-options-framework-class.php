@@ -134,7 +134,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		/*
 		 * @var array required fields for $type = menu
 		 */
-		protected $required_keys_all_types = array( 'type' );
+//		protected $required_keys_all_types = array( 'type' );
+		protected $required_keys_all_types = array();
 
 
 		/*
@@ -210,6 +211,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 
 			}
+
 
 		}
 
@@ -746,6 +748,26 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			return apply_filters( 'exopite_sof_filter_config_default_metabox_array', $default );
 		}
 
+
+		/*
+		 * Get default config for group type field
+		 * @return array $default
+		 */
+		public function get_config_default_group_options() {
+
+			$default = array(
+				//
+				'repeater'        => true,
+				'accordion'       => true,
+				'button_title'    => __( 'Add New', 'exopite-options-framework' ),
+				'accordion_title' => __( 'Accordion Title', 'exopite-options-framework' ),
+				'limit'           => 50,
+				'sortable'        => true,
+			);
+
+			return apply_filters( 'exopite_sof_filter_config_default_group_array', $default );
+		}
+
 		/*
 		 * Get default config for menu
 		 * @return array $default
@@ -974,13 +996,16 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		public function save( $posted_data ) {
 
 
-			// $this->write_log( 'post', var_export( $_POST, true ) );
+//			$this->write_log( 'posted_data', var_export( $_POST, true ) . PHP_EOL . PHP_EOL );
+//			$this->write_log( 'posted_data', var_export( $posted_data, true ) . PHP_EOL . PHP_EOL );
 
 
 			// Is user has ability to save?
 			if ( ! current_user_can( $this->config['capability'] ) ) {
 				return null;
 			}
+
+			//TODO Verify nonce
 
 			$valid = array();
 
@@ -1000,7 +1025,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				 * For some reason, if user select "All languages" here WPML report the default language
 				 */
 //				if ( $this->is_multilang() ) {
-//					$current_language = ( isset( $_POST['_language'] ) && ! empty( $_POST['_language'] ) ) ? $_POST['_language'] : $this->config['multilang']['current'];
+////				TODO: Joe, This function is not right, it brings the wrong current_lang for polylang , not sure about WPML
+//					$current_language = ( isset( $_POST['_language'] ) && ! empty( $_POST['_language'] ) ) ? sanitize_key( $_POST['_language'] ) : $this->lang_current;
+//
+//					// Update $this->lang_current as well if the $_POST['_language'] is not as we currently have in $this->lang_current
+//					if ( $current_language != $this->lang_current ) {
+//						$this->lang_current = $current_language;
+//					}
+//
 //				}
 
 				// Preserve values start with "_".
@@ -1014,10 +1046,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					}
 
 				}
-
-
-//				var_dump( $fields);
-//				die();
 
 			}
 
@@ -1042,39 +1070,65 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					return null;
 				}
 
-				global $post;
+
+				// Global $post is not required and should not be used as we already have the $post id in $posted_data
+//				global $post;
 
 
 			}
 
-
+			/*
+			 * @var $section_fields_with_values it will hold the sanitized fields => value
+			 */
 			$section_fields_with_values = array();
 
 			/**
-			 * Loop all fields (from options)
+			 * Loop all fields (from $config fields array ) and update values from $_POST
 			 */
+
+			// Preserve other language setting
+			// Get current field value, make sure we are not override other language values
+			$other_languages = $this->languages_except_current_language();
+
+			// TODO: Take care of group type as well, its hard to preserve their value
+			foreach ( $other_languages as $language ) {
+				$section_fields_with_values[ $language ] = $this->db_options[ $language ];
+			}
+
+
+			$section_fields_current_lang = array();
+
 			foreach ( $this->fields as $section ) {
 
 				// Make sure we have $fields array and get sanitized Values
 				if ( isset( $section['fields'] ) && is_array( $section['fields'] ) ) {
 
-					$section_fields_with_values = array_merge( $section_fields_with_values, $this->get_sanitized_field_values( $section['fields'], $posted_data ));
+					$section_fields_current_lang = array_merge(
+						$section_fields_current_lang,  // Value we currently have in the array
+						$this->get_sanitized_fields_values( $section['fields'], $posted_data ) // sanitized array we are getting
+					);
 
 				}
 
 			}
 
+			$section_fields_with_values[ $this->lang_current ] = $section_fields_current_lang;
+
+//			$section_fields_with_values = array_merge( $section_fields_with_values , $section_fields_current_lang);
 
 
-
-			do_action( 'exopite_sof_do_save_options', $valid, $this->unique );
-
-			$valid = apply_filters( 'exopite_sof_save_options', $section_fields_with_values, $this->unique );
-
+//			$this->write_log( 'posted_data', var_export( $section_fields_with_values, true ) . PHP_EOL . PHP_EOL );
 
 			if ( $this->is_menu() ) {
-				$valid = apply_filters( 'exopite_sof_save_menu_options', $valid, $this->unique );
-				do_action( 'exopite_sof_do_save_menu_options', $value, $this->unique );
+
+				// These actions and filters only for options menu
+
+				// TODO: remove one set from the following set of filters + actions
+				do_action( 'exopite_sof_do_save_options', $section_fields_with_values, $this->unique );
+				$valid = apply_filters( 'exopite_sof_save_options', $section_fields_with_values, $this->unique );
+
+				$valid = apply_filters( 'exopite_sof_save_menu_options', $section_fields_with_values, $this->unique );
+				do_action( 'exopite_sof_do_save_menu_options', $section_fields_with_values, $this->unique );
 
 				return $valid;
 			}
@@ -1082,17 +1136,18 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			if ( $this->is_metabox() ) {
 
 				// When we click on "New Post" (CPT), then $post is not available, so we need to check if it is set
-				if ( isset( $post ) ) {
-					$valid = apply_filters( 'exopite_sof_save_meta_options', $valid, $this->unique, $post->ID );
-					do_action( 'exopite_sof_do_save_meta_options', $valid, $this->unique, $post->ID );
+				if ( isset( $post_id ) ) {
+
+					$valid = apply_filters( 'exopite_sof_save_meta_options', $section_fields_with_values, $this->unique, $post_id );
+					do_action( 'exopite_sof_do_save_meta_options', $section_fields_with_values, $this->unique, $post_id );
 
 
 					if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
 						foreach ( $valid as $key => $value ) {
-							update_post_meta( $post->ID, $key, $value );
+							update_post_meta( $post_id, $key, $value );
 						}
 					} else {
-						update_post_meta( $post->ID, $this->unique, $valid );
+						update_post_meta( $post_id, $this->unique, $valid );
 					}
 				}
 
@@ -1112,208 +1167,299 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		// DEBUG
 
 
-		public function get_sanitized_field_values( $fields, $posted_data ) {
-
-//			var_dump( $fields );
-//			die();
+		public function get_sanitized_fields_values( $fields, $posted_data ) {
 
 			$sanitized_fields_data = array();
-			$valid                 = $sanitized_fields_data;
 
-			foreach ( $fields as $index => $field ) {
+			if ( $this->is_multilang() ) {
 
-				$field_type = ( isset( $field['type'] ) ) ? $field['type'] : '';
+				$sanitized_fields_data = $this->get_sanitized_fields_values_multilang( $fields, $posted_data );
+
+			} else {
+
+				$sanitized_fields_data = $this->get_sanitized_fields_values_single_lang( $fields, $posted_data );
+			}
+
+			/*
+			foreach ( $fields as $index => $field ) :
+
+				$field_type = ( isset( $field['type'] ) ) ? $field['type'] : false;
+				$field_id   = ( isset( $field['id'] ) ) ? $field['id'] : false;
+
+				// if do not have $field_id or $field_type, we continue to next field
+				if ( ! $field_id || ! $field_type ) {
+					continue;
+				}
 
 				// Get current field value, make sure we are not override other language values
-
-				// Preserve the options from other Languages
 				if ( $this->is_multilang() ) {
 
 					$other_languages = $this->languages_except_current_language();
 
+					// TODO: Take care of group type as well, its hard to preserve their value
 					foreach ( $other_languages as $language ) {
-						$sanitized_fields_data[ $field['id'] ][ $language ] = $this->db_options[ $field['id'] ][ $language ];
+						$sanitized_fields_data[ $field_id ][ $language ] = $this->db_options[ $field_id ][ $language ];
 					}
 
 				}
 
-//				if ( $this->is_metabox() ):
-//
-//					// if field is not a group
-//					if ( $field['type'] !== 'group' ) {
-//						$sanitized_fields_data[ $index ] = $this->get_sanitized_field_value_from_post_meta( $field );
-//					}
-//
-//				endif; // if($this->is_metabox())
-//
-//
-//				if ( $this->is_menu() ):
-//
-//					// if field is not a group
-//					if ( $field['type'] !== 'group' ) {
-//						$sanitized_fields_data[ $index ] = $this->get_sanitized_field_value_from_global_post( $field );
-//					}
-//
-//				endif; // if($this->is_menu())
 
+				// if field is not a group
 
-// if field is not a group
+				if ( $field_type !== 'group' ) {
 
+					$sanitized_fields_data[ $field['id'] ][ $this->lang_current ] = $this->get_sanitized_field_value_from_global_post( $field );
 
-				if ( $field['type'] !== 'group' ) {
-					$sanitized_fields_data[ $field['id'] ][ $this->lang_current ] = $this->get_sanitized_field_value_from_global_post( $field , $posted_data );
-				}
+				} // ( $field_type !== 'group' )
 
-
+				// If the field is group
 				if ( $field_type === 'group' ) {
 
 					$group = $field;
 
-					if ( isset( $group['options']['repeater'] ) && $group['options']['repeater'] ) {
+					$group_id = ( isset( $field['id'] ) ) ? $field['id'] : false;
 
-						$i = 0;
 
-						switch ( $this->config['type'] ) {
-							case 'menu':
-								$value_array = $fields[ $field['id'] ];
-								break;
+					$group_fields = isset( $field['fields'] ) && is_array( $field['fields'] ) ? $field['fields'] : false;
 
-							case 'metabox':
-								if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
-									$value_array = ( isset( $_POST[ $field['id'] ] ) ) ? $_POST[ $field['id'] ] : array();
-								} else {
-									$value_array = ( isset( $_POST[ $this->unique ][ $field['id'] ] ) ) ? $_POST[ $this->unique ][ $field['id'] ] : array();
+					// We are not processing if group_id is not there
+					if ( $group_id && $group_fields ):
+
+
+						// Normalise the group options (so we dont need to check for isset()
+						$default_group_options = $this->get_config_default_group_options();
+						$group_options         = ( isset( $group['options'] ) ) ? $group['options'] : $default_group_options;
+						$group['options']      = $group_options = wp_parse_args( $group_options, $default_group_options );
+
+						$is_repeater = ( isset( $group['options']['repeater'] ) ) ? (bool) $group['options']['repeater'] : false;
+
+
+						// If the group is NOT a repeater
+						if ( ! $is_repeater ) :
+
+
+							foreach ( $group_fields as $sub_field ) :
+
+								$sanitized_fields_data[ $group_id ][ $this->lang_current ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id );;
+
+							endforeach;
+
+
+						endif; // ( ! $is_repeater )  // If the group is a repeater
+
+						// If the group is a repeater
+						if ( $is_repeater ):
+
+							foreach ( $group_fields as $group_field_index => $sub_field ) :
+
+								$sub_field_id = ( isset( $sub_field['id'] ) ) ? $sub_field['id'] : false;
+
+								// sub field id is required
+								if ( ! $sub_field_id ) {
+									continue;
 								}
-								break;
-						}
+//			$this->write_log( 'posted_data', var_export( $sub_field_id, true ) . PHP_EOL . PHP_EOL );
 
-						foreach ( $value_array as $field_value ) {
+								$sanitized_fields_data[ $group_id ][ $group_field_index ][ $sub_field_id ][ $this->lang_current ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id, $group_field_index );;
 
-							foreach ( $field['fields'] as $sub_field ) {
+							endforeach; // $group_fields
 
-								switch ( $this->config['type'] ) {
-									case 'menu':
-										$value = $field_value[ $sub_field['id'] ];
-										break;
+						endif; // ( $is_repeater )
 
-									case 'metabox':
-										if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
-											$value = ( isset( $_POST[ $field['id'] ][ $i ][ $sub_field['id'] ] ) ) ? $_POST[ $field['id'] ][ $i ][ $sub_field['id'] ] : '';
-										} else {
-											$value = ( isset( $_POST[ $this->unique ][ $field['id'] ][ $i ][ $sub_field['id'] ] ) ) ? $_POST[ $this->unique ][ $field['id'] ][ $i ][ $sub_field['id'] ] : '';
-										};
-										break;
-								}
+					endif; // ( ! $group_id )
 
-								if ( is_array( $this->config['multilang'] ) ) {
+				} // ( $field_type === 'group' )
 
-									if ( is_array( $value ) ) {
-										$current_value = $this->sanitize( $sub_field, $value[ $this->lang_current ] );
-									} else {
-										$current_value = $this->sanitize( $sub_field, $value );
-									}
+			endforeach; // $fields array
+			*/
 
-									if ( ! is_array( $sanitized_fields_data[ $field['id'] ][ $i ][ $sub_field['id'] ] ) ) {
-										$valid[ $field['id'] ][ $i ][ $sub_field['id'] ] = array();
-									}
-
-									$valid[ $field['id'] ][ $i ][ $sub_field['id'] ][ $this->lang_current ] = $current_value;
-									$valid[ $field['id'] ][ $i ][ $sub_field['id'] ]['multilang']           = true;
-
-								} else {
-									$valid[ $field['id'] ][ $i ][ $sub_field['id'] ] = $this->sanitize( $sub_field, $value );
-								}
-
-							}
-							$i ++;
-
-						}
-
-					} else {
-
-						if ( isset( $group['fields'] ) && is_array( $group['fields'] ) ):
-
-							foreach ( $group['fields'] as $sub_field ) {
-
-								$sanitized_fields_data[ $group['id'] ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $posted_data,  $group['id'] );
-
-
-								switch ( $this->config['type'] ) {
-									case 'menu':
-										$value = $fields[ $field['id'] ][ $sub_field['id'] ];
-										break;
-
-									case 'metabox':
-										if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
-											$value = ( isset( $_POST[ $field['id'] ][ $sub_field['id'] ] ) ) ? $_POST[ $field['id'] ][ $sub_field['id'] ] : '';
-										} else {
-											$value = ( isset( $_POST[ $this->unique ][ $field['id'] ][ $sub_field['id'] ] ) ) ? $_POST[ $this->unique ][ $field['id'] ][ $sub_field['id'] ] : '';
-										}
-										break;
-								}
-
-								if ( is_array( $this->config['multilang'] ) ) {
-
-									if ( is_array( $value ) ) {
-										$current_value = $this->sanitize( $sub_field, $value[ $this->lang_current ] );
-									} else {
-										$current_value = $this->sanitize( $sub_field, $value );
-									}
-
-									if ( ! is_array( $valid[ $field['id'] ][ $sub_field['id'] ] ) ) {
-										$valid[ $field['id'] ][ $sub_field['id'] ] = array();
-									}
-
-									$valid[ $field['id'] ][ $sub_field['id'] ][ $this->lang_current ] = $current_value;
-									$valid[ $field['id'] ][ $sub_field['id'] ]['multilang']           = true;
-
-								} else {
-									$valid[ $field['id'] ][ $sub_field['id'] ] = $this->sanitize( $sub_field, $value );
-								}
-
-							}
-						endif;
-
-
-					}
-
-				} else {
-
-					/**
-					 * Possibilities:
-					 * - no WMPL, qTranslate-X or Polilang activated -> single
-					 * - multilang plugin deactivated -> array but looking for single
-					 * - multilang plugin activated after settings -> single but looking for an array
-					 */
-//					if ( is_array( $this->config['multilang'] ) ) {
-//
-//						if ( is_array( $value ) ) {
-//							$current_value = $this->sanitize( $field, $value[ $this->lang_current ] );
-//						} else {
-//							$current_value = $this->sanitize( $field, $value );
-//						}
-//
-//						if ( ( is_array( $valid[ $field['id'] ] ) && $field['type'] == 'select' && key( $valid[ $field['id'] ] ) === 0 ) ||
-//						     ! is_array( $valid[ $field['id'] ] ) ) {
-//							$valid[ $field['id'] ] = array();
-//						}
-//
-//						$valid[ $field['id'] ][ $this->lang_current ] = $current_value;
-//						$valid[ $field['id'] ]['multilang']         = true;
-//
-//					} else {
-//						$valid[ $field['id'] ] = $this->sanitize( $field, $value );
-//					}
-
-				}
-
-			}
-
-//			var_dump( $sanitized_fields_data );
-//			die();
+			//$this->write_log( 'sanitization', var_export( $sanitized_fields_data , true));
 
 			return $sanitized_fields_data;
 
+		} //
+
+		public function get_sanitized_fields_values_single_lang( $fields, $posted_data ) {
+
+			$sanitized_fields_data = array();
+
+			foreach ( $fields as $index => $field ) :
+
+				$field_type = ( isset( $field['type'] ) ) ? $field['type'] : false;
+				$field_id   = ( isset( $field['id'] ) ) ? $field['id'] : false;
+
+				// if do not have $field_id or $field_type, we continue to next field
+				if ( ! $field_id || ! $field_type ) {
+					continue;
+				}
+
+				// if field is not a group
+
+				if ( $field_type !== 'group' ) {
+
+					$sanitized_fields_data[ $field['id'] ] = $this->get_sanitized_field_value_from_global_post( $field );
+
+				} // ( $field_type !== 'group' )
+
+				// If the field is group
+				if ( $field_type === 'group' ) {
+
+					$group = $field;
+
+					$group_id = ( isset( $field['id'] ) ) ? $field['id'] : false;
+
+					$group_fields = isset( $field['fields'] ) && is_array( $field['fields'] ) ? $field['fields'] : false;
+
+					// We are not processing if group_id is not there
+					if ( $group_id && $group_fields ):
+
+						// Normalise the group options (so we don't need to check for isset()
+						$default_group_options = $this->get_config_default_group_options();
+						$group_options         = ( isset( $group['options'] ) ) ? $group['options'] : $default_group_options;
+						$group['options']      = $group_options = wp_parse_args( $group_options, $default_group_options );
+
+						$is_repeater = ( isset( $group['options']['repeater'] ) ) ? (bool) $group['options']['repeater'] : false;
+
+
+						// If the group is NOT a repeater
+						if ( ! $is_repeater ) :
+
+
+							foreach ( $group_fields as $sub_field ) :
+
+								$sanitized_fields_data[ $group_id ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id );;
+
+							endforeach;
+
+
+						endif; // ( ! $is_repeater )  // If the group is a repeater
+
+						// If the group is a repeater
+						if ( $is_repeater ):
+
+							foreach ( $group_fields as $group_field_index => $sub_field ) :
+
+								$sub_field_id = ( isset( $sub_field['id'] ) ) ? $sub_field['id'] : false;
+
+								// sub field id is required
+								if ( ! $sub_field_id ) {
+									continue;
+								}
+//			$this->write_log( 'posted_data', var_export( $sub_field_id, true ) . PHP_EOL . PHP_EOL );
+
+								$sanitized_fields_data[ $group_id ][ $group_field_index ][ $sub_field_id ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id, $group_field_index );;
+
+							endforeach; // $group_fields
+
+						endif; // ( $is_repeater )
+
+					endif; // ( ! $group_id )
+
+				} // ( $field_type === 'group' )
+
+			endforeach; // $fields array
+
+			return $sanitized_fields_data;
+		}
+
+		public function get_sanitized_fields_values_multilang( $fields, $posted_data ) {
+
+			$sanitized_fields_data = array();
+			foreach ( $fields as $index => $field ) :
+
+				$field_type = ( isset( $field['type'] ) ) ? $field['type'] : false;
+				$field_id   = ( isset( $field['id'] ) ) ? $field['id'] : false;
+
+				// if do not have $field_id or $field_type, we continue to next field
+				if ( ! $field_id || ! $field_type ) {
+					continue;
+				}
+
+
+				// if field is not a group
+
+				if ( $field_type !== 'group' ) {
+
+					$sanitized_fields_data[ $field['id'] ] = $this->get_sanitized_field_value_from_global_post( $field );
+
+				} // ( $field_type !== 'group' )
+
+				// If the field is group
+				if ( $field_type === 'group' ) {
+
+					$group = $field;
+
+					$group_id = ( isset( $field['id'] ) ) ? $field['id'] : false;
+
+					$group_fields = isset( $field['fields'] ) && is_array( $field['fields'] ) ? $field['fields'] : false;
+
+					// We are not processing if group_id is not there
+					if ( $group_id && $group_fields ):
+
+
+						// Normalise the group options (so we dont need to check for isset()
+						$default_group_options = $this->get_config_default_group_options();
+						$group_options         = ( isset( $group['options'] ) ) ? $group['options'] : $default_group_options;
+						$group['options']      = $group_options = wp_parse_args( $group_options, $default_group_options );
+
+						$is_repeater = ( isset( $group['options']['repeater'] ) ) ? (bool) $group['options']['repeater'] : false;
+
+
+						// If the group is NOT a repeater
+						if ( ! $is_repeater ) :
+
+
+							foreach ( $group_fields as $sub_field ) :
+
+								$sanitized_fields_data[ $group_id ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id );;
+
+							endforeach;
+
+
+						endif; // ( ! $is_repeater )  // If the group is a repeater
+
+						// If the group is a repeater
+						if ( $is_repeater ):
+
+							// How many times $_POST has this
+
+							$repeater_count = ( isset( $posted_data[ $this->lang_current ][ $group_id ] ) && is_array( $posted_data[ $this->lang_current ][ $group_id ] ) ) ? count( $posted_data[ $this->lang_current ][ $group_id ] ) : 0;
+
+
+							for ( $i = 0; $i < $repeater_count; $i ++ ) {
+
+								foreach ( $group_fields as $sub_field ) :
+
+									$sub_field_id = ( isset( $sub_field['id'] ) ) ? $sub_field['id'] : false;
+
+									// sub field id is required
+									if ( ! $sub_field_id ) {
+										continue;
+									}
+//			$this->write_log( 'posted_data', var_export( $sub_field_id, true ) . PHP_EOL . PHP_EOL );
+
+									$sanitized_fields_data[ $group_id ][ $i ][ $sub_field_id ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id, $i );
+
+
+//									$this->write_log( 'repeater_count', var_export( $sanitized_fields_data[ $this->lang_current ][ $group_id ][ $i ][ $sub_field_id ], true ) . PHP_EOL );
+
+
+								endforeach; // $group_fields
+
+
+							}
+
+//
+
+						endif; // ( $is_repeater )
+
+					endif; // ( ! $group_id )
+
+				} // ( $field_type === 'group' )
+
+			endforeach; // $fields array
+
+			return $sanitized_fields_data;
 		} //
 
 		/*
@@ -1322,48 +1468,75 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 * @param array  $field
 		 * @return mixed $clean_value
 		 */
-		public function get_sanitized_field_value_from_global_post( $field, $posted_data , $group_id = null ) {
+		public function get_sanitized_field_value_from_global_post( $field, $group_id = null, $group_field_index = null ) {
 
 
 			if ( ! isset( $field['id'] ) || ! isset( $field['type'] ) ) {
 				return '';
+			} else {
+				$field_id   = $field['id'];
+				$field_type = $field['type'];
 			}
 
+
+			// Get $dirty_value from global $_POST
+			// We are not using $posted_data so that we can use this code for both menu and metabox
 			if ( $this->is_multilang() ) {
 
-				if ( $group_id !== null ) {
+				if ( $group_id !== null ) { // We have group field
 
-					$dirty_value = ( isset( $posted_data[ $group_id ][ $field['id'] ][ $this->lang_current ] ) )
-						? $posted_data[ $group_id ][ $field['id'] ][ $this->lang_current ]
-						: '';
+					if ( $group_field_index !== null ) { // We have group field index number
+
+						$dirty_value = ( isset( $_POST[ $this->unique ][ $this->lang_current ][ $group_id ][ $group_field_index ][ $field_id ] ) )
+							? $_POST[ $this->unique ][ $this->lang_current ][ $group_id ][ $group_field_index ][ $field_id ]
+							: '88';
+
+					} else {
+
+						$dirty_value = ( isset( $_POST[ $this->unique ][ $this->lang_current ][ $group_id ][ $field_id ] ) )
+							? $_POST[ $this->unique ][ $this->lang_current ][ $group_id ][ $field_id ]
+							: '';
+					}
+
 
 				} else {
 
 
-					$dirty_value = ( isset( $posted_data[ $field['id']][ $this->lang_current ]  ) )
-						? $posted_data[ $field['id']][ $this->lang_current ]
+					$dirty_value = ( isset( $_POST[ $this->unique ][ $this->lang_current ][ $field_id ] ) )
+						? $_POST[ $this->unique ][ $this->lang_current ][ $field_id ]
 						: '';
 				}
 
 
 			} else {
 
+				// If its a group sub field
 				if ( $group_id !== null ) {
 
-					$dirty_value = ( isset( $posted_data[ $group_id ][ $field['id'] ] ) )
-						? $posted_data[ $group_id ][ $field['id'] ]
-						: '';
+
+					if ( $group_field_index !== null ) {
+
+						$dirty_value = ( isset( $_POST[ $this->unique ][ $group_id ][ $group_field_index ][ $field_id ] ) )
+							? $_POST[ $this->unique ][ $group_id ][ $group_field_index ][ $field_id ]
+							: '';
+					} else {
+
+						$dirty_value = ( isset( $_POST[ $this->unique ][ $group_id ][ $field_id ] ) )
+							? $_POST[ $this->unique ][ $group_id ][ $field_id ]
+							: '';
+					}
 
 				} else {
-					$dirty_value = ( isset( $posted_data[ $field['id'] ] ) )
-						? $posted_data[ $field['id'] ]
+
+					// Regular field type
+
+					$dirty_value = ( isset( $_POST[ $this->unique ][ $field_id ] ) )
+						? $_POST[ $this->unique ][ $field_id ]
 						: '';
 				}
 
 
-			}
-
-			// TODO: account for $options type 'simple'
+				// TODO: account for $options type 'simple'
 //			if ( $this->config['options'] === 'simple' ) {
 //							$value = ( isset( $_POST[ $field['id'] ] ) ) ? $_POST[ $field['id'] ] : '';
 //						} else {
@@ -1371,18 +1544,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 //						}
 
 
-			if ( isset( $field['sanitize'] ) && ! empty( $field['sanitize'] ) && function_exists( $field['sanitize'] ) ) {
-
-				$sanitize_func_name = $field['sanitize'];
-
-				$clean_value = call_user_func( $sanitize_func_name, $dirty_value );
-
-				// Value is now sanitized
-				return $clean_value;
-
 			}
 
-			$clean_value = $this->get_sanitized_field_value_by_type( $field, $dirty_value );
+			$clean_value = $this->sanitize( $field, $dirty_value );
 
 			return $clean_value;
 
@@ -1461,32 +1625,29 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 *
 		 * @return mixed
 		 */
-		public function sanitize( $field, $value ) {
+		public function sanitize( $field, $dirty_value ) {
 
 
-			$value = isset( $value ) ? $value : '';
+			$dirty_value = isset( $dirty_value ) ? $dirty_value : '';
 
 
-			// $this->write_log( 'sanitize', var_export( $field, true) . PHP_EOL . var_export( $value, true) . PHP_EOL . PHP_EOL );
+			// if $config array has sanitize function, then call it
+			if ( isset( $field['sanitize'] ) && ! empty( $field['sanitize'] ) && function_exists( $field['sanitize'] ) ) {
 
 
-			if ( isset( $field['sanitize'] ) && ! empty( $field['sanitize'] ) ) {
-
+				// TODO: in future, we can allow for sanitize functions array as well
 				$sanitize_func_name = $field['sanitize'];
 
-				if ( function_exists( $sanitize_func_name ) ) {
+				$clean_value = call_user_func( $sanitize_func_name, $dirty_value );
 
-					$value = call_user_func( $sanitize_func_name, $value );
+			} else {
 
-					// Value is now sanitized
-					return $value;
-				}
+				// if $config array doe not have sanitize function, do sanitize on field type basis
+				$clean_value = $this->get_sanitized_field_value_by_type( $field, $dirty_value );
 
 			}
 
-			$value = $this->get_sanitized_field_value_by_type( $field, $value );
-
-			return apply_filters( 'exopite_sof_sanitize_value', $value, $this->config );
+			return apply_filters( 'exopite_sof_sanitize_value', $clean_value, $this->config );
 
 		}
 
@@ -1640,12 +1801,35 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 				if ( empty( $value ) ) {
 
+					if ( ( isset( $field['sub'] ) && ! empty( $field['sub'] ) ) ) {
+
+//						$base_id = str_replace( '[REPLACEME]', '', $this->unique );
+//
+//						var_dump( $base_id );
+//
+//						$group_id = preg_match("/\[([^\]]*)\]/", $base_id, $output_array);
+//
+//						$group_id = $output_array[1];
+
+						$value    = ( isset( $field['id'] ) && isset( $this->db_options[ $this->lang_current ][ $field['id'] ] ) ) ? $this->db_options[ $this->lang_current ][ $field['id'] ] : null;
+
+//						var_dump( $group_id );
+
+					}
+
 
 					if ( $this->is_menu() ) {
-						$value = ( isset( $field['id'] ) && isset( $this->db_options[ $field['id'] ] ) ) ? $this->db_options[ $field['id'] ] : null;
+
+						if ( $this->is_multilang() ) {
+							$value = ( isset( $field['id'] ) && isset( $this->db_options[ $this->lang_current ][ $field['id'] ] ) ) ? $this->db_options[ $this->lang_current ][ $field['id'] ] : null;
+						} else {
+							$value = ( isset( $field['id'] ) && isset( $this->db_options[ $field['id'] ] ) ) ? $this->db_options[ $field['id'] ] : null;
+						}
+
 					}
 
 					if ( $this->is_metabox() ) {
+
 						if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
 							$meta = get_post_meta( get_the_ID() );
 
@@ -1673,7 +1857,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 
 				ob_start();
-				$element = new $class( $field, $value, $this->unique, $this->config );
+				$element = new $class( $field, $value, $this->unique, $this->config, $this->multilang );
 				$element->output();
 				$output .= ob_get_clean();
 
@@ -1714,10 +1898,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			settings_fields( $this->unique );
 			do_settings_sections( $this->unique );
 
-			$current_language = ( is_array( $this->config['multilang'] ) ) ? apply_filters( 'exopite-simple-options-framework-title-language-notice', ' [' . $this->config['multilang']['current'] . ']' ) : '';
+			$current_language = apply_filters( 'exopite_sof_title_language_notice', $this->lang_current);
 
 			echo '<header class="exopite-sof-header exopite-sof-header-js">';
-			echo '<h1>' . $this->config['title'] . $current_language . '</h1>';
+			echo '<h1>' . $this->config['title'] .' [ ' .$current_language .' ]'. '</h1>';
 
 			echo '<fieldset><span class="exopite-sof-ajax-message"></span>';
 			submit_button( esc_attr__( 'Save Settings', 'exopite-simple-options' ), 'primary ' . 'exopite-sof-submit-button-js', $this->unique . '-save', false, array() );
