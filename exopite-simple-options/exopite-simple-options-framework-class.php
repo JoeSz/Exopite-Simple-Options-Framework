@@ -109,7 +109,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		public $version = '1.0';
 
-		public $debug = true;
+		public $debug = false;
 
 		/**
 		 *
@@ -998,7 +998,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		public function save( $posted_data ) {
 
 
-//			$this->write_log( 'posted_data', var_export( $_POST, true ) . PHP_EOL . PHP_EOL );
+
+
 //			$this->write_log( 'posted_data', var_export( $posted_data, true ) . PHP_EOL . PHP_EOL );
 
 
@@ -1070,6 +1071,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			// Specific to Metabox
 			if ( $this->is_metabox() ) {
+
+				$this->write_log( 'post_id', var_export( $posted_data, true ) . PHP_EOL . PHP_EOL );
 
 				// if this is metabox, $posted_data is post_id we are saving
 				$post_id = $posted_data;
@@ -1153,11 +1156,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 //					} else {
 //						update_post_meta( $post_id, $this->unique, $valid );
 //					}
+//					$this->write_log( 'post_id', var_export($post_id,  true));
+					update_post_meta( $post_id, $this->unique, $valid );
 
-					update_post_meta( $post_id, $this->unique, $valid  );
 				}
 
 			}
+
+			unset($post_id , $valid , $posted_data , $section_fields_with_values);
 
 		}
 
@@ -1321,10 +1327,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 						// Normalise the group options (so we don't need to check for isset()
 						$default_group_options = $this->get_config_default_group_options();
-						$group_options         = ( isset( $group['options'] ) ) ? $group['options'] : $default_group_options;
-						$group['options']      = $group_options = wp_parse_args( $group_options, $default_group_options );
+						$group_options_array   = ( isset( $group['options'] ) ) ? $group['options'] : array();
+						$group_options         = wp_parse_args( $group_options_array, $default_group_options );
 
-						$is_repeater = ( isset( $group['options']['repeater'] ) ) ? (bool) $group['options']['repeater'] : false;
+//						$this->write_log( 'group_options', var_export( $group_options , true).PHP_EOL);
+
+
+						$is_repeater = ( isset( $group_options['repeater'] ) ) ? (bool) $group_options['repeater'] : false;
 
 
 						// If the group is NOT a repeater
@@ -1343,19 +1352,33 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 						// If the group is a repeater
 						if ( $is_repeater ):
 
-							foreach ( $group_fields as $group_field_index => $sub_field ) :
+// How many times $_POST has this
 
-								$sub_field_id = ( isset( $sub_field['id'] ) ) ? $sub_field['id'] : false;
+							$repeater_count = ( isset( $_POST[ $this->unique ][ $group_id ] ) && is_array( $_POST[ $this->unique ][ $group_id ] ) ) ? count( $_POST[ $this->unique ][ $group_id ] ) : 0;
 
-								// sub field id is required
-								if ( ! $sub_field_id ) {
-									continue;
-								}
+
+							for ( $i = 0; $i < $repeater_count; $i ++ ) {
+
+								foreach ( $group_fields as $sub_field ) :
+
+									$sub_field_id = ( isset( $sub_field['id'] ) ) ? $sub_field['id'] : false;
+
+									// sub field id is required
+									if ( ! $sub_field_id ) {
+										continue;
+									}
 //			$this->write_log( 'posted_data', var_export( $sub_field_id, true ) . PHP_EOL . PHP_EOL );
 
-								$sanitized_fields_data[ $group_id ][ $group_field_index ][ $sub_field_id ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id, $group_field_index );;
+									$sanitized_fields_data[ $group_id ][ $i ][ $sub_field_id ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id, $i );
+//
 
-							endforeach; // $group_fields
+//									$this->write_log( 'repeater_count', var_export( $sanitized_fields_data[ $this->lang_current ][ $group_id ][ $i ][ $sub_field_id ], true ) . PHP_EOL );
+
+
+								endforeach; // $group_fields
+
+
+							}
 
 						endif; // ( $is_repeater )
 
@@ -1837,24 +1860,32 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 					if ( $this->is_metabox() ) {
 
-						if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
-							$meta = get_post_meta( get_the_ID() );
 
-							/*
-							 * get_post_meta return empty on non existing meta
-							 * we need to check if meta key is exist to return null,
-							 * because default value can only display if value is null
-							 * on empty vlaue - may saved by the user - should display empty.
-							 */
-							if ( isset( $field['id'] ) && isset( $meta[ $field['id'] ] ) ) {
-								$value = get_post_meta( get_the_ID(), $field['id'], true );
-							} else {
-								$value = null;
-							}
-						} else {
-							$meta = get_post_meta( get_the_ID() , $this->unique, true );
-							$value = ( isset( $field['id'] ) && isset( $meta[ $field['id'] ] ) ) ? $meta[ $field['id'] ] : null;
-						}
+						$meta = get_post_meta( get_the_ID(), $this->unique, true );
+
+						$value = ( isset( $field['id'] ) && isset( $meta[ $field['id'] ] ) ) ? $meta[ $field['id'] ] : null;
+
+//						TODO: Account for options= 'simple'
+//						if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
+//							$meta = get_post_meta( get_the_ID() );
+//
+//							/*
+//							 * get_post_meta return empty on non existing meta
+//							 * we need to check if meta key is exist to return null,
+//							 * because default value can only display if value is null
+//							 * on empty vlaue - may saved by the user - should display empty.
+//							 */
+//							if ( isset( $field['id'] ) && isset( $meta[ $field['id'] ] ) ) {
+//								$value = get_post_meta( get_the_ID(), $field['id'], true );
+//							} else {
+//								$value = null;
+//							}
+//						} else {
+//							$meta = get_post_meta( get_the_ID() , $this->unique, true );
+//							$value = ( isset( $field['id'] ) && isset( $meta[ $field['id'] ] ) ) ? $meta[ $field['id'] ] : null;
+//						}
+
+
 						// $meta = get_post_meta( get_the_ID(), $field['id'], true );
 						// $value = ( isset( $field['id'] ) ) ? $meta : null;
 						// $value = ( isset( $field['id'] ) && isset( $this->db_options[$field['id']] ) ) ? $this->db_options[$field['id']] : null;
@@ -2036,8 +2067,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 					if ( $this->debug ) {
 						echo '<pre>POST_META<br>';
-						$meta_options     = get_post_meta( get_the_ID(), $this->unique, true );
+
+
+						$meta_options = get_post_meta( get_the_ID(), $this->unique, true );
 //						var_export( get_post_meta( get_the_ID() ) );
+						var_export( get_the_ID() );
 						var_export( $meta_options );
 						echo '</pre>';
 					}
