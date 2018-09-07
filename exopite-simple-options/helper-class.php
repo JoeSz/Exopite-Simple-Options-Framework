@@ -37,8 +37,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 			$multilang['current']   = $default;
 			$multilang['languages'] = array( $default );
 
+			// Sitepress is WPML
 
-			if ( class_exists( 'SitePress' ) || class_exists( 'Polylang' ) || function_exists( 'qtrans_getSortedLanguages' ) ) {
+			if ( class_exists( 'SitePress' ) || class_exists( 'Polylang' ) || function_exists( 'qtranxf_getSortedLanguages' ) ) {
 
 
 				if ( class_exists( 'SitePress' ) ) {
@@ -49,7 +50,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 					$active_languages     = $sitepress->get_active_languages();
 
 					if ( is_array( $active_languages ) ) {
-						$multilang['languages'] = array_keys( $active_languages);
+						$multilang['languages'] = array_keys( $active_languages );
 					}
 
 				} else if ( class_exists( 'Polylang' ) ) {
@@ -94,16 +95,21 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 					$multilang['languages'] = ( isset( $languages ) && $languages ) ? $languages : $multilang['languages'];
 
 
-				} else if ( function_exists( 'qtrans_getSortedLanguages' ) ) {
+				} else if ( function_exists( 'qtranxf_getSortedLanguages' ) ) {
 
 					global $q_config;
 					$multilang['default']   = $q_config['default_language'];
 					$multilang['current']   = $q_config['language'];
-					$multilang['languages'] = array_flip( qtrans_getSortedLanguages() );
+					$multilang['languages'] = qtranxf_getSortedLanguages(false);
+
+//				var_dump( $multilang['languages']); die();
+
 
 				}
 
 			}
+
+
 
 			$multilang = apply_filters( 'exopite_sof_language_defaults', $multilang );
 
