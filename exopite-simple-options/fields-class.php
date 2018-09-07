@@ -35,7 +35,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 				$this->multilang &&
 				isset( $this->multilang['languages'] ) &&
 				is_array( $this->multilang['languages'] )
-			) ? $this->multilang['current'] : array( $this->lang_default );
+			) ? $this->multilang['languages'] : array( $this->lang_default );
 
 		}
 
@@ -110,25 +110,27 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
             } else {
                 $name = $this->unique . $extra_multilang . '[' . $this->field['id'] . ']' . $extra_name;
             }
-
-
-
-
-            // echo '<pre>u:<br>';
-            // var_export( $this->unique );
-            // echo '</pre>';
-
-            // echo '<pre>ML:<br>';
-            // var_export($this->config);
-            // echo '</pre>';
-
-            // echo '<pre>NAME:<br>';
-            // var_export( $this->field );
-            // echo '</pre>';
-
-            // echo '<pre>NAME:<br>';
-            // var_export( $name );
-            // echo '</pre>';
+//
+//
+//             echo '<pre>u:<br>';
+//             var_export( $this->unique );
+//             echo '</pre>';
+//
+//             echo '<pre>ML:<br>';
+//             var_export($this->config);
+//             echo '</pre>';
+//
+//             echo '<pre>FIELD:<br>';
+//             var_export( $this->field );
+//             echo '</pre>';
+//
+//             echo '<pre>NAME:<br>';
+//             var_export( $name );
+//             echo '</pre>';
+//
+//			echo '<pre>VALUE:<br>';
+//			var_export( $this->value );
+//			echo '</pre>';
 
 			return ( ! empty( $this->unique ) ) ? $name : '';
 

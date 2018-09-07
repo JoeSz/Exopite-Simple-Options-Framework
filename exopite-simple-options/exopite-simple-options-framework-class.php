@@ -105,8 +105,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		public $lang_default;
 		public $lang_current;
 
-		public static $current_language_code;
-
 		public $languages = array();
 
 		public $version = '1.0';
@@ -187,8 +185,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			$this->define_metabox_hooks();
 
-
-			self::$current_language_code = $this->lang_current;
 
 		}
 
@@ -1022,7 +1018,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			$section_fields_with_values = array();
 
 
-
 			// Specific to Menu Options
 			if ( $this->is_menu() ) {
 
@@ -1071,7 +1066,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				}
 
 
-
 			}
 
 			// Specific to Metabox
@@ -1101,7 +1095,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 
 			}
-
 
 
 			/**
@@ -1161,7 +1154,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 //						update_post_meta( $post_id, $this->unique, $valid );
 //					}
 
-					update_post_meta( $post_id, $this->unique, $valid );
+					update_post_meta( $post_id, $this->unique, $valid  );
 				}
 
 			}
@@ -1814,6 +1807,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 				if ( empty( $value ) ) {
 
+
 					if ( ( isset( $field['sub'] ) && ! empty( $field['sub'] ) ) ) {
 
 //						$base_id = str_replace( '[REPLACEME]', '', $this->unique );
@@ -1824,7 +1818,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 //
 //						$group_id = $output_array[1];
 
-						$value    = ( isset( $field['id'] ) && isset( $this->db_options[ $this->lang_current ][ $field['id'] ] ) ) ? $this->db_options[ $this->lang_current ][ $field['id'] ] : null;
+						$value = ( isset( $field['id'] ) && isset( $this->db_options[ $this->lang_current ][ $field['id'] ] ) ) ? $this->db_options[ $this->lang_current ][ $field['id'] ] : null;
 
 //						var_dump( $group_id );
 
@@ -1858,7 +1852,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 								$value = null;
 							}
 						} else {
-							$value = ( isset( $field['id'] ) && isset( $this->db_options[ $field['id'] ] ) ) ? $this->db_options[ $field['id'] ] : null;
+							$meta = get_post_meta( get_the_ID() , $this->unique, true );
+							$value = ( isset( $field['id'] ) && isset( $meta[ $field['id'] ] ) ) ? $meta[ $field['id'] ] : null;
 						}
 						// $meta = get_post_meta( get_the_ID(), $field['id'], true );
 						// $value = ( isset( $field['id'] ) ) ? $meta : null;
@@ -1911,10 +1906,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			settings_fields( $this->unique );
 			do_settings_sections( $this->unique );
 
-			$current_language = apply_filters( 'exopite_sof_title_language_notice', $this->lang_current);
+			$current_language = apply_filters( 'exopite_sof_title_language_notice', $this->lang_current );
 
 			echo '<header class="exopite-sof-header exopite-sof-header-js">';
-			echo '<h1>' . $this->config['title'] .' [ ' .$current_language .' ]'. '</h1>';
+			echo '<h1>' . $this->config['title'] . ' [ ' . $current_language . ' ]' . '</h1>';
 
 			echo '<fieldset><span class="exopite-sof-ajax-message"></span>';
 			submit_button( esc_attr__( 'Save Settings', 'exopite-simple-options' ), 'primary ' . 'exopite-sof-submit-button-js', $this->unique . '-save', false, array() );
@@ -2041,7 +2036,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 					if ( $this->debug ) {
 						echo '<pre>POST_META<br>';
-						var_export( get_post_meta( get_the_ID() ) );
+						$meta_options     = get_post_meta( get_the_ID(), $this->unique, true );
+//						var_export( get_post_meta( get_the_ID() ) );
+						var_export( $meta_options );
 						echo '</pre>';
 					}
 
@@ -2084,9 +2081,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			if ( $this->debug ) {
 
-                echo '<pre>';
-                var_export( $this->config['multilang'] );
-                echo '</pre>';
+				echo '<pre>';
+				var_export( $this->config['multilang'] );
+				echo '</pre>';
 
 				echo '<pre>DB_OPTIONS<br>';
 				var_export( $this->db_options );
@@ -2167,10 +2164,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		} // display_page()
 
-
-		public static function get_current_language_code(){
-			return self::$current_language_code;
-		}
 
 	} //class
 
