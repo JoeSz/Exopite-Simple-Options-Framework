@@ -49,7 +49,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 			// get the first element priority of language plugins
 			$language_plugin_priority = array_shift( $language_plugins_active );
 
-			if ( ! empty( $language_plugin_priority ) ) {
+			if ( ! empty( $language_plugin_priority ) && is_string( $language_plugin_priority ) ) {
 
 				switch ( $language_plugin_priority ) {
 

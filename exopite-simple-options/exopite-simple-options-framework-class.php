@@ -109,7 +109,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		public $version = '1.0';
 
-		public $debug = true;
+		public $debug = false;
+
+
+		public $lang_current_array_key = '';
 
 		/**
 		 *
@@ -209,7 +212,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					$this->lang_current = $this->multilang['current'];
 					$this->lang_default = $this->multilang['default'];
 					$this->languages    = $this->multilang['languages'];
+
+					$this->lang_current_array_key = "[{$this->lang_current}]";
 				}
+
+
+//				var_dump( $this->lang_current_array_key); die();
 
 
 			}
@@ -1022,7 +1030,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				/**
 				 * Import options sould not be checked.
 				 */
-				if ( isset( $_POST['action'] ) && sanitize_key( $_POST['action'] ) == 'exopite-sof-import-options' ) {
+				if ( isset( $_POST['action'] ) && sanitize_key( $_POST['action'] ) === 'exopite-sof-import-options' ) {
 					return apply_filters( 'exopite_sof_import_options', $posted_data, $this->unique );
 				}
 
@@ -1160,7 +1168,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			}
 
-			unset($post_id , $valid , $posted_data , $section_fields_with_values);
+			unset( $post_id, $valid, $posted_data, $section_fields_with_values );
 
 		}
 
@@ -1180,114 +1188,15 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			$sanitized_fields_data = array();
 
-			if ( $this->is_multilang() ) {
-
-				$sanitized_fields_data = $this->get_sanitized_fields_values_multilang( $fields, $posted_data );
-
-			} else {
-
-				$sanitized_fields_data = $this->get_sanitized_fields_values_single_lang( $fields, $posted_data );
-			}
-
-			/*
-			foreach ( $fields as $index => $field ) :
-
-				$field_type = ( isset( $field['type'] ) ) ? $field['type'] : false;
-				$field_id   = ( isset( $field['id'] ) ) ? $field['id'] : false;
-
-				// if do not have $field_id or $field_type, we continue to next field
-				if ( ! $field_id || ! $field_type ) {
-					continue;
-				}
-
-				// Get current field value, make sure we are not override other language values
-				if ( $this->is_multilang() ) {
-
-					$other_languages = $this->languages_except_current_language();
-
-					// TODO: Take care of group type as well, its hard to preserve their value
-					foreach ( $other_languages as $language ) {
-						$sanitized_fields_data[ $field_id ][ $language ] = $this->db_options[ $field_id ][ $language ];
-					}
-
-				}
-
-
-				// if field is not a group
-
-				if ( $field_type !== 'group' ) {
-
-					$sanitized_fields_data[ $field['id'] ][ $this->lang_current ] = $this->get_sanitized_field_value_from_global_post( $field );
-
-				} // ( $field_type !== 'group' )
-
-				// If the field is group
-				if ( $field_type === 'group' ) {
-
-					$group = $field;
-
-					$group_id = ( isset( $field['id'] ) ) ? $field['id'] : false;
-
-
-					$group_fields = isset( $field['fields'] ) && is_array( $field['fields'] ) ? $field['fields'] : false;
-
-					// We are not processing if group_id is not there
-					if ( $group_id && $group_fields ):
-
-
-						// Normalise the group options (so we dont need to check for isset()
-						$default_group_options = $this->get_config_default_group_options();
-						$group_options         = ( isset( $group['options'] ) ) ? $group['options'] : $default_group_options;
-						$group['options']      = $group_options = wp_parse_args( $group_options, $default_group_options );
-
-						$is_repeater = ( isset( $group['options']['repeater'] ) ) ? (bool) $group['options']['repeater'] : false;
-
-
-						// If the group is NOT a repeater
-						if ( ! $is_repeater ) :
-
-
-							foreach ( $group_fields as $sub_field ) :
-
-								$sanitized_fields_data[ $group_id ][ $this->lang_current ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id );;
-
-							endforeach;
-
-
-						endif; // ( ! $is_repeater )  // If the group is a repeater
-
-						// If the group is a repeater
-						if ( $is_repeater ):
-
-							foreach ( $group_fields as $group_field_index => $sub_field ) :
-
-								$sub_field_id = ( isset( $sub_field['id'] ) ) ? $sub_field['id'] : false;
-
-								// sub field id is required
-								if ( ! $sub_field_id ) {
-									continue;
-								}
-//			$this->write_log( 'posted_data', var_export( $sub_field_id, true ) . PHP_EOL . PHP_EOL );
-
-								$sanitized_fields_data[ $group_id ][ $group_field_index ][ $sub_field_id ][ $this->lang_current ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id, $group_field_index );;
-
-							endforeach; // $group_fields
-
-						endif; // ( $is_repeater )
-
-					endif; // ( ! $group_id )
-
-				} // ( $field_type === 'group' )
-
-			endforeach; // $fields array
-			*/
-
-			//$this->write_log( 'sanitization', var_export( $sanitized_fields_data , true));
+			$sanitized_fields_data = $this->get_sanitized_fields_values_all_type( $fields, $posted_data );
 
 			return $sanitized_fields_data;
 
 		} //
 
+
+		/*
+		 *
 		public function get_sanitized_fields_values_single_lang( $fields, $posted_data ) {
 
 			$sanitized_fields_data = array();
@@ -1488,6 +1397,135 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			return $sanitized_fields_data;
 		} //
 
+		*/
+
+		public function get_sanitized_fields_values_all_type( $fields, $posted_data ) {
+
+			$sanitized_fields_data = array();
+			foreach ( $fields as $index => $field ) :
+
+				$field_type = ( isset( $field['type'] ) ) ? $field['type'] : false;
+				$field_id   = ( isset( $field['id'] ) ) ? $field['id'] : false;
+
+				// if do not have $field_id or $field_type, we continue to next field
+				if ( ! $field_id || ! $field_type ) {
+					continue;
+				}
+
+
+				// if field is not a group
+
+				if ( $field_type !== 'group' ) {
+
+					$sanitized_fields_data[ $field['id'] ] = $this->get_sanitized_field_value_from_global_post( $field );
+
+				} // ( $field_type !== 'group' )
+
+				// If the field is group
+				if ( $field_type === 'group' ) {
+
+					$group = $field;
+
+					$group_id = ( isset( $field['id'] ) ) ? $field['id'] : false;
+
+					$group_fields = isset( $field['fields'] ) && is_array( $field['fields'] ) ? $field['fields'] : false;
+
+					// We are not processing if group_id is not there
+					if ( $group_id && $group_fields ):
+
+
+						// Normalise the group options (so we dont need to check for isset()
+						$default_group_options = $this->get_config_default_group_options();
+						$group_options         = ( isset( $group['options'] ) ) ? $group['options'] : $default_group_options;
+						$group['options']      = $group_options = wp_parse_args( $group_options, $default_group_options );
+
+						$is_repeater = ( isset( $group['options']['repeater'] ) ) ? (bool) $group['options']['repeater'] : false;
+
+
+						// If the group is NOT a repeater
+						if ( ! $is_repeater ) :
+
+
+							foreach ( $group_fields as $sub_field ) :
+
+								$sanitized_fields_data[ $group_id ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id );;
+
+							endforeach;
+
+
+						endif; // ( ! $is_repeater )  // If the group is a repeater
+
+						// If the group is a repeater
+						if ( $is_repeater ):
+
+
+							if ( $this->is_multilang() ) {
+								// How many times $_POST has this
+
+								$repeater_count = ( isset( $posted_data[ $this->lang_current ][ $group_id ] ) && is_array( $posted_data[ $this->lang_current ][ $group_id ] ) ) ? count( $posted_data[ $this->lang_current ][ $group_id ] ) : 0;
+
+								for ( $i = 0; $i < $repeater_count; $i ++ ) {
+
+									foreach ( $group_fields as $sub_field ) :
+
+										$sub_field_id = ( isset( $sub_field['id'] ) ) ? $sub_field['id'] : false;
+
+										// sub field id is required
+										if ( ! $sub_field_id ) {
+											continue;
+										}
+
+										$sanitized_fields_data[ $group_id ][ $i ][ $sub_field_id ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id, $i );
+
+									endforeach; // $group_fields
+								}
+							} // $this->is_multilang()
+
+							if ( ! $this->is_multilang() ) {
+
+
+								$repeater_count = ( isset( $_POST[ $this->unique ][ $group_id ] ) && is_array( $_POST[ $this->unique ][ $group_id ] ) ) ? count( $_POST[ $this->unique ][ $group_id ] ) : 0;
+
+
+								for ( $i = 0; $i < $repeater_count; $i ++ ) {
+
+									foreach ( $group_fields as $sub_field ) :
+
+										$sub_field_id = ( isset( $sub_field['id'] ) ) ? $sub_field['id'] : false;
+
+										// sub field id is required
+										if ( ! $sub_field_id ) {
+											continue;
+										}
+//			$this->write_log( 'posted_data', var_export( $sub_field_id, true ) . PHP_EOL . PHP_EOL );
+
+										$sanitized_fields_data[ $group_id ][ $i ][ $sub_field_id ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id, $i );
+//
+
+//									$this->write_log( 'repeater_count', var_export( $sanitized_fields_data[ $this->lang_current ][ $group_id ][ $i ][ $sub_field_id ], true ) . PHP_EOL );
+
+
+									endforeach; // $group_fields
+
+
+								}
+
+							}
+
+
+						endif; // ( $is_repeater )
+
+					endif; // ( ! $group_id )
+
+				} // ( $field_type === 'group' )
+
+			endforeach; // $fields array
+
+			return $sanitized_fields_data;
+
+		} //
+
+
 		/*
 		 * Get the clean value from single field
 		 *
@@ -1526,7 +1564,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 
 				} else {
-
 
 					$dirty_value = ( isset( $_POST[ $this->unique ][ $this->lang_current ][ $field_id ] ) )
 						? $_POST[ $this->unique ][ $this->lang_current ][ $field_id ]
