@@ -109,7 +109,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		public $version = '1.0';
 
-		public $debug = false;
+		public $debug = true;
 
 		/**
 		 *
@@ -1072,7 +1072,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			// Specific to Metabox
 			if ( $this->is_metabox() ) {
 
-				$this->write_log( 'post_id', var_export( $posted_data, true ) . PHP_EOL . PHP_EOL );
+//				$this->write_log( 'post_id', var_export( $posted_data, true ) . PHP_EOL . PHP_EOL );
 
 				// if this is metabox, $posted_data is post_id we are saving
 				$post_id = $posted_data;

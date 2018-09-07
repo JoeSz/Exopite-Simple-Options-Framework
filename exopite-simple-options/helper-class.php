@@ -44,9 +44,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 				if ( class_exists( 'SitePress' ) ) {
 
 					global $sitepress;
-					$multilang['default']   = $sitepress->get_default_language();
-					$multilang['current']   = $sitepress->get_current_language();
-					$multilang['languages'] = $sitepress->get_active_languages();
+					$multilang['default'] = $sitepress->get_default_language();
+					$multilang['current'] = $sitepress->get_current_language();
+					$active_languages     = $sitepress->get_active_languages();
+
+					if ( is_array( $active_languages ) ) {
+						$multilang['languages'] = array_keys( $active_languages);
+					}
 
 				} else if ( class_exists( 'Polylang' ) ) {
 
