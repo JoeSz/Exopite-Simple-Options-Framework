@@ -108,7 +108,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		public $version = '1.0';
 
-		public $debug = false;
+		public $debug = true;
 
 		/**
 		 *
@@ -1489,7 +1489,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 						$dirty_value = ( isset( $_POST[ $this->unique ][ $this->lang_current ][ $group_id ][ $group_field_index ][ $field_id ] ) )
 							? $_POST[ $this->unique ][ $this->lang_current ][ $group_id ][ $group_field_index ][ $field_id ]
-							: '88';
+							: '';
 
 					} else {
 
@@ -2064,15 +2064,17 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			$tabbed = ( $sections > 1 && $this->config['tabbed'] ) ? ' exopite-sof-content-nav exopite-sof-content-js' : '';
 
-			// echo '<pre>';
-			// var_export( $this->config['multilang'] );
-			// echo '</pre>';
 
 			// echo '<pre>';
 			// var_export( $this->config );
 			// echo '</pre>';
 
 			if ( $this->debug ) {
+
+                echo '<pre>';
+                var_export( $this->config['multilang'] );
+                echo '</pre>';
+
 				echo '<pre>DB_OPTIONS<br>';
 				var_export( $this->db_options );
 				echo '</pre>';

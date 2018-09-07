@@ -29,11 +29,11 @@
 if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 	class Exopite_Simple_Options_Framework_Field_group extends Exopite_Simple_Options_Framework_Fields {
 
-		public $is_repeater;
-		public $limit;
-		public $is_sortable;
-		public $is_accordion;
-		public $is_multilang;
+		// public $is_repeater;
+		// public $limit;
+		// public $is_sortable;
+		// public $is_accordion;
+		// public $is_multilang;
 
 		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 			parent::__construct( $field, $value, $unique, $config );
@@ -134,6 +134,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 			// $base_id['multilang'] = ( isset( $this->config['multilang'] ) && $this->config['multilang'] == false ) ? false : true;
 
 			$self = new Exopite_Simple_Options_Framework( $base_id, null );
+            $self->config['multilang'] = $this->config['multilang'];
+
+            // echo '<pre>';
+            // var_export( $self->config );
+            // echo '</pre>';
 
 			$num = 0;
 
@@ -191,7 +196,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 					echo '<div class="exopite-sof-cloneable__wrapper exopite-sof-accordion__wrapper" data-sortable="' . $sortable . '" data-name="' . $this->element_name() . '">';
 					// echo "3<br>";
 				} else {
-					echo '<div class="exopite-sof-cloneable__wrapper exopite-sof-accordion__wrapper" data-sortable="' . $sortable . '" data-name="' . $this->unique . '[' . $this->field['id'] . ']' . '">';
+                    echo '<div class="exopite-sof-cloneable__wrapper exopite-sof-accordion__wrapper" data-sortable="' . $sortable . '" data-name="' . $base_id['id'] . '">';
+					// echo '<div class="exopite-sof-cloneable__wrapper exopite-sof-accordion__wrapper" data-sortable="' . $sortable . '" data-name="' . $this->unique . '[' . $this->field['id'] . ']' . '">';
 					// echo "4<br>";
 				}
 
@@ -232,15 +238,16 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 						echo '</h4>';
 						echo '<div class="exopite-sof-cloneable__content exopite-sof-sub-dependencies exopite-sof-accordion__content">';
 
-						if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
-							// $self->unique = $this->field['id'] . '[' . $num . ']';
-							$self->unique = $this->element_name() . '[' . $num . ']';
-						} else {
-							$self->unique = $this->unique . '[' . $this->field['id'] . '][' . $num . ']';
-						}
+						// if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
+						// 	// $self->unique = $this->field['id'] . '[' . $num . ']';
+						// 	$self->unique = $this->element_name() . '[' . $num . ']';
+						// } else {
+						// 	$self->unique = $this->unique . '[' . $this->field['id'] . '][' . $num . ']';
+						// }
 
 						// $self->unique = $this->element_name() . '[' . $num . ']';
 						// $self->unique = $this->unique . '[' . $this->field['id'] . '][' . $num . ']';
+                        $self->unique = $this->unique . $multilang_array_index . '[' . $this->field['id'] . '][' . $num . ']';
 
 						foreach ( $fields as $field ) {
 

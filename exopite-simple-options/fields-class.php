@@ -13,11 +13,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 	abstract class Exopite_Simple_Options_Framework_Fields {
 
-		public $multilang;
-		public $current_lang;
-		public $lang_default;
-		public $lang_current;
-		public $languages;
+		// public $multilang;
+		// public $current_lang;
+		// public $lang_default;
+		// public $lang_current;
+		// public $languages;
 
 		public function __construct( $field = array(), $value = null, $unique = '', $config = array()) {
 
@@ -45,8 +45,18 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 		*/
 		public function is_multilang() {
 
+            // echo '<pre>IS_M<br>';
+            // var_export( $this->multilang );
+            // echo '</pre>';
+
+            // if ( is_array( $this->config['multilang'] ) ) {
+            //     echo "1<br>";
+            // } else {
+            //     echo "2<br>";
+            // }
+
 			// We should have received multilang as well together with $this->config['multilang']
-			return ( isset($this->config['multilang']) && $this->config['multilang'] && $this->multilang ) ? true : false;
+			return ( isset($this->config['multilang']) && is_array( $this->config['multilang'] ) ) ? true : false;
 
 		}
 
@@ -84,7 +94,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 
 
-			$extra_multilang = ( $this->is_multilang() ) ? '[' . $this->lang_current . ']' : '';
+            $extra_multilang = ( isset($this->config['multilang']) && is_array( $this->config['multilang'] ) ) ? '[' . $this->lang_current . ']' : '';
+            // for some reason this not work, maybe because abstract class
+			// $extra_multilang = ( $this->is_multilang() ) ? '[' . $this->lang_current . ']' : '';
 
 //			TODO: Accout for 'simple' options style
 //			if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
@@ -93,7 +105,31 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 //				$name = $this->unique . '[' . $this->field['id'] . ']' . $extra_multilang . $extra_name;
 //			}
 
-			$name = $this->unique . $extra_multilang . '[' . $this->field['id'] . ']' . $extra_name;
+            // Because you changed to unique, this will determinate if ti is a "sub" field. Sub field is inside group.
+            if ( isset( $this->field['sub'] ) ) {
+                $name = $this->unique . '[' . $this->field['id'] . ']' . $extra_name;
+            } else {
+                $name = $this->unique . $extra_multilang . '[' . $this->field['id'] . ']' . $extra_name;
+            }
+
+
+
+
+            // echo '<pre>u:<br>';
+            // var_export( $this->unique );
+            // echo '</pre>';
+
+            // echo '<pre>ML:<br>';
+            // var_export($this->config);
+            // echo '</pre>';
+
+            // echo '<pre>NAME:<br>';
+            // var_export( $this->field );
+            // echo '</pre>';
+
+            // echo '<pre>NAME:<br>';
+            // var_export( $name );
+            // echo '</pre>';
 
 			return ( ! empty( $this->unique ) ) ? $name : '';
 
