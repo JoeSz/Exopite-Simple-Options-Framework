@@ -997,9 +997,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function save( $posted_data ) {
 
-
-
-
 //			$this->write_log( 'posted_data', var_export( $posted_data, true ) . PHP_EOL . PHP_EOL );
 
 
