@@ -40,6 +40,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 
 			if ( class_exists( 'SitePress' ) || class_exists( 'Polylang' ) || function_exists( 'qtrans_getSortedLanguages' ) ) {
 
+
 				if ( class_exists( 'SitePress' ) ) {
 
 					global $sitepress;
@@ -49,21 +50,29 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 
 				} else if ( class_exists( 'Polylang' ) ) {
 
-
 					// These checks of function_exists() and method_exists() added as deactivating polylang was giving fatal error
 
 					global $polylang;
 
 
 					if ( function_exists( 'pll_current_language' ) ) {
+
 						$current = pll_current_language();
+
 					}
 
 					if ( function_exists( 'pll_default_language' ) ) {
 						$default = pll_default_language();
 					}
 
-					if ( property_exists( $polylang, 'model' ) && method_exists( $polylang->model, 'get_languages_list' ) ) {
+					if (
+						// if i do not check for is_object( $polylang ), it gives $polylang as NULL
+						// in short, these polylang methods not available to us while calling from plugin (not exopite framework)
+//						is_object( $polylang ) &&
+						property_exists( $polylang, 'model' ) &&
+						method_exists( $polylang->model, 'get_languages_list' )
+					) {
+
 						$poly_langs = $polylang->model->get_languages_list();
 					}
 
@@ -75,9 +84,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 					}
 
 
-					$multilang['default']   = $default;
-					$multilang['current']   = $current;
-					$multilang['languages'] = $languages;
+					$multilang['default'] = $default;
+					// When all languages selected, then $current is false, so make $current as $default
+					$multilang['current']   = ( isset( $current ) && $current ) ? $current : $multilang['current'];
+					$multilang['languages'] = ( isset( $languages ) && $languages ) ? $languages : $multilang['languages'];
+
 
 				} else if ( function_exists( 'qtrans_getSortedLanguages' ) ) {
 
@@ -94,6 +105,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 
 			return ( ! empty( $multilang ) ) ? $multilang : false;
 
+		}
+
+
+		public static function get_current_language_code() {
+
+			$multilang = self::get_language_defaults();
+
+			return $multilang['current'];
 		}
 
 	}

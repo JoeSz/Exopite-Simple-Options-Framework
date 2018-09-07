@@ -104,6 +104,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		public $lang_default;
 		public $lang_current;
+
+		public static $current_language_code;
+
 		public $languages = array();
 
 		public $version = '1.0';
@@ -183,6 +186,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			$this->define_menu_hooks();
 
 			$this->define_metabox_hooks();
+
+
+			self::$current_language_code = $this->lang_current;
 
 		}
 
@@ -1010,6 +1016,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			$valid = array();
 
 
+			/*
+			 * @var $section_fields_with_values it will hold the sanitized fields => value
+			 */
+			$section_fields_with_values = array();
+
+
+
 			// Specific to Menu Options
 			if ( $this->is_menu() ) {
 
@@ -1047,6 +1060,18 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 				}
 
+
+				// Preserve other language setting
+				// Get current field value, make sure we are not override other language values
+				$other_languages = $this->languages_except_current_language();
+
+				// TODO: Take care of group type as well, its hard to preserve their value
+				foreach ( $other_languages as $language ) {
+					$section_fields_with_values[ $language ] = $this->db_options[ $language ];
+				}
+
+
+
 			}
 
 			// Specific to Metabox
@@ -1077,25 +1102,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			}
 
-			/*
-			 * @var $section_fields_with_values it will hold the sanitized fields => value
-			 */
-			$section_fields_with_values = array();
+
 
 			/**
 			 * Loop all fields (from $config fields array ) and update values from $_POST
+			 *
+			 * for both menu and meta
 			 */
-
-			// Preserve other language setting
-			// Get current field value, make sure we are not override other language values
-			$other_languages = $this->languages_except_current_language();
-
-			// TODO: Take care of group type as well, its hard to preserve their value
-			foreach ( $other_languages as $language ) {
-				$section_fields_with_values[ $language ] = $this->db_options[ $language ];
-			}
-
-
 			$section_fields_current_lang = array();
 
 			foreach ( $this->fields as $section ) {
@@ -1112,15 +1125,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			}
 
-			$section_fields_with_values[ $this->lang_current ] = $section_fields_current_lang;
-
-//			$section_fields_with_values = array_merge( $section_fields_with_values , $section_fields_current_lang);
-
 
 //			$this->write_log( 'posted_data', var_export( $section_fields_with_values, true ) . PHP_EOL . PHP_EOL );
 
 			if ( $this->is_menu() ) {
 
+				// update $section_fields_with_values with $section_fields_current_lang
+				$section_fields_with_values[ $this->lang_current ] = $section_fields_current_lang;
 				// These actions and filters only for options menu
 
 				// TODO: remove one set from the following set of filters + actions
@@ -1138,17 +1149,19 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				// When we click on "New Post" (CPT), then $post is not available, so we need to check if it is set
 				if ( isset( $post_id ) ) {
 
-					$valid = apply_filters( 'exopite_sof_save_meta_options', $section_fields_with_values, $this->unique, $post_id );
-					do_action( 'exopite_sof_do_save_meta_options', $section_fields_with_values, $this->unique, $post_id );
+					$valid = apply_filters( 'exopite_sof_save_meta_options', $section_fields_current_lang, $this->unique, $post_id );
+					do_action( 'exopite_sof_do_save_meta_options', $section_fields_current_lang, $this->unique, $post_id );
 
+//                  TODO: Account for options = 'simple'
+//					if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
+//						foreach ( $valid as $key => $value ) {
+//							update_post_meta( $post_id, $key, $value );
+//						}
+//					} else {
+//						update_post_meta( $post_id, $this->unique, $valid );
+//					}
 
-					if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
-						foreach ( $valid as $key => $value ) {
-							update_post_meta( $post_id, $key, $value );
-						}
-					} else {
-						update_post_meta( $post_id, $this->unique, $valid );
-					}
+					update_post_meta( $post_id, $this->unique, $valid );
 				}
 
 			}
@@ -2152,8 +2165,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			do_action( 'exopite_sof_form_' . $this->config['type'] . '_after' );
 
+		} // display_page()
+
+
+		public static function get_current_language_code(){
+			return self::$current_language_code;
 		}
 
-	}
+	} //class
 
 endif;

@@ -14,7 +14,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 	abstract class Exopite_Simple_Options_Framework_Fields {
 
 		// public $multilang;
-		// public $current_lang;
 		// public $lang_default;
 		// public $lang_current;
 		// public $languages;
