@@ -101,7 +101,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		public $fields = array();
 
 		public $multilang = false;
-
 		public $lang_default;
 		public $lang_current;
 
@@ -110,9 +109,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		public $version = '1.0';
 
 		public $debug = true;
-
-
-		public $lang_current_array_key = '';
 
 		/**
 		 *
@@ -213,12 +209,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					$this->lang_default = $this->multilang['default'];
 					$this->languages    = $this->multilang['languages'];
 
-					$this->lang_current_array_key = "[{$this->lang_current}]";
 				}
-
-
-//				var_dump( $this->lang_current_array_key); die();
-
 
 			}
 
@@ -283,13 +274,15 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			if ( $this->is_metabox() ) {
 				$default_metabox_config = $this->get_config_default_metabox();
 				$this->config           = wp_parse_args( $this->config, $default_metabox_config );
+
 			}
 
+			$this->config['is_options_simple'] = ( $this->is_options_simple() ) ? true : false;
 
 			$this->dirname = wp_normalize_path( dirname( __FILE__ ) );
 
 
-			// My Test
+			// Rao's Test
 
 //			$main_array = array(
 //				'literature' => array(
@@ -331,7 +324,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		public function get_array_nested_value( array $main_array, array $keys_array, $default_value = null ) {
 
-			$length     = count( $keys_array );
+			$length = count( $keys_array );
 
 			for ( $i = 0; $i < $length; $i ++ ) {
 
@@ -488,6 +481,15 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		protected function is_menu() {
 
 			return ( $this->type === 'menu' ) ? true : false;
+		}
+
+		/*
+		 * @return bool true if its a 'options'   => 'simple' in $config
+		 */
+		protected function is_options_simple() {
+
+			// 'options'    => 'simple' in $config only required for metabox type
+			return ( ! $this->is_menu() && isset( $this->config['options'] ) && $this->config['options'] === 'simple' ) ? true : false;
 		}
 
 		/*
@@ -810,7 +812,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				'priority'   => 'default',
 				'capability' => 'edit_posts',
 				'tabbed'     => true,
-				'options'    => '',
+				'options'    => false,
 				'multilang'  => false
 
 			);
@@ -861,7 +863,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				'position'      => 100,
 				'icon'          => '',
 				'multilang'     => true,
-				'options'       => 'simple'
+				'options'       => false
 			);
 
 			return apply_filters( 'exopite_sof_filter_config_default_menu_array', $default );
@@ -1067,7 +1069,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function save( $posted_data ) {
 
-//			$this->write_log( 'posted_data', var_export( $posted_data, true ) . PHP_EOL . PHP_EOL );
+			$this->write_log( 'posted_data', var_export( $_POST, true ) . PHP_EOL . PHP_EOL );
 
 
 			// Is user has ability to save?
@@ -1151,7 +1153,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			}
 
-
 			/**
 			 * Loop all fields (from $config fields array ) and update values from $_POST
 			 *
@@ -1202,21 +1203,23 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					do_action( 'exopite_sof_do_save_meta_options', $section_fields_current_lang, $this->unique, $post_id );
 
 //                  TODO: Account for options = 'simple'
-//					if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
-//						foreach ( $valid as $key => $value ) {
-//							update_post_meta( $post_id, $key, $value );
-//						}
-//					} else {
-//						update_post_meta( $post_id, $this->unique, $valid );
-//					}
-//					$this->write_log( 'post_id', var_export($post_id,  true));
-					update_post_meta( $post_id, $this->unique, $valid );
+					if ( $this->is_options_simple() ) {
+						foreach ( $valid as $key => $value ) {
+							$meta_key = $this->unique . '_' . $key;
+							update_post_meta( $post_id, $key, $value );
+							$this->write_log( 'post_id', var_export( $key, true ) . PHP_EOL . var_export( $key, true ) );
+						}
+					} else {
+						update_post_meta( $post_id, $this->unique, $valid );
+					}
+
+//					update_post_meta( $post_id, $this->unique, $valid );
 
 				}
 
 			}
 
-			unset( $post_id, $valid, $posted_data, $section_fields_with_values );
+			unset( $post_id, $valid, $posted_data, $section_fields_with_values, $section_fields_current_lang );
 
 		}
 
@@ -1368,7 +1371,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			// Adding elements to $keys_array
 			// order matters!!!
-			$keys_array[] = $this->unique;
+			if ( ! $this->is_options_simple() ) {
+				$keys_array[] = $this->unique;
+			}
 
 			if ( $this->is_multilang() ) {
 				$keys_array[] = $this->lang_current;
@@ -1393,8 +1398,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 //						} else {
 //							$value = ( isset( $_POST[ $this->unique ][ $field['id'] ] ) ) ? $_POST[ $this->unique ][ $field['id'] ] : '';
 //						}
-
-
 //			}
 
 
@@ -1656,17 +1659,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 					if ( ( isset( $field['sub'] ) && ! empty( $field['sub'] ) ) ) {
 
-//						$base_id = str_replace( '[REPLACEME]', '', $this->unique );
-//
-//						var_dump( $base_id );
-//
-//						$group_id = preg_match("/\[([^\]]*)\]/", $base_id, $output_array);
-//
-//						$group_id = $output_array[1];
-
 						$value = ( isset( $field['id'] ) && isset( $this->db_options[ $this->lang_current ][ $field['id'] ] ) ) ? $this->db_options[ $this->lang_current ][ $field['id'] ] : null;
-
-//						var_dump( $group_id );
 
 					}
 
@@ -1683,12 +1676,35 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 					if ( $this->is_metabox() ) {
 
-
-						$meta = get_post_meta( get_the_ID(), $this->unique, true );
-
-						$value = ( isset( $field['id'] ) && isset( $meta[ $field['id'] ] ) ) ? $meta[ $field['id'] ] : null;
-
 //						TODO: Account for options= 'simple'
+
+						if ( $this->is_options_simple() ) {
+
+
+							$meta = get_post_meta( get_the_ID() );
+
+							/*
+							 * get_post_meta return empty on non existing meta
+							 * we need to check if meta key is exist to return null,
+							 * because default value can only display if value is null
+							 * on empty vlaue - may saved by the user - should display empty.
+							 */
+							if ( isset( $field['id'] ) && isset( $meta[ $field['id'] ] ) ) {
+
+								$value = array_shift( $meta[ $field['id'] ] );
+
+							} else {
+								$value = null;
+							}
+
+						} else {
+							// This is working without options simple
+							$meta  = get_post_meta( get_the_ID(), $this->unique, true );
+							$value = ( isset( $field['id'] ) && isset( $meta[ $field['id'] ] ) ) ? $meta[ $field['id'] ] : null;
+
+						}
+
+
 //						if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
 //							$meta = get_post_meta( get_the_ID() );
 //
@@ -1760,7 +1776,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			settings_fields( $this->unique );
 			do_settings_sections( $this->unique );
 			$current_language_title = '';
-			if($this->is_multilang()){
+			if ( $this->is_multilang() ) {
 				$current_language_title = apply_filters( 'exopite_sof_title_language_notice', $this->lang_current );
 				$current_language_title = ' [ ' . $current_language_title . ' ]';
 			}
@@ -1895,10 +1911,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					if ( $this->debug ) {
 						echo '<pre>POST_META<br>';
 
-
-						$meta_options = get_post_meta( get_the_ID(), $this->unique, true );
+						$meta_options = get_post_meta( get_the_ID() );
 //						var_export( get_post_meta( get_the_ID() ) );
-						var_export( get_the_ID() );
 						var_export( $meta_options );
 						echo '</pre>';
 					}

@@ -105,11 +105,41 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 //			}
 
             // Because you changed to unique, this will determinate if ti is a "sub" field. Sub field is inside group.
-            if ( isset( $this->field['sub'] ) ) {
-                $name = $this->unique . '[' . $this->field['id'] . ']' . $extra_name;
-            } else {
-                $name = $this->unique . $extra_multilang . '[' . $this->field['id'] . ']' . $extra_name;
-            }
+//            if ( isset( $this->field['sub'] ) ) {
+//                $name = $this->unique . '[' . $this->field['id'] . ']' . $extra_name;
+//            } else {
+//                $name = $this->unique . $extra_multilang . '[' . $this->field['id'] . ']' . $extra_name;
+//            }
+
+
+			// Because you changed to unique, this will determinate if ti is a "sub" field. Sub field is inside group.
+			if ( isset( $this->field['sub'] ) ) {
+
+				if ( $this->config['is_options_simple'] ) {
+
+					$name = $this->field['id'] . $extra_name;
+
+				} else {
+					// This is the actual
+					$name = $this->unique . '[' . $this->field['id'] . ']' . $extra_name;
+				}
+
+
+			} else {
+
+				if ( $this->config['is_options_simple'] ) {
+
+					$name = $this->field['id'] . $extra_name;
+
+				} else {
+					// This is the actual
+					$name = $this->unique . $extra_multilang . '[' . $this->field['id'] . ']' . $extra_name;
+				}
+
+
+			}
+
+//
 //
 //
 //             echo '<pre>u:<br>';
