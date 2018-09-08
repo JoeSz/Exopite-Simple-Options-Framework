@@ -1069,8 +1069,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function save( $posted_data ) {
 
-			$this->write_log( 'posted_data', var_export( $_POST, true ) . PHP_EOL . PHP_EOL );
-
+//			$this->write_log( 'posted_data', var_export( $_POST, true ) . PHP_EOL . PHP_EOL );
 
 			// Is user has ability to save?
 			if ( ! current_user_can( $this->config['capability'] ) ) {
@@ -1174,6 +1173,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			}
 
+
 			if ( $this->is_menu() ) {
 
 				// update $section_fields_with_values with $section_fields_current_lang
@@ -1201,13 +1201,18 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 					$valid = apply_filters( 'exopite_sof_save_meta_options', $section_fields_current_lang, $this->unique, $post_id );
 					do_action( 'exopite_sof_do_save_meta_options', $section_fields_current_lang, $this->unique, $post_id );
+//
+//
+//					$this->write_log( 'posted_data', var_export( $section_fields_current_lang, true ) . PHP_EOL );
 
 //                  TODO: Account for options = 'simple'
 					if ( $this->is_options_simple() ) {
+
 						foreach ( $valid as $key => $value ) {
-							$meta_key = $this->unique . '_' . $key;
+//							$meta_key = $this->unique . '_' . $key;
+
 							update_post_meta( $post_id, $key, $value );
-							$this->write_log( 'post_id', var_export( $key, true ) . PHP_EOL . var_export( $key, true ) );
+
 						}
 					} else {
 						update_post_meta( $post_id, $this->unique, $valid );
@@ -1236,6 +1241,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		public function get_sanitized_fields_values( $fields, $posted_data ) {
 			$sanitized_fields_data = array();
 			foreach ( $fields as $index => $field ) :
+
 
 				$field_type = ( isset( $field['type'] ) ) ? $field['type'] : false;
 				$field_id   = ( isset( $field['id'] ) ) ? $field['id'] : false;
@@ -1281,8 +1287,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 							foreach ( $group_fields as $sub_field ) :
 
-								$sanitized_fields_data[ $group_id ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id );;
+								$sub_field_id = ( isset( $sub_field['id'] ) ) ? $sub_field['id'] : false;
 
+
+								$sanitized_fields_data[ $group_id ][ $sub_field_id ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id );;
+
+//								$this->write_log( 'posted_data', var_export( $sanitized_fields_data, true ) . PHP_EOL . PHP_EOL );
 							endforeach;
 
 
@@ -1317,7 +1327,15 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 							if ( ! $this->is_multilang() ) {
 
 
-								$repeater_count = ( isset( $_POST[ $this->unique ][ $group_id ] ) && is_array( $_POST[ $this->unique ][ $group_id ] ) ) ? count( $_POST[ $this->unique ][ $group_id ] ) : 0;
+								if ( $this->is_options_simple() ) {
+
+									$repeater_count = ( isset( $_POST[ $group_id ] ) && is_array( $_POST[ $group_id ] ) ) ? count( $_POST[ $group_id ] ) : 0;
+
+								} else {
+
+									$repeater_count = ( isset( $_POST[ $this->unique ][ $group_id ] ) && is_array( $_POST[ $this->unique ][ $group_id ] ) ) ? count( $_POST[ $this->unique ][ $group_id ] ) : 0;
+
+								}
 
 
 								for ( $i = 0; $i < $repeater_count; $i ++ ) {
@@ -1388,6 +1406,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			}
 
 			$keys_array[] = $field_id;
+
 
 			// Get $dirty_value from global $_POST
 			$dirty_value = $this->get_array_nested_value( $_POST, $keys_array, '' );
@@ -1618,6 +1637,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 * @return string   generated HTML for the field
 		 */
 		public function add_field( $field, $value = null ) {
+
 
 			do_action( 'exopite_sof_before_generate_field', $field, $this->config );
 			do_action( 'exopite_sof_before_add_field', $field, $this->config );

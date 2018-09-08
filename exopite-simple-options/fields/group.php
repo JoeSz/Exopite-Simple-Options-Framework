@@ -94,11 +94,62 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 			$multilang_array_index = ( $this->is_multilang ) ? "[{$this->config['multilang']['current']}]" : "";
 
 
-			$base_id = ( $this->is_repeater )
-				? array( 'id' => "$this->unique{$multilang_array_index}[{$this->field['id']}][REPLACEME]" )
-				: array( 'id' => "$this->unique{$multilang_array_index}[$this->field['id']]" );
+//			var_dump( $this->config['is_options_simple']); die();
+
+			if ( $this->config['is_options_simple'] ) {
+				$parent_array = $this->field['id'];
+			} else {
+				$parent_array = $this->unique . '[' . $this->field['id'] . ']';
+			}
 
 
+			if ( $this->is_repeater ) {
+
+
+				if ( $this->config['is_options_simple'] ) {
+
+					$base_id = array(
+						'id'                => "{$this->field['id']}[REPLACEME]",
+						'is_options_simple' => true
+					);
+
+				} else {
+					// This is Working
+//					$base_id = array(
+//						'id' => "$this->unique{$multilang_array_index}[{$this->field['id']}][REPLACEME]"
+//					);
+
+					$base_id = array(
+						'id' => $this->unique . $multilang_array_index . '[' . $this->field['id'] . ']' . '[REPLACEME]'
+					);
+
+
+				}
+
+			} else {
+
+				if ( $this->config['is_options_simple'] ) {
+					$base_id = array(
+						'id'                => "{$this->field['id']}",
+						'is_options_simple' => true
+					);
+
+				} else {
+
+
+					$base_id = array(
+						'id' => $this->unique . $multilang_array_index . '[' . $this->field['id'] . ']'
+					);
+//
+//					var_dump( $base_id );
+
+				}
+
+			}
+
+//			$base_id = ( $this->is_repeater )
+//				? array( 'id' => "$this->unique{$multilang_array_index}[{$this->field['id']}][REPLACEME]" )
+//				: array( 'id' => "$this->unique{$multilang_array_index}[$this->field['id']]" );
 
 
 //			echo '<pre>';
@@ -133,16 +184,16 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 
 			// $base_id['multilang'] = ( isset( $this->config['multilang'] ) && $this->config['multilang'] == false ) ? false : true;
 
-			$self = new Exopite_Simple_Options_Framework( $base_id, null );
-            $self->config['multilang'] = $this->config['multilang'];
+			$self                      = new Exopite_Simple_Options_Framework( $base_id, null );
+			$self->config['multilang'] = $this->config['multilang'];
+//			$self->config['is_multilang'] = $this->config['is_multilang'];
 
-            // echo '<pre>';
-            // var_export( $self->config );
-            // echo '</pre>';
+
+			// echo '<pre>';
+			// var_export( $self->config );
+			// echo '</pre>';
 
 			$num = 0;
-
-//			var_dump( $fields);
 
 			foreach ( $fields as $field ) {
 
@@ -151,7 +202,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 					continue;
 				}
 
+				if ( $this->config['is_options_simple'] ) {
+					$field['is_options_simple'] = true;
+				}
+
+
 				$field['sub'] = true;
+
 
 				$field_default = ( isset( $field['default'] ) ) ? $field['default'] : '';
 
@@ -160,7 +217,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 				// If repeater, template field has no values
 				if ( $this->is_repeater ) {
 
+//					var_dump( $this->is_multilang );
+
 					$field_value = null;
+//
+
 
 					$field_attributes = array(
 						'disabled' => 'only-key',
@@ -174,14 +235,26 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 
 				} else {
 
+
+					if ( is_serialized( $this->value ) ) {
+						$this->value = unserialize( $this->value );
+					}
+
+
 					$field_value = ( isset( $this->value[ $field['id'] ] ) ) ? $this->value[ $field['id'] ] : '';
+
 					$field_value = ( $this->is_repeater ) ? null : $field_value;
 
 				}
 
 				$self->add_field( $field, $field_value );
 
+				$num ++;
+
 			}
+
+//			var_dump( $fields);
+
 
 			echo '</div>'; // exopite-sof-cloneable-content
 
@@ -196,12 +269,22 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 					echo '<div class="exopite-sof-cloneable__wrapper exopite-sof-accordion__wrapper" data-sortable="' . $sortable . '" data-name="' . $this->element_name() . '">';
 					// echo "3<br>";
 				} else {
-                    echo '<div class="exopite-sof-cloneable__wrapper exopite-sof-accordion__wrapper" data-sortable="' . $sortable . '" data-name="' . $base_id['id'] . '">';
+					echo '<div class="exopite-sof-cloneable__wrapper exopite-sof-accordion__wrapper" data-sortable="' . $sortable . '" data-name="' . $base_id['id'] . '">';
 					// echo '<div class="exopite-sof-cloneable__wrapper exopite-sof-accordion__wrapper" data-sortable="' . $sortable . '" data-name="' . $this->unique . '[' . $this->field['id'] . ']' . '">';
 					// echo "4<br>";
 				}
 
+
 				if ( $this->value ) {
+
+					if ( $this->config['is_options_simple'] ) {
+
+						if ( is_serialized( $this->value ) ) {
+							$this->value = unserialize( $this->value );
+						}
+
+					}
+
 
 					$num = 0;
 
@@ -247,15 +330,34 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 
 						// $self->unique = $this->element_name() . '[' . $num . ']';
 						// $self->unique = $this->unique . '[' . $this->field['id'] . '][' . $num . ']';
-                        $self->unique = $this->unique . $multilang_array_index . '[' . $this->field['id'] . '][' . $num . ']';
+
+						if ( $this->config['is_options_simple'] ) {
+
+
+							$self->unique = $this->field['id'] . '[' . $num . ']';
+
+//							var_dump($self->unique);
+
+
+						} else {
+							$self->unique = $this->unique . $multilang_array_index . '[' . $this->field['id'] . '][' . $num . ']';
+
+						}
+
 
 						foreach ( $fields as $field ) {
 
 							$field['sub'] = true;
 
+							if ( $this->config['is_options_simple'] ) {
+								$field['is_options_simple'] = true;
+							}
+
 							if ( in_array( $field['type'], $unallows ) ) {
 								continue;
 							}
+
+//							var_dump( $this->value );
 
 							$self->add_field( $field, $this->value[ $num ][ $field['id'] ] );
 
