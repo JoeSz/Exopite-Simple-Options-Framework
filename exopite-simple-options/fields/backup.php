@@ -80,8 +80,19 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_backup' ) ) {
 			/*
 			 * https://sweetalert.js.org/guides/
 			 */
-			wp_enqueue_script( 'sweetalert', '//unpkg.com/sweetalert/dist/sweetalert.min.js', false, '2.1.0', true );
+			// wp_enqueue_script( 'sweetalert', '//unpkg.com/sweetalert/dist/sweetalert.min.js', false, '2.1.0', true );
+			$resources = array(
+				array(
+					'name'       => 'sweetalert',
+					'fn'         => 'sweetalert.min.js',
+					'type'       => 'script',
+					'dependency' => false,
+					'version'    => '2.1.0',
+					'attr'       => true,
+				),
+			);
 
+			parent::do_enqueue( $resources, $args );
 
 		}
 

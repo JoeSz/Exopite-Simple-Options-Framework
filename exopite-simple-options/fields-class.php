@@ -13,13 +13,56 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 	abstract class Exopite_Simple_Options_Framework_Fields {
 
-		public function __construct( $field = array(), $value = '', $unique = '', $where = '' ) {
+		public $field;
+		public $value;
+		public $org_value;
+		public $unique;
+		public $config;
+		public $where;
+		public $multilang;
+		public $lang_default;
+		public $lang_current;
+		public $languages;
+
+		public function __construct( $field = array(), $value = null, $unique = '', $config = array() ) {
 
 			$this->field     = $field;
 			$this->value     = $value;
 			$this->org_value = $value;
 			$this->unique    = $unique;
-			$this->where     = $where;
+			$this->config    = $config;
+			$this->where     = ( isset( $this->config['type'] ) ) ? $this->config['type'] : '';
+			$this->multilang = ( isset( $this->config['multilang'] ) ) ? $this->config['multilang'] : false;
+
+			$this->lang_default = ( $this->multilang && isset( $this->multilang['default'] ) ) ? $this->multilang['default'] : mb_substr( get_locale(), 0, 2 );
+			$this->lang_current = ( $this->multilang && isset( $this->multilang['current'] ) ) ? $this->multilang['current'] : $this->lang_default;
+
+			$this->languages = (
+				$this->multilang &&
+				isset( $this->multilang['languages'] ) &&
+				is_array( $this->multilang['languages'] )
+			) ? $this->multilang['languages'] : array( $this->lang_default );
+
+
+		}
+
+		/*
+		 * @return bool true if multilang is set to true
+		*/
+		public function is_multilang() {
+
+			// echo '<pre>IS_M<br>';
+			// var_export( $this->multilang );
+			// echo '</pre>';
+
+			// if ( is_array( $this->config['multilang'] ) ) {
+			//     echo "1<br>";
+			// } else {
+			//     echo "2<br>";
+			// }
+
+			// We should have received multilang as well together with $this->config['multilang']
+			return ( isset( $this->config['multilang'] ) && is_array( $this->config['multilang'] ) ) ? true : false;
 
 		}
 
@@ -55,7 +98,141 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 		public function element_name( $extra_name = '' ) {
 
-			return ( ! empty( $this->unique ) ) ? $this->unique . '[' . $this->field['id'] . ']' . $extra_name : '';
+
+			$extra_multilang = ( isset( $this->config['multilang'] ) && is_array( $this->config['multilang'] ) ) ? '[' . $this->lang_current . ']' : '';
+			// for some reason this not work, maybe because abstract class
+			// $extra_multilang = ( $this->is_multilang() ) ? '[' . $this->lang_current . ']' : '';
+
+
+			// Because you changed to unique, this will determinate if ti is a "sub" field. Sub field is inside group.
+			if ( isset( $this->field['sub'] ) ) {
+
+				$name = $this->unique . '[' . $this->field['id'] . ']' . $extra_name;
+
+
+			} else {
+
+				if ( $this->config['is_options_simple'] ) {
+
+					$name = $this->field['id'] . $extra_name;
+
+				} else {
+					// This is the actual
+					$name = $this->unique . $extra_multilang . '[' . $this->field['id'] . ']' . $extra_name;
+				}
+
+
+			}
+
+//
+
+//
+			// echo '<pre>u:<br>';
+			// var_export( $this->unique );
+			// echo '</pre>';
+//
+//			echo '<pre>ML:<br>';
+//			var_export( $this->config );
+//			echo '</pre>';
+//
+//			echo '<pre>FIELD:<br>';
+//			var_export( $this->field );
+//			echo '</pre>';
+//////
+//			echo '<pre>NAME:<br>';
+//			var_export( $name );
+//			echo '</pre>';
+////////
+//			echo '<pre>VALUE:<br>';
+//			var_export( $this->value );
+//			echo '</pre>';
+
+//			echo '<pre>Parent Array:<br>';
+//			var_export( $parent_array );
+//			echo '</pre>';
+
+			return ( ! empty( $this->unique ) ) ? $name : '';
+
+		}
+
+		public function element_value( $value = null ) {
+
+			$value = $this->value;
+
+			if ( ! isset( $value ) && isset( $this->field['default'] ) && ! empty( $this->field['default'] ) ) {
+
+				$default = $this->field['default'];
+
+				if ( is_array( $default ) ) {
+
+					if ( isset( $default['function'] ) && is_callable( $default['function'] ) ) {
+						$args = ( isset( $default['args'] ) ) ? $default['args'] : '';
+
+						return call_user_func( $default['function'], $args );
+					}
+
+				}
+
+				return $default;
+
+			}
+
+			return $value;
+
+
+			/**
+			 * Set default if not exist
+			 */
+//			if ( (
+//				     // multilang activated and multilang set to value but not in the current language
+//				     ( is_array( $this->multilang ) && isset( $this->value['multilang'] ) && ! isset( $value[ $this->multilang['current'] ] ) ) ||
+//				     // multilang is activated but still "single language" value there and not current language (either current is set or next rule apply)
+//				     ( is_array( $this->multilang ) && ! isset( $this->value['multilang'] ) && $this->multilang['current'] != $this->multilang['default'] ) ||
+//				     // value is not set
+//				     ! isset( $value )
+//			     ) &&
+//			     // and default value is set in options
+//			     isset( $this->field['default'] ) && $this->field['default'] !== ''
+//			) {
+//
+//				$default = $this->field['default'];
+//
+//				if ( is_array( $default ) ) {
+//
+//					if ( is_callable( $default['function'] ) ) {
+//						$args = ( isset( $default['args'] ) ) ? $default['args'] : '';
+//
+//						return call_user_func( $default['function'], $args );
+//					}
+//
+//				}
+//
+//				return $default;
+//
+//			}
+//
+//			if ( is_array( $this->multilang ) && isset( $this->value['multilang'] ) && is_array( $value ) ) {
+//
+//				$current = $this->multilang['current'];
+//
+//				if ( isset( $value[ $current ] ) ) {
+//					$value = $value[ $current ];
+//				} else if ( $this->multilang['current'] == $this->multilang['default'] && isset( $value[ $current ] ) ) {
+//					$value = $this->value;
+//				} else {
+//					$value = '';
+//				}
+//
+//			} else if ( is_array( $this->multilang ) && ! is_array( $value ) && ( $this->multilang['current'] != $this->multilang['default'] ) ) {
+//				$value = '';
+//			} else if ( ! is_array( $this->multilang ) && isset( $this->value['multilang'] ) && is_array( $this->value ) ) {
+//
+//				$value = array_values( $this->value );
+//				$value = $value[0];
+//
+//			}
+//
+//			return $value;
 
 		}
 
@@ -65,9 +242,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 			$element_id = ( isset( $this->field['id'] ) ) ? $this->field['id'] : '';
 
 			if ( $el_attributes !== false ) {
-				$sub_elemenet  = ( isset( $this->field['sub'] ) ) ? 'sub-' : '';
-				$el_attributes = ( is_string( $el_attributes ) || is_numeric( $el_attributes ) ) ? array( 'data-' . $sub_elemenet . 'depend-id' => $element_id . '_' . $el_attributes ) : $el_attributes;
-				$el_attributes = ( empty( $el_attributes ) && isset( $element_id ) ) ? array( 'data-' . $sub_elemenet . 'depend-id' => $element_id ) : $el_attributes;
+				$sub_element   = ( isset( $this->field['sub'] ) ) ? 'sub-' : '';
+				$el_attributes = ( is_string( $el_attributes ) || is_numeric( $el_attributes ) ) ? array( 'data-' . $sub_element . 'depend-id' => $element_id . '_' . $el_attributes ) : $el_attributes;
+				$el_attributes = ( empty( $el_attributes ) && isset( $element_id ) ) ? array( 'data-' . $sub_element . 'depend-id' => $element_id ) : $el_attributes;
 			}
 
 			$attributes = wp_parse_args( $attributes, $el_attributes );
@@ -88,36 +265,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 		}
 
-		public function element_value( $value = '' ) {
-
-			$value = $this->value;
-
-			if ( empty( $value ) && isset( $this->field['default'] ) && $this->field['default'] !== '' ) {
-
-				$default = $this->field['default'];
-
-				if ( is_array( $default ) ) {
-
-					if ( isset( $default['function'] ) && is_callable( $default['function'] ) ) {
-						$args = ( isset( $default['args'] ) ) ? $default['args'] : '';
-
-						return call_user_func( $default['function'], $args );
-					}
-
-				}
-
-				return $default;
-
-			}
-
-			return $this->value;
-
-		}
-
 		public function element_class( $el_class = '' ) {
-
-			$field_class = '';
-
 
 			$classes     = ( isset( $this->field['class'] ) ) ? array_merge( explode( ' ', $el_class ), explode( ' ', $this->field['class'] ) ) : explode( ' ', $el_class );
 			$classes     = array_filter( $classes );
@@ -145,6 +293,49 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 		}
 
+		public static function do_enqueue( $styles_scripts, $args ) {
+
+			foreach ( $styles_scripts as $resource ) {
+
+				$resource_file = join( DIRECTORY_SEPARATOR, array(
+					$args['plugin_sof_path'] . 'assets',
+					$resource['fn']
+				) );
+				$resource_url  = join( '/', array(
+					untrailingslashit( $args['plugin_sof_url'] ),
+					'assets',
+					$resource['fn']
+				) );
+
+				if ( ! file_exists( $resource_file ) ) {
+					continue;
+				}
+
+				if ( ! empty( $resource['version'] ) ) {
+					$version = $resource['version'];
+				} else {
+					$version = filemtime( $resource_file );
+				}
+
+				switch ( $resource['type'] ) {
+					case 'script':
+						$function = 'wp_enqueue_script';
+						break;
+					case 'style':
+						$function = 'wp_enqueue_style';
+						break;
+					default:
+						continue;
+
+						var_dump( $resource_file);
+						 die();
+				}
+
+				$function( $resource['name'], $resource_url, $resource['dependency'], $version, $resource['attr'] );
+
+			}
+
+		}
 
 	}
 

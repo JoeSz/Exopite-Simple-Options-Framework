@@ -2,6 +2,31 @@
 	die;
 } // Cannot access pages directly.
 /**
+ * INFOS AND TODOS:
+ * - INFOS:
+ *   - menu working without multilang??
+ *   - menu working with multilang (WPML, Polyland and qTranslate-X)
+ *   - meta working with multilang IF not simple (disabled as default)
+ *     (WPML, Polyland do not need this)
+ *     (required for qTranlate-X only, may check if activated)
+ *   - meta simple is working
+ *   - enqueue of fields are local, except:
+ *     - ACE (for some reason not working if local. Wierd)
+ *     - FontAwesome <- need font files - done
+ *   - default value is correct, doesn't show up on empty (should only show up is not exist/null!)
+ *   - ACE Field can not be sanitized with wp_kses (need to store JS/CSS/PHP code, maybe convert chars?)
+ *     -> changed to esc_textarea
+ * -TODOS
+ *   - drag and drop reorder is not working on group, check JS reorder
+ *
+ * - DONE
+ *  - If disable multilang, does not load default language options
+ *   - something wrong with trumbowyg style - done
+ *
+ * - IDEAS
+ *   - import options from file
+ */
+/**
  * Available fields:
  * - ACE field
  * - attached
@@ -100,7 +125,15 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public $fields = array();
 
+		public $multilang = false;
+		public $lang_default;
+		public $lang_current;
+
+		public $languages = array();
+
 		public $version = '1.0';
+
+		public $debug = false;
 
 		/**
 		 *
@@ -126,7 +159,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		/*
 		 * @var array required fields for $type = menu
 		 */
-		protected $required_keys_all_types = array( 'type' );
+//		protected $required_keys_all_types = array( 'type' );
+		protected $required_keys_all_types = array();
 
 
 		/*
@@ -147,10 +181,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				return;
 			}
 
-			$this->version = '20180901';
+			$this->version = '20190910';
 
-			$this->unique = sanitize_key( $config['id'] );
-
+			// TODO: Do sanitize $config['id']
+			$this->unique = $config['id'];
 			// Filter for override every exopite $config and $fields
 			$this->config = apply_filters( 'exopite_sof_config', $config );
 			$this->fields = apply_filters( 'exopite_sof_options', $fields );
@@ -159,9 +193,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			$this->config = apply_filters( 'exopite_sof_config_' . $this->unique, $config );
 			$this->fields = apply_filters( 'exopite_sof_options_' . $this->unique, $fields );
 
-			if ( isset( $this->config['type'] ) ) {
-				$this->set_type( $this->config['type'] );
-			}
+			// now is_menu() and is_metabox() available
 
 			$this->check_required_configuration_keys();
 
@@ -169,11 +201,65 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			$this->load_classes();
 
+			$this->setup_multilang();
+
 			$this->define_shared_hooks();
 
 			$this->define_menu_hooks();
 
 			$this->define_metabox_hooks();
+
+
+		}
+
+		protected function setup_multilang() {
+
+			/**
+			 * Set multilang default true.
+			 *
+			 * In metabox there is no "multilang", because there are no need for that,
+			 * WPML and others will handle mulitlang on their own.
+			 * Meta will be saved for each language "copy" separately.
+			 *
+			 * OK, that was not true. My bad! :( - Joe
+			 * WPML and Polylang save meta (custom fields) induvidually in post language version
+			 * but it is required for qTranslate-X (only).
+			 * So I modified the class, now "multilang" = true is working on meta too.
+			 * Should leave it false as default and write in readme for qTranslate-X
+			 * it is required to set it true.
+			 */
+
+//			// Check simple
+//			if ( $this->is_multilang() ) {
+//				// if ( $this->is_menu() && $this->is_multilang() ) {
+//
+//				$multilang_defaults = Exopite_Simple_Options_Framework_Helper::get_language_defaults();
+//
+//				if ( is_array( $multilang_defaults ) ) {
+//
+//					$this->config['multilang'] = $this->multilang = $multilang_defaults;
+//
+//					$this->lang_current = $this->multilang['current'];
+//					$this->lang_default = $this->multilang['default'];
+//					$this->languages    = $this->multilang['languages'];
+//
+//				}
+//
+//			}
+
+			// Srt Defaults for all cases
+			$multilang_defaults = Exopite_Simple_Options_Framework_Helper::get_language_defaults();
+
+			if ( is_array( $multilang_defaults ) ) {
+
+				$this->config['multilang'] = $this->multilang = $multilang_defaults;
+
+				$this->lang_current = $this->multilang['current'];
+				$this->lang_default = $this->multilang['default'];
+				$this->languages    = $this->multilang['languages'];
+
+			}
+
 
 		}
 
@@ -221,20 +307,96 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		protected function set_properties() {
 
-			$this->dirname = wp_normalize_path( dirname( __FILE__ ) );
+			if ( isset( $this->config['type'] ) ) {
+				$this->set_type( $this->config['type'] );
+			}
 
-
+			// Parse the configuration against default values for Menu
 			if ( $this->is_menu() ) {
 				$default_menu_config = $this->get_config_default_menu();
 				$this->config        = wp_parse_args( $this->config, $default_menu_config );
 			}
 
+			// Parse the configuration against default values for Metabox
 			if ( $this->is_metabox() ) {
 				$default_metabox_config = $this->get_config_default_metabox();
 				$this->config           = wp_parse_args( $this->config, $default_metabox_config );
+
 			}
 
+			$this->config['is_options_simple'] = ( $this->is_options_simple() ) ? true : false;
+
+			$this->dirname = wp_normalize_path( dirname( __FILE__ ) );
+
+
+			// Rao's Test
+
+//			$main_array = array(
+//				'literature' => array(
+//					'books'      => array(),
+//					'audiobooks' => array(
+//						'cd'  => array(),
+//						'mp3' => array()
+//					)// array 'audiobooks'
+//				),// array 'literature'
+//
+//				'electronics' => array(
+//					'tv-video'  => array(),
+//					'computers' => array(
+//						'desktops' => array(
+//							'windows' => 'rao pc',
+//							'apple'   => 'JOE PC'
+//						),
+//						'laptops'  => array()
+//					)    // array 'computers'
+//				)// array 'electronics'
+//			);
+//			$keys_array = array(
+//				'electronics',
+//				'computers',
+//				'desktops',
+//				'windows',
+//			);
+//
+//			$dirty_value = $this->get_array_nested_value($main_array, $keys_array, '88');
+//
+//			echo "<pre>";
+//			var_dump( $dirty_value );
+//			echo "</pre>";
+//			die();
+
+
 		}
+
+
+		public function get_array_nested_value( array $main_array, array $keys_array, $default_value = null ) {
+
+			$length = count( $keys_array );
+
+			for ( $i = 0; $i < $length; $i ++ ) {
+
+				$is_set = ( isset( $main_array[ $keys_array[ $i ] ] ) ) ? true : false;
+
+				if ( ! $is_set ) {
+					// if the array key is not set, we break out of loop and return $$default_value
+					break;
+				} else {
+					// Reset the $main_array to the sub array that we know exit
+					$main_array = $main_array[ $keys_array[ $i ] ];
+
+					if ( $i === $length - 1 ) { // We are at the last item of array
+						// $main_array is now the required value / array
+						return $main_array;
+					}
+
+				}
+
+			} // end for loop
+
+			return $default_value;
+
+		}
+
 
 		public function display_error() {
 			add_action( 'admin_notices', array( $this, 'display_admin_error' ) );
@@ -369,6 +531,32 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		}
 
 		/*
+		 * @return bool true if its a 'options'   => 'simple' in $config
+		 */
+		protected function is_options_simple() {
+
+			// 'options'    => 'simple' in $config only required for metabox type
+			return ( ! $this->is_menu() && isset( $this->config['options'] ) && $this->config['options'] === 'simple' ) ? true : false;
+		}
+
+		/*
+		 * @return bool true if multilang is set to true
+		*/
+		protected function is_multilang() {
+
+			/**
+			 * Make sure if metabox and simple options are activated,
+			 * then multilang is disabled.
+			 * Enabled multilang is only required for qTranslate-X.
+			 */
+			if ( $this->is_metabox() && $this->is_options_simple() ) {
+				return false;
+			}
+
+			return isset( $this->config['multilang'] ) ? $this->config['multilang'] : false;
+		}
+
+		/*
 		 * @return bool true if its menu options
 		 */
 		protected function is_menu_page_loaded() {
@@ -490,6 +678,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function load_classes() {
 
+			require_once 'helper-class.php';
 			require_once 'fields-class.php';
 			require_once 'upload-class.php';
 
@@ -679,10 +868,32 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				'priority'   => 'default',
 				'capability' => 'edit_posts',
 				'tabbed'     => true,
+				'options'    => false,
+				'multilang'  => false
 
 			);
 
 			return apply_filters( 'exopite_sof_filter_config_default_metabox_array', $default );
+		}
+
+
+		/*
+		 * Get default config for group type field
+		 * @return array $default
+		 */
+		public function get_config_default_group_options() {
+
+			$default = array(
+				//
+				'repeater'        => true,
+				'accordion'       => true,
+				'button_title'    => __( 'Add New', 'exopite-options-framework' ),
+				'accordion_title' => __( 'Accordion Title', 'exopite-options-framework' ),
+				'limit'           => 50,
+				'sortable'        => true,
+			);
+
+			return apply_filters( 'exopite_sof_filter_config_default_group_array', $default );
 		}
 
 		/*
@@ -706,7 +917,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				'settings_link' => true,
 				'tabbed'        => true,
 				'position'      => 100,
-				'icon'          => ''
+				'icon'          => '',
+				'multilang'     => true,
+				'options'       => false
 			);
 
 			return apply_filters( 'exopite_sof_filter_config_default_menu_array', $default );
@@ -827,37 +1040,63 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			 */
 			if ( $this->is_menu_page_loaded() || $this->is_metabox_enabled_post_type() ) :
 
+				$url  = $this->get_url( $this->dirname );
+				$base = trailingslashit( join( '/', array( $url, 'assets' ) ) );
+
 				if ( ! wp_style_is( 'font-awesome' ) || ! wp_style_is( 'font-awesome-470' ) || ! wp_style_is( 'FontAwesome' ) ) {
 
 					/* Get font awsome */
-					wp_register_style( 'font-awesome-470', "//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css", false, '470' );
-					wp_enqueue_style( 'font-awesome-470' );
+					//TODO: Remove CDN for fontawsome
+					// For this need font files too
+					// wp_register_style( 'font-awesome-470', "//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css", false, '470' );
+					// wp_enqueue_style( 'font-awesome-470' );
+					wp_enqueue_style( 'font-awesome-470', $base . 'font-awesome-4.7.0/font-awesome.min.css', array(), $this->version, 'all' );
 
 				}
 
+				//TODO: Remove CDN for jQuery
+				wp_enqueue_style( 'jquery-ui', $base . 'jquery-ui.css', array(), '1.8.24', 'all' );
+				wp_enqueue_style( 'exopite-simple-options-framework', $base . 'styles.css', array(), $this->version, 'all' );
+
 				// Add jQuery form scripts for menu options AJAX save
 				wp_enqueue_script( 'jquery-form' );
-
-				wp_register_style( 'jquery-ui', '//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css' );
-
-
-				wp_enqueue_style( 'jquery-ui' );
 
 				// Add the date picker script
 				wp_enqueue_script( 'jquery-ui-datepicker' );
 
 				wp_enqueue_script( 'jquery-ui-sortable' );
 
-				$url  = $this->get_url( $this->dirname );
-				$base = trailingslashit( join( '/', array( $url, 'assets' ) ) );
+				$scripts_styles = array(
+					array(
+						'name' => 'jquery-interdependencies',
+						'fn'   => 'jquery.interdependencies.min.js',
+						'dep'  => array(
+							'jquery',
+							'jquery-ui-datepicker',
+							'wp-color-picker'
+						),
+					),
+					array(
+						'name' => 'exopite-simple-options-framework-js',
+						'fn'   => 'scripts.min.js',
+						'dep'  => array(
+							'jquery',
+							'jquery-ui-datepicker',
+							'wp-color-picker',
+							'jquery-interdependencies'
+						),
+					),
+				);
 
-				wp_enqueue_style( 'exopite-simple-options-framework', $base . 'styles.css', array(), $this->version, 'all' );
+				foreach ( $scripts_styles as $item ) {
+					wp_enqueue_script( $item['name'], $base . $item['fn'], $item['dep'], $this->version, true );
+				}
 
-				wp_enqueue_script( 'jquery-interdependencies', $base . 'jquery.interdependencies.min.js', array(
-					'jquery',
-					'jquery-ui-datepicker',
-					'wp-color-picker'
-				), $this->version, true );
+				// wp_enqueue_script( 'jquery-interdependencies', $base . 'jquery.interdependencies.min.js', array(
+				// 	'jquery',
+				// 	'jquery-ui-datepicker',
+				// 	'wp-color-picker'
+				// ), $this->version, true );
 
 				/**
 				 * Load classes and enqueue class scripts
@@ -865,12 +1104,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				 */
 				$this->include_enqueue_field_classes();
 
-				wp_enqueue_script( 'exopite-simple-options-framework-js', $base . 'scripts.min.js', array(
-					'jquery',
-					'jquery-ui-datepicker',
-					'wp-color-picker',
-					'jquery-interdependencies'
-				), $this->version, true );
+				// wp_enqueue_script( 'exopite-simple-options-framework-js', $base . 'scripts.min.js', array(
+				// 	'jquery',
+				// 	'jquery-ui-datepicker',
+				// 	'wp-color-picker',
+				// 	'jquery-interdependencies'
+				// ), $this->version, true );
 
 			endif; //$this->is_menu_page_loaded() || $this->is_metabox_enabled_post_type()
 
@@ -878,42 +1117,66 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		}
 
 		/*
+		 * Return the array of languages except current language
+		 *
+		 * @return array $languages_except_current
+		 *
+		 */
+		public function languages_except_current_language() {
+
+			$all_languages = $this->languages;
+
+			if ( empty( $all_languages ) ) {
+				return $all_languages;
+			}
+
+			$languages_except_current = array_diff( $all_languages, array( $this->lang_current ) );
+
+			unset( $all_languages );
+
+			return $languages_except_current;
+
+		}
+
+		/*
 		 * Save options or metabox to meta
 		 *
 		 * @return mixed
+		 *
+		 * @hooked  'save_post' for metabox
+		 * @hooked  register_setting() for menu
+		 *
 		 */
-		public function save( $fields ) {
+		public function save( $posted_data ) {
 
-			$capability = isset( $this->config['capability'] ) ? sanitize_key( $this->config['capability'] ) : 'edit_posts';
+			// $this->write_log( 'posted_data', var_export( $_POST, true ) . PHP_EOL . PHP_EOL );
+			// $this->write_log( 'posted_data', var_export( $this->unique, true ) . PHP_EOL . PHP_EOL );
 
-			if ( ! current_user_can( $capability ) ) {
+			// Is user has ability to save?
+			if ( ! current_user_can( $this->config['capability'] ) ) {
 				return null;
 			}
 
-			/**
-			 * If fields is post id then check post type
-			 * and if not the post types in settings, then return.
+			//TODO Verify nonce
+
+			$valid   = array();
+			$post_id = null;
+
+			/*
+			 * @var $section_fields_with_values it will hold the sanitized fields => value
 			 */
-			if ( ! is_array( $fields ) && is_array( $this->config['post_types'] ) ) {
+			$section_fields_with_values = array();
 
-				// Make sure its post id
-				$fields = absint( $fields );
+			// Specific to Menu Options
+			if ( $this->is_menu() ) {
 
-				if ( ! in_array( get_post_type( $fields ), $this->config['post_types'] ) ) {
-					return null;
+				/**
+				 * Import options should not be checked.
+				 */
+				if ( isset( $_POST['action'] ) && sanitize_key( $_POST['action'] ) === 'exopite-sof-import-options' ) {
+					return apply_filters( 'exopite_sof_import_options', $posted_data, $this->unique );
 				}
 
-			}
-
-//			$menu = ( $this->config['type'] == 'menu' );
-
-			if ( ! $this->is_menu() ) {
-				global $post;
-			}
-
-			$valid = array();
-
-			if ( $this->is_menu() ) {
 				// Preserve values start with "_".
 				$options = get_option( $this->unique );
 				foreach ( $options as $key => $value ) {
@@ -925,158 +1188,421 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					}
 
 				}
+
+			}
+
+			// Specific to Metabox
+			if ( $this->is_metabox() ) {
+
+//				$this->write_log( 'post_id', var_export( $posted_data, true ) . PHP_EOL . PHP_EOL );
+
+				// if this is metabox, $posted_data is post_id we are saving
+				$post_id = $posted_data;
+
+				// Stop WP from clearing custom fields on autosave
+				if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+					return null;
+				}
+
+				// Prevent quick edit from clearing custom fields
+				if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+					return null;
+				}
+
+				// If the post type is not in our post_type array, do nothing
+				if ( ! in_array( get_post_type( $post_id ), $this->config['post_types'] ) ) {
+					return null;
+				}
+				// Global $post is not required and should not be used as we already have the $post id in $posted_data
+//				global $post;
+
+
 			}
 
 			/**
-			 * Loop all fields (from options)
+			 * This must be running on post meta too because of the qTranslate-X.
+			 * Maybe check first if qTranslate-X is installed and active?
 			 */
+			// Preserve other language setting
+			// Get current field value, make sure we are not override other language values
+			if ( $this->is_multilang() ) {
+				$other_languages = $this->languages_except_current_language();
+
+				// TODO: Take care of group type as well, its hard to preserve their value
+				foreach ( $other_languages as $language ) {
+					if ( $this->is_metabox() ) {
+						// required only for qTranslate-X
+						$post_meta = get_post_meta( $post_id );
+						if ( ! empty( $post_meta ) ) {
+							$options_array_from_post_meta = maybe_unserialize( $post_meta[ $this->unique ][0] );
+							if ( is_array( $options_array_from_post_meta ) ) {
+								$section_fields_with_values[ $language ] = $options_array_from_post_meta[ $language ];
+							}
+						}
+					}
+					if ( $this->is_menu() ) {
+						$section_fields_with_values[ $language ] = $this->db_options[ $language ];
+					}
+				}
+			}
+
+			/**
+			 * Loop all fields (from $config fields array ) and update values from $_POST
+			 *
+			 * for both menu and meta
+			 */
+			$section_fields_current_lang = array();
+
 			foreach ( $this->fields as $section ) {
 
-				foreach ( $section['fields'] as $field ) {
+				// Make sure we have $fields array and get sanitized Values
+				if ( isset( $section['fields'] ) && is_array( $section['fields'] ) ) {
 
-					if ( $field['type'] == 'group' ) {
-
-						if ( isset( $field['options']['repeater'] ) && $field['options']['repeater'] ) {
-
-							$i = 0;
-
-							switch ( $this->config['type'] ) {
-								case 'menu':
-									$value_array = $fields[ $field['id'] ];
-									break;
-
-								case 'metabox':
-									$value_array = ( isset( $_POST[ $this->unique ][ $field['id'] ] ) ) ? $_POST[ $this->unique ][ $field['id'] ] : array();
-									break;
-							}
-
-							foreach ( $value_array as $field_value ) {
-
-								foreach ( $field['fields'] as $sub_field ) {
-
-									switch ( $this->config['type'] ) {
-										case 'menu':
-											$value = $field_value[ $sub_field['id'] ];
-											break;
-
-										case 'metabox':
-											$value = ( isset( $_POST[ $this->unique ][ $field['id'] ][ $i ][ $sub_field['id'] ] ) ) ? $_POST[ $this->unique ][ $field['id'] ][ $i ][ $sub_field['id'] ] : '';
-											break;
-									}
-
-
-									$valid[ $field['id'] ][ $i ][ $sub_field['id'] ] = $this->sanitize( $sub_field, $value );
-								}
-								$i ++;
-
-							}
-
-						} else {
-
-							foreach ( $field['fields'] as $sub_field ) {
-
-								switch ( $this->config['type'] ) {
-									case 'menu':
-										$value = $fields[ $field['id'] ][ $sub_field['id'] ];
-										break;
-
-									case 'metabox':
-										$value = ( isset( $_POST[ $this->unique ][ $field['id'] ][ $sub_field['id'] ] ) ) ? $_POST[ $this->unique ][ $field['id'] ][ $sub_field['id'] ] : '';
-										break;
-								}
-
-								$valid[ $field['id'] ][ $sub_field['id'] ] = $this->sanitize( $sub_field, $value );
-
-							}
-
-						}
-
-					} else {
-
-						// not group
-
-						switch ( $this->config['type'] ) {
-							case 'menu':
-								$value = $fields[ $field['id'] ];
-								break;
-
-							case 'metabox':
-								$value = ( isset( $_POST[ $this->unique ][ $field['id'] ] ) ) ? $_POST[ $this->unique ][ $field['id'] ] : '';
-								break;
-						}
-
-						$valid[ $field['id'] ] = $this->sanitize( $field, $value );
-
-					}
+					$section_fields_current_lang = array_merge(
+						$section_fields_current_lang,  // Value we currently have in the array
+						$this->get_sanitized_fields_values( $section['fields'], $posted_data ) // sanitized array we are getting
+					);
 
 				}
 
 			}
 
-			do_action( 'exopite_sof_do_save_options', $valid, $this->unique );
-			$valid = apply_filters( 'exopite_sof_save_options', $valid, $this->unique );
-			switch ( $this->config['type'] ) {
-				case 'menu':
-					$valid = apply_filters( 'exopite_sof_save_menu_options', $valid, $this->unique );
-					do_action( 'exopite_sof_do_save_menu_options', $value, $this->unique );
+			// update $section_fields_with_values with $section_fields_current_lang
+			if ( $this->is_multilang() ) {
+				$section_fields_with_values[ $this->lang_current ] = $section_fields_current_lang;
+			} else {
+				$section_fields_with_values = $section_fields_current_lang;
+			}
 
-					return $valid;
-					break;
+			// TODO: remove one set from the following set of filters + actions
+			/**
+			 * The idea here is that, this hook run on both.
+			 */
+			do_action( 'exopite_sof_do_save_options', $section_fields_with_values, $this->unique, $post_id );
+			$valid = apply_filters( 'exopite_sof_save_options', $section_fields_with_values, $this->unique, $post_id );
 
-				case 'metabox':
-					// When we click on "New Post" (CPT), then $post is not available, so we need to check if it is set
-					if ( isset( $post ) ) {
-						$valid = apply_filters( 'exopite_sof_save_meta_options', $valid, $this->unique, $post->ID );
-						do_action( 'exopite_sof_do_save_meta_options', $valid, $this->unique, $post->ID );
-						update_post_meta( $post->ID, $this->unique, $valid );
+			if ( $this->is_menu() ) {
 
-						break;
+				// update $section_fields_with_values with $section_fields_current_lang
+				// if ( $this->is_multilang() ) {
+				// 	$section_fields_with_values[ $this->lang_current ] = $section_fields_current_lang;
+				// } else {
+				// 	$section_fields_with_values = $section_fields_current_lang;
+				// }
+				// These actions and filters only for options menu
+
+				$valid = apply_filters( 'exopite_sof_save_menu_options', $section_fields_with_values, $this->unique );
+				do_action( 'exopite_sof_do_save_menu_options', $section_fields_with_values, $this->unique );
+
+				return $valid;
+			}
+
+			if ( $this->is_metabox() ) {
+
+				// When we click on "New Post" (CPT), then $post is not available, so we need to check if it is set
+				/**
+				 * NEED TESTING!
+				 * I'm not sure about this, need check. I think post ID IS available because saving custom field
+				 * should be after post is inserted.
+				 */
+				if ( isset( $post_id ) ) {
+
+					$valid = apply_filters( 'exopite_sof_save_meta_options', $section_fields_with_values, $this->unique, $post_id );
+					do_action( 'exopite_sof_do_save_meta_options', $section_fields_with_values, $this->unique, $post_id );
+					// $valid = apply_filters( 'exopite_sof_save_meta_options', $section_fields_current_lang, $this->unique, $post_id );
+					// do_action( 'exopite_sof_do_save_meta_options', $section_fields_current_lang, $this->unique, $post_id );
+//
+//
+//					$this->write_log( 'posted_data', var_export( $section_fields_current_lang, true ) . PHP_EOL );
+
+//                  TODO: Account for options = 'simple'
+					if ( $this->is_options_simple() ) {
+
+						foreach ( $valid as $key => $value ) {
+//							$meta_key = $this->unique . '_' . $key;
+
+							update_post_meta( $post_id, $key, $value );
+
+						}
+					} else {
+						update_post_meta( $post_id, $this->unique, $valid );
 					}
 
-				case 'default':
-					return null;
+//					update_post_meta( $post_id, $this->unique, $valid );
 
+				}
 
 			}
+
+			unset( $post_id, $valid, $posted_data, $section_fields_with_values, $section_fields_current_lang );
 
 		}
 
 		//DEGUB
 		public function write_log( $type, $log_line ) {
 
-			$hash        = 'ee0b589bc9c7a7ba65c46cd960764e52ca37e0ae';
-			$fn          = plugin_dir_path( __FILE__ ) . 'logs/' . $type . '-' . $hash . '.log';
+			$hash        = '';
+			$fn          = plugin_dir_path( __FILE__ ) . '/' . $type . '-' . $hash . '.log';
 			$log_in_file = file_put_contents( $fn, date( 'Y-m-d H:i:s' ) . ' - ' . $log_line . PHP_EOL, FILE_APPEND );
 
 		}
 
-		// DEBUG
 
-		/**
-		 * Validate and sanitize values
-		 *
-		 * @param $field
-		 * @param $value
-		 *
-		 * @return mixed|void
-		 */
-		public function sanitize( $field, $value ) {
+		public function get_sanitized_fields_values( $fields, $posted_data ) {
+			$sanitized_fields_data = array();
+			foreach ( $fields as $index => $field ) :
 
-			if ( ! empty( $field['sanitize'] ) ) {
 
-				$sanitize = $field['sanitize'];
+				$field_type = ( isset( $field['type'] ) ) ? $field['type'] : false;
+				$field_id   = ( isset( $field['id'] ) ) ? $field['id'] : false;
 
-				if ( function_exists( $sanitize ) ) {
-
-					$value_sanitize = isset( $value ) ? $value : '';
-
-					return call_user_func( $sanitize, $value_sanitize );
-
+				// if do not have $field_id or $field_type, we continue to next field
+				if ( ! $field_id || ! $field_type ) {
+					continue;
 				}
 
+
+				// if field is not a group
+
+				if ( $field_type !== 'group' ) {
+
+					$sanitized_fields_data[ $field['id'] ] = $this->get_sanitized_field_value_from_global_post( $field );
+
+				} // ( $field_type !== 'group' )
+
+				// If the field is group
+				if ( $field_type === 'group' ) {
+
+					$group = $field;
+
+					$group_id = ( isset( $field['id'] ) ) ? $field['id'] : false;
+
+					$group_fields = isset( $field['fields'] ) && is_array( $field['fields'] ) ? $field['fields'] : false;
+
+					// We are not processing if group_id is not there
+					if ( $group_id && $group_fields ):
+
+
+						// Normalise the group options (so we dont need to check for isset()
+						$default_group_options = $this->get_config_default_group_options();
+						$group_options         = ( isset( $group['options'] ) ) ? $group['options'] : $default_group_options;
+						$group['options']      = $group_options = wp_parse_args( $group_options, $default_group_options );
+
+						$is_repeater = ( isset( $group['options']['repeater'] ) ) ? (bool) $group['options']['repeater'] : false;
+
+
+						// If the group is NOT a repeater
+						if ( ! $is_repeater ) :
+
+
+							foreach ( $group_fields as $sub_field ) :
+
+								$sub_field_id = ( isset( $sub_field['id'] ) ) ? $sub_field['id'] : false;
+
+
+								$sanitized_fields_data[ $group_id ][ $sub_field_id ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id );;
+
+//								$this->write_log( 'posted_data', var_export( $sanitized_fields_data, true ) . PHP_EOL . PHP_EOL );
+							endforeach;
+
+
+						endif; // ( ! $is_repeater )  // If the group is a repeater
+
+						// If the group is a repeater
+						if ( $is_repeater ):
+
+							$repeater_count = 0;
+
+							if ( $this->is_multilang() ) {
+								// How many times $_POST has this
+
+								if ( $this->is_menu() ) {
+									$repeater_count = ( isset( $posted_data[ $this->lang_current ][ $group_id ] ) && is_array( $posted_data[ $this->lang_current ][ $group_id ] ) ) ? count( $posted_data[ $this->lang_current ][ $group_id ] ) : 0;
+								}
+								if ( $this->is_metabox() ) {
+									$repeater_count = ( isset( $_POST[ $this->unique ][ $this->lang_current ][ $group_id ] ) && is_array( $_POST[ $this->unique ][ $this->lang_current ][ $group_id ] ) ) ? count( $_POST[ $this->unique ][ $this->lang_current ][ $group_id ] ) : 0;
+								}
+								/**
+								 * Here you are assume multilang IS menu
+								 * not multilang IS meta.
+								 * This may incorrect.
+								 */
+								/**
+								 * This must be running on post meta too because of the qTranslate-X.
+								 * Maybe check first if qTranslate-X is installed and active?
+								 */
+								// $repeater_count = ( isset( $posted_data[ $this->lang_current ][ $group_id ] ) && is_array( $posted_data[ $this->lang_current ][ $group_id ] ) ) ? count( $posted_data[ $this->lang_current ][ $group_id ] ) : 0;
+
+								// // This code is duplicated
+								// for ( $i = 0; $i < $repeater_count; $i ++ ) {
+
+								// 	foreach ( $group_fields as $sub_field ) :
+
+								// 		$sub_field_id = ( isset( $sub_field['id'] ) ) ? $sub_field['id'] : false;
+
+								// 		// sub field id is required
+								// 		if ( ! $sub_field_id ) {
+								// 			continue;
+								// 		}
+
+								// 		$sanitized_fields_data[ $group_id ][ $i ][ $sub_field_id ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id, $i );
+
+								// 	endforeach; // $group_fields
+								// }
+							} // $this->is_multilang()
+
+							/**
+							 * ToDos:
+							 * - On simple options NEED to disable multilang! (if meta)
+							 */
+							if ( ! $this->is_multilang() ) {
+
+
+								if ( $this->is_options_simple() ) {
+
+									$repeater_count = ( isset( $_POST[ $group_id ] ) && is_array( $_POST[ $group_id ] ) ) ? count( $_POST[ $group_id ] ) : 0;
+
+								} else {
+
+									if ( $this->is_menu() ) {
+										$repeater_count = ( isset( $posted_data[ $group_id ] ) && is_array( $posted_data[ $group_id ] ) ) ? count( $posted_data[ $group_id ] ) : 0;
+									}
+									if ( $this->is_metabox() ) {
+										$repeater_count = ( isset( $_POST[ $this->unique ][ $group_id ] ) && is_array( $_POST[ $this->unique ][ $group_id ] ) ) ? count( $_POST[ $this->unique ][ $group_id ] ) : 0;
+									}
+									/**
+									 * Here you are assume multilang IS menu
+									 * not multilang IS meta.
+									 * This may incorrect.
+									 */
+									/**
+									 * This must be running on post meta too because of the qTranslate-X.
+									 * Maybe check first if qTranslate-X is installed and active?
+									 */
+									// $repeater_count = ( isset( $_POST[ $this->unique ][ $group_id ] ) && is_array( $_POST[ $this->unique ][ $group_id ] ) ) ? count( $_POST[ $this->unique ][ $group_id ] ) : 0;
+
+								}
+
+								// // This code is duplicated
+								// for ( $i = 0; $i < $repeater_count; $i ++ ) {
+
+								// 	foreach ( $group_fields as $sub_field ) :
+
+								// 		$sub_field_id = ( isset( $sub_field['id'] ) ) ? $sub_field['id'] : false;
+
+								// 		// sub field id is required
+								// 		if ( ! $sub_field_id ) {
+								// 			continue;
+								// 		}
+
+								// 		$sanitized_fields_data[ $group_id ][ $i ][ $sub_field_id ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id, $i );
+
+								// 	endforeach; // $group_fields
+								// }
+							}
+
+
+							// This code is run anyway. No need to duplicate.
+							for ( $i = 0; $i < $repeater_count; $i ++ ) {
+
+								foreach ( $group_fields as $sub_field ) :
+
+									$sub_field_id = ( isset( $sub_field['id'] ) ) ? $sub_field['id'] : false;
+
+									// sub field id is required
+									if ( ! $sub_field_id ) {
+										continue;
+									}
+
+									$sanitized_fields_data[ $group_id ][ $i ][ $sub_field_id ] = $this->get_sanitized_field_value_from_global_post( $sub_field, $group_id, $i );
+
+								endforeach; // $group_fields
+							}
+
+						endif; // ( $is_repeater )
+
+					endif; // ( ! $group_id )
+
+				} // ( $field_type === 'group' )
+
+			endforeach; // $fields array
+
+			return $sanitized_fields_data;
+
+		} //
+
+
+		/*
+		 * Get the clean value from single field
+		 *
+		 * @param array  $field
+		 * @return mixed $clean_value
+		 */
+		public function get_sanitized_field_value_from_global_post( $field, $group_id = null, $group_field_index = null ) {
+
+
+			if ( ! isset( $field['id'] ) || ! isset( $field['type'] ) ) {
+				return '';
+			} else {
+				$field_id   = $field['id'];
+				$field_type = $field['type'];
 			}
 
-			switch ( $field['type'] ) {
+			// Initialize array
+			$keys_array = array();
+
+			// Adding elements to $keys_array
+			// order matters!!!
+			if ( ! $this->is_options_simple() ) {
+				$keys_array[] = $this->unique;
+			}
+
+			if ( $this->is_multilang() ) {
+				$keys_array[] = $this->lang_current;
+			}
+
+			if ( $group_id !== null ) {
+				$keys_array[] = $group_id;
+			}
+
+			if ( $group_field_index !== null ) {
+				$keys_array[] = $group_field_index;
+			}
+
+			$keys_array[] = $field_id;
+
+
+			// Get $dirty_value from global $_POST
+			$dirty_value = $this->get_array_nested_value( $_POST, $keys_array, '' );
+
+			// TODO: account for $options type 'simple'
+//			if ( $this->config['options'] === 'simple' ) {
+//							$value = ( isset( $_POST[ $field['id'] ] ) ) ? $_POST[ $field['id'] ] : '';
+//						} else {
+//							$value = ( isset( $_POST[ $this->unique ][ $field['id'] ] ) ) ? $_POST[ $this->unique ][ $field['id'] ] : '';
+//						}
+//			}
+
+
+			$clean_value = $this->sanitize( $field, $dirty_value );
+
+			return $clean_value;
+
+		}
+
+		/*
+		 * Pass the field and value to run sanitization by type of field
+		 *
+		 * @param array $field
+		 * @param mixed $value
+		 *
+		 * $return mixed $value after sanitization
+		 */
+		public function get_sanitized_field_value_by_type( $field, $value ) {
+
+			$field_type = ( isset( $field['type'] ) ) ? $field['type'] : '';
+
+			switch ( $field_type ) {
 
 				case 'panel':
 					// no break
@@ -1092,17 +1618,25 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					// no break
 				case 'textarea':
 					// HTML and array are allowed
-					//     $value = sanitize_text_field( $value );
+					$value = esc_textarea( $value );
+					// $value = wp_kses_post( $value );
 					break;
 
 				case 'ace_editor':
-					// $value = base64_encode( $value );
+					// TODO:
+					// This is not a good idea, here we can save code
+					// like JS or CSS or even PHP
+					// depense of the use of the field
+					// this can be like "paste your google analytics code here"
+					// wp_kses_post will remove this.
+					$value = esc_textarea( $value );
+					// $value = wp_kses_post( $value );
 					break;
 
 				case 'switcher':
 					// no break
 				case 'checkbox':
-					$value = ( isset( $value ) && $value === 'yes' ) ? 'yes' : 'no';
+					$value = ( $value === 'yes' ) ? 'yes' : 'no';
 					break;
 
 				case 'range':
@@ -1114,16 +1648,51 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					if ( isset( $field['max'] ) && $value > $field['max'] ) {
 						$value = $field['max'];
 					}
-					$value = ( isset( $value ) && ! empty( $value ) && is_numeric( $value ) ) ? $value : 0;
+					$value = ( is_numeric( $value ) ) ? $value : 0;
 
 					break;
 
 				default:
-					$value = ( isset( $value ) && ! empty( $value ) ) ? sanitize_text_field( $value ) : '';
-					break;
+					$value = ( ! empty( $value ) ) ? sanitize_text_field( $value ) : '';
+
 			}
 
-			return apply_filters( 'exopite_sof_sanitize_value', $value, $this->config );
+			return $value;
+
+		}
+
+
+		/**
+		 * Validate and sanitize values
+		 *
+		 * @param $field
+		 * @param $value
+		 *
+		 * @return mixed
+		 */
+		public function sanitize( $field, $dirty_value ) {
+
+
+			$dirty_value = isset( $dirty_value ) ? $dirty_value : '';
+
+
+			// if $config array has sanitize function, then call it
+			if ( isset( $field['sanitize'] ) && ! empty( $field['sanitize'] ) && function_exists( $field['sanitize'] ) ) {
+
+
+				// TODO: in future, we can allow for sanitize functions array as well
+				$sanitize_func_name = $field['sanitize'];
+
+				$clean_value = call_user_func( $sanitize_func_name, $dirty_value );
+
+			} else {
+
+				// if $config array doe not have sanitize function, do sanitize on field type basis
+				$clean_value = $this->get_sanitized_field_value_by_type( $field, $dirty_value );
+
+			}
+
+			return apply_filters( 'exopite_sof_sanitize_value', $clean_value, $this->config );
 
 		}
 
@@ -1139,6 +1708,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				// before
 				if ( $callbacks['before'] ) {
 					call_user_func( array( $this, $callbacks['before'] ), $section );
+				}
+
+				if ( ! isset( $section['fields'] ) || ! is_array( $section['fields'] ) ) {
+					continue;
 				}
 
 				foreach ( $section['fields'] as $field ) {
@@ -1236,9 +1809,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 *
 		 * @param  array $field field args
 		 *
-		 * @return string   generated HTML for the field
+		 * @echo string   generated HTML for the field
 		 */
-		public function add_field( $field, $value = '' ) {
+		public function add_field( $field, $value = null ) {
+
 
 			do_action( 'exopite_sof_before_generate_field', $field, $this->config );
 			do_action( 'exopite_sof_before_add_field', $field, $this->config );
@@ -1277,28 +1851,101 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 				if ( empty( $value ) ) {
 
-					switch ( $this->config['type'] ) {
-						case 'menu':
-							$value = ( isset( $field['id'] ) && isset( $this->db_options[ $field['id'] ] ) ) ? $this->db_options[ $field['id'] ] : '';
-							break;
 
-						case 'metabox':
-							$value = ( isset( $field['id'] ) && isset( $this->db_options[ $field['id'] ] ) ) ? $this->db_options[ $field['id'] ] : '';
-							break;
+					if ( ( isset( $field['sub'] ) && ! empty( $field['sub'] ) ) ) {
+
+						$value = ( isset( $field['id'] ) && isset( $this->db_options[ $this->lang_current ][ $field['id'] ] ) ) ? $this->db_options[ $this->lang_current ][ $field['id'] ] : null;
+
 					}
+
+
+					if ( $this->is_menu() ) {
+
+						if ( $this->is_multilang() ) {
+							$value = ( isset( $field['id'] ) && isset( $this->db_options[ $this->lang_current ][ $field['id'] ] ) ) ? $this->db_options[ $this->lang_current ][ $field['id'] ] : null;
+						} else {
+							$value = ( isset( $field['id'] ) && isset( $this->db_options[ $field['id'] ] ) ) ? $this->db_options[ $field['id'] ] : null;
+						}
+
+					}
+
+					if ( $this->is_metabox() ) {
+
+//						TODO: Account for options= 'simple'
+
+						if ( $this->is_options_simple() ) {
+
+
+							$meta = get_post_meta( get_the_ID() );
+
+							/*
+							 * get_post_meta return empty on non existing meta
+							 * we need to check if meta key is exist to return null,
+							 * because default value can only display if value is null
+							 * on empty vlaue - may saved by the user - should display empty.
+							 */
+							if ( isset( $field['id'] ) && isset( $meta[ $field['id'] ] ) ) {
+
+								$value = array_shift( $meta[ $field['id'] ] );
+
+							} else {
+								$value = null;
+							}
+
+						} else {
+							// This is working without options simple
+							if ( $this->is_multilang() ) {
+								$meta  = get_post_meta( get_the_ID(), $this->unique, true );
+								$value = ( isset( $field['id'] ) && isset( $meta[ $this->lang_current ][ $field['id'] ] ) ) ? $meta[ $this->lang_current ][ $field['id'] ] : null;
+							} else {
+								$meta  = get_post_meta( get_the_ID(), $this->unique, true );
+								$value = ( isset( $field['id'] ) && isset( $meta[ $field['id'] ] ) ) ? $meta[ $field['id'] ] : null;
+							}
+							// $meta  = get_post_meta( get_the_ID(), $this->unique, true );
+							// $value = ( isset( $field['id'] ) && isset( $meta[ $field['id'] ] ) ) ? $meta[ $field['id'] ] : null;
+
+						}
+
+
+//						if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
+//							$meta = get_post_meta( get_the_ID() );
+//
+//							/*
+//							 * get_post_meta return empty on non existing meta
+//							 * we need to check if meta key is exist to return null,
+//							 * because default value can only display if value is null
+//							 * on empty vlaue - may saved by the user - should display empty.
+//							 */
+//							if ( isset( $field['id'] ) && isset( $meta[ $field['id'] ] ) ) {
+//								$value = get_post_meta( get_the_ID(), $field['id'], true );
+//							} else {
+//								$value = null;
+//							}
+//						} else {
+//							$meta = get_post_meta( get_the_ID() , $this->unique, true );
+//							$value = ( isset( $field['id'] ) && isset( $meta[ $field['id'] ] ) ) ? $meta[ $field['id'] ] : null;
+//						}
+
+
+						// $meta = get_post_meta( get_the_ID(), $field['id'], true );
+						// $value = ( isset( $field['id'] ) ) ? $meta : null;
+						// $value = ( isset( $field['id'] ) && isset( $this->db_options[$field['id']] ) ) ? $this->db_options[$field['id']] : null;
+					}
+
 
 				}
 
+
 				ob_start();
-				$element = new $class( $field, $value, $this->unique, $this->config['type'] );
+				$element = new $class( $field, $value, $this->unique, $this->config, $this->multilang );
 				$element->output();
 				$output .= ob_get_clean();
 
 			} else {
 
 				$output .= '<div class="danger unknown">';
-				$output .= __( 'ERROR:', 'exopite-simple-options' ) . ' ';
-				$output .= __( 'This field class is not available!', 'exopite-simple-options' );
+				$output .= esc_attr__( 'ERROR:', 'exopite-simple-options' ) . ' ';
+				$output .= esc_attr__( 'This field class is not available!', 'exopite-simple-options' );
 				$output .= ' <i>(' . $field['type'] . ')</i>';
 				$output .= '</div>';
 
@@ -1326,17 +1973,22 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function display_options_page_header() {
 
-
-			echo '<form method="post" action="options.php" enctype="multipart/form-data" name="' . $this->unique . '" class="exopite-sof-form-js ' . $this->unique . '-form" data-save="' . __( 'Saving...', 'exopite-simple-options' ) . '" data-saved="' . __( 'Saved Successfully.', 'exopite-simple-options' ) . '">';
+			echo '<form method="post" action="options.php" enctype="multipart/form-data" name="' . $this->unique . '" class="exopite-sof-form-js ' . $this->unique . '-form" data-save="' . esc_attr__( 'Saving...', 'exopite-simple-options' ) . '" data-saved="' . esc_attr__( 'Saved Successfully.', 'exopite-simple-options' ) . '">';
 
 			settings_fields( $this->unique );
 			do_settings_sections( $this->unique );
+			$current_language_title = '';
+			if ( $this->is_multilang() ) {
+				$current_language_title = apply_filters( 'exopite_sof_title_language_notice', $this->lang_current );
+				$current_language_title = ' [ ' . $current_language_title . ' ]';
+			}
+
 
 			echo '<header class="exopite-sof-header exopite-sof-header-js">';
-			echo '<h1>' . $this->config['title'] . '</h1>';
+			echo '<h1>' . $this->config['title'] . $current_language_title . '</h1>';
 
 			echo '<fieldset><span class="exopite-sof-ajax-message"></span>';
-			submit_button( __( 'Save Settings', 'exopite-simple-options' ), 'primary ' . 'exopite-sof-submit-button-js', $this->unique . '-save', false, array() );
+			submit_button( esc_attr__( 'Save Settings', 'exopite-simple-options' ), 'primary ' . 'exopite-sof-submit-button-js', $this->unique . '-save', false, array() );
 			echo '</fieldset>';
 			echo '</header>';
 
@@ -1351,7 +2003,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			echo '<footer class="exopite-sof-footer-js exopite-sof-footer">';
 
 			echo '<fieldset><span class="exopite-sof-ajax-message"></span>';
-			submit_button( __( 'Save Settings', 'exopite-simple-options' ), 'primary ' . 'exopite-sof-submit-button-js', '', false, array() );
+			submit_button( esc_attr__( 'Save Settings', 'exopite-simple-options' ), 'primary ' . 'exopite-sof-submit-button-js', '', false, array() );
 			echo '</fieldset>';
 
 			echo '</footer>';
@@ -1414,11 +2066,81 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					/**
 					 * Get options
 					 * Can not get options in __consturct, because there, the_ID is not yet available.
+					 *
+					 * Only if options is not simple, if yes, then value determinated when field are displayed.
+					 * Simple options is stored az induvidual meta key, value pair, otherwise it is stored in an array.
+					 *
+					 * I implemented this option because it is possible to search in serialized (array) post meta:
+					 * @link https://wordpress.stackexchange.com/questions/16709/meta-query-with-meta-values-as-serialize-arrays
+					 * @link https://stackoverflow.com/questions/15056407/wordpress-search-serialized-meta-data-with-custom-query
+					 * @link https://www.simonbattersby.com/blog/2013/03/querying-wordpress-serialized-custom-post-data/
+					 *
+					 * but there is no way to sort them with wp_query or SQL.
+					 * @link https://wordpress.stackexchange.com/questions/87265/order-by-meta-value-serialized-array/87268#87268
+					 * "Not in any reliable way. You can certainly ORDER BY that value but the sorting will use the whole serialized string,
+					 * which will give * you technically accurate results but not the results you want. You can't extract part of the string
+					 * for sorting within the query itself. Even if you wrote raw SQL, which would give you access to database functions like
+					 * SUBSTRING, I can't think of a dependable way to do it. You'd need a MySQL function that would unserialize the value--
+					 * you'd have to write it yourself.
+					 * Basically, if you need to sort on a meta_value you can't store it serialized. Sorry."
+					 *
+					 * It is possible to get all required posts and store them in an array and then sort them as an array,
+					 * but what if you want multiple keys/value pair to be sorted?
+					 *
+					 * UPDATE
+					 * it is maybe possible:
+					 * @link http://www.russellengland.com/2012/07/how-to-unserialize-data-using-mysql.html
+					 * but it is waaay more complicated and less documented as meta query sort and search.
+					 * It should be not an excuse to use it, but it is not as reliable as it should be.
+					 *
+					 * @link https://wpquestions.com/Order_by_meta_key_where_value_is_serialized/7908
+					 * "...meta info serialized is not a good idea. But you really are going to lose the ability to query your
+					 * data in any efficient manner when serializing entries into the WP database.
+					 *
+					 * The overall performance saving and gain you think you are achieving by serialization is not going to be noticeable to
+					 * any major extent. You might obtain a slightly smaller database size but the cost of SQL transactions is going to be
+					 * heavy if you ever query those fields and try to compare them in any useful, meaningful manner.
+					 *
+					 * Instead, save serialization for data that you do not intend to query in that nature, but instead would only access in
+					 * a passive fashion by the direct WP API call get_post_meta() - from that function you can unpack a serialized entry
+					 * to access its array properties too."
 					 */
-					$meta_options     = get_post_meta( get_the_ID(), $this->unique, true );
-					$this->db_options = apply_filters( 'exopite_sof_meta_get_options', $meta_options, $this->unique, get_the_ID() );
-					// $this->db_options = json_decode( get_post_meta( get_the_ID(), $this->unique, true ), true );
+					if ( $this->config['type'] == 'metabox' && ( ! isset( $this->config['options'] ) || $this->config['options'] != 'simple' ) ) {
+						$meta_options     = get_post_meta( get_the_ID(), $this->unique, true );
+						$this->db_options = apply_filters( 'exopite-simple-options-framework-meta-get-options', $meta_options, $this->unique, get_the_ID() );
+					}
+
+					if ( $this->debug ) {
+						echo '<pre>POST_META<br>';
+
+						$meta_options = get_post_meta( get_the_ID() );
+//						var_export( get_post_meta( get_the_ID() ) );
+						var_export( $meta_options );
+						echo '</pre>';
+					}
+
 					break;
+			}
+
+			if ( isset( $this->config['multilang'] ) && is_array( $this->config['multilang'] ) ) {
+
+				switch ( $this->config['type'] ) {
+					case 'menu':
+						$current_language = $this->config['multilang']['current'];
+						break;
+
+					case 'metabox':
+						// Pages/Posts can not have "All languages" displayed, then default will be displayed
+						$current_language = ( $this->config['multilang']['current'] == 'all' ) ? $this->config['multilang']['default'] : $this->config['multilang']['current'];
+						break;
+				}
+
+				$current_language = 'en';
+				/**
+				 * Current language need to pass to save function, if "All languages" seleted, WPML report default
+				 * on save hook.
+				 */
+				echo '<input type="hidden" name="_language" value="' . $current_language . '">';
 			}
 
 			$sections = 0;
@@ -1429,10 +2151,25 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			$tabbed = ( $sections > 1 && $this->config['tabbed'] ) ? ' exopite-sof-content-nav exopite-sof-content-js' : '';
 
+
 			// echo '<pre>';
-			// var_export( $this->db_options );
+			// var_export( $this->config );
 			// echo '</pre>';
 
+			if ( $this->debug ) {
+
+				echo '<pre>MULTILANG<br>';
+				var_export( $this->config['multilang'] );
+				echo '</pre>';
+
+				echo '<pre>DB_OPTIONS<br>';
+				var_export( $this->db_options );
+				echo '</pre>';
+
+				echo '<pre>SIMPLE:<br>';
+				var_export( $this->is_options_simple );
+				echo '</pre>';
+			}
 			/**
 			 * Generate fields
 			 */
@@ -1447,6 +2184,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					if ( $section === reset( $this->fields ) ) {
 						$active = ' active';
 					}
+//
+//					echo "<pre>";
+//					var_dump( $section);
+//					echo "</pre>";
 
 					$depend = '';
 					$hidden = '';
@@ -1469,6 +2210,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					echo '</li>';
 
 				}
+
 
 				echo '</ul></div>';
 
@@ -1501,8 +2243,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			do_action( 'exopite_sof_form_' . $this->config['type'] . '_after' );
 
-		}
+		} // display_page()
 
-	}
+
+	} //class
 
 endif;

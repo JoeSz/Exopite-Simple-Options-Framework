@@ -49,17 +49,51 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_ace_editor' ) ) {
 
 			//https://cdnjs.com/libraries/ace/
 
-			wp_enqueue_script( 'ace-editor', '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/ace.js', array( 'jquery' ), '1.2.4', true );
+//			wp_enqueue_script( 'ace-editor', '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/ace.js', array( 'jquery' ), '1.2.4', true );
+//
+//			wp_enqueue_script( 'ace-editor-language_tool', '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-language_tools.js', array( 'ace-editor' ), '1.2.4', true );
+//
+//			$script_file = 'ace-loader.min.js';
+//			$script_name = 'exopite-sof-ace-loader';
+//
+//			wp_enqueue_script( $script_name, $args['plugin_sof_url'] . 'assets/' . $script_file, array( 'ace-editor-language_tool' ), filemtime( join( DIRECTORY_SEPARATOR, array(
+//				$args['plugin_sof_path'] . 'assets',
+//				$script_file
+//			) ) ), true );
 
-			wp_enqueue_script( 'ace-editor-language_tool', '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-language_tools.js', array( 'ace-editor' ), '1.2.4', true );
+			/**
+			 * For some reason this is not working. :-O
+			 * Maybe ace.js file is corrupted? Tried to download twice.
+			 */
+			$resources = array(
+				array(
+					'name'       => 'ace-editor',
+					'fn'         => 'editors/ace/ace.js',
+					'type'       => 'script',
+					'dependency' => array( 'jquery' ),
+					'version'    => '1.2.4',
+					'attr'       => true,
+				),
+				array(
+					'name'       => 'ace-editor-language_tool',
+					'fn'         => 'editors/ace/ext-language_tools.js',
+					'type'       => 'script',
+					'dependency' => array( 'ace-editor' ),
+					'version'    => '1.2.4',
+					'attr'       => true,
+				),
+				array(
+					'name'       => 'exopite-sof-ace-loader',
+					'fn'         => 'ace-loader.min.js',
+					'type'       => 'script',
+					'dependency' => array( 'ace-editor-language_tool' ),
+					'version'    => '',
+					'attr'       => true,
+				),
 
-			$script_file = 'ace-loader.min.js';
-			$script_name = 'exopite-sof-ace-loader';
+			);
 
-			wp_enqueue_script( $script_name, $args['plugin_sof_url'] . 'assets/' . $script_file, array( 'ace-editor-language_tool' ), filemtime( join( DIRECTORY_SEPARATOR, array(
-				$args['plugin_sof_path'] . 'assets',
-				$script_file
-			) ) ), true );
+			parent::do_enqueue( $resources, $args );
 
 		}
 

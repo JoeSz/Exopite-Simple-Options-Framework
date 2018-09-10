@@ -10,8 +10,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_text' ) ) {
 
 	class Exopite_Simple_Options_Framework_Field_text extends Exopite_Simple_Options_Framework_Fields {
 
-		public function __construct( $field, $value = '', $unique = '', $where = '' ) {
-			parent::__construct( $field, $value, $unique, $where );
+		public function __construct( $field, $value = '', $unique = '', $where = '', $multilang ) {
+			parent::__construct( $field, $value, $unique, $where, $multilang );
+
 		}
 
 		public function output() {
