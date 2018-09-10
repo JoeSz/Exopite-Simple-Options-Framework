@@ -297,20 +297,20 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 						 * then skip.
 						 * (without this check group will display from other languages elements as empty)
 						 */
-						if ( is_array( $this->multilang ) ) {
-							if ( ! is_string( reset( $value ) ) && ! reset( $value )[ $this->multilang['current'] ] ) {
-								continue;
-							}
-							if ( is_string( reset( $value ) ) && $this->multilang['current'] != $this->multilang['default'] ) {
-								continue;
-							}
-						} else {
-							$first_value      = reset( $value );
-							$default_language = mb_substr( get_locale(), 0, 2 );
-							if ( isset( $first_value['multilang'] ) && ! isset( $first_value[ $default_language ] ) ) {
-								continue;
-							}
-						}
+						// if ( is_array( $this->multilang ) ) {
+						// 	if ( ! is_string( reset( $value ) ) && ! reset( $value )[ $this->multilang['current'] ] ) {
+						// 		continue;
+						// 	}
+						// 	if ( is_string( reset( $value ) ) && $this->multilang['current'] != $this->multilang['default'] ) {
+						// 		continue;
+						// 	}
+						// } else {
+						// 	$first_value      = reset( $value );
+						// 	$default_language = mb_substr( get_locale(), 0, 2 );
+						// 	if ( isset( $first_value['multilang'] ) && ! isset( $first_value[ $default_language ] ) ) {
+						// 		continue;
+						// 	}
+						// }
 
 						echo '<div class="exopite-sof-cloneable__item exopite-sof-accordion__item exopite-sof-accordion--hidden">';
 

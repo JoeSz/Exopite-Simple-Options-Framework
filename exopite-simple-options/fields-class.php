@@ -13,10 +13,16 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 	abstract class Exopite_Simple_Options_Framework_Fields {
 
-//		public $multilang;
-//		public $lang_default;
-//		public $lang_current;
-//		public $languages;
+		public $field;
+		public $value;
+		public $org_value;
+		public $unique;
+		public $config;
+		public $where;
+		public $multilang;
+		public $lang_default;
+		public $lang_current;
+		public $languages;
 
 		public function __construct( $field = array(), $value = null, $unique = '', $config = array() ) {
 
@@ -97,38 +103,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 			// for some reason this not work, maybe because abstract class
 			// $extra_multilang = ( $this->is_multilang() ) ? '[' . $this->lang_current . ']' : '';
 
-//			TODO: Accout for 'simple' options style
-//			if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
-//				$name = $this->field['id'] . $extra_multilang . $extra_name;
-//			} else {
-//				$name = $this->unique . '[' . $this->field['id'] . ']' . $extra_multilang . $extra_name;
-//			}
-
-			// Because you changed to unique, this will determinate if ti is a "sub" field. Sub field is inside group.
-//            if ( isset( $this->field['sub'] ) ) {
-//                $name = $this->unique . '[' . $this->field['id'] . ']' . $extra_name;
-//            } else {
-//                $name = $this->unique . $extra_multilang . '[' . $this->field['id'] . ']' . $extra_name;
-//            }
-
-//			if ( $this->config['is_options_simple'] ) {
-//				$parent_array = $this->field['id'];
-//			} else {
-//				$parent_array = $this->unique . '[' . $this->field['id'] . ']';
-//			}
-
 
 			// Because you changed to unique, this will determinate if ti is a "sub" field. Sub field is inside group.
 			if ( isset( $this->field['sub'] ) ) {
-
-//				if ( $this->field['is_options_simple'] ) {
-//
-//					$name = $this->field['id'] . $extra_name;
-//
-//				} else {
-//					// This is the actual
-//					$name = $this->unique . '[' . $this->field['id'] . ']' . $extra_name;
-//				}
 
 				$name = $this->unique . '[' . $this->field['id'] . ']' . $extra_name;
 
@@ -150,9 +127,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 //
 
 //
-			echo '<pre>u:<br>';
-			var_export( $this->unique );
-			echo '</pre>';
+			// echo '<pre>u:<br>';
+			// var_export( $this->unique );
+			// echo '</pre>';
 //
 //			echo '<pre>ML:<br>';
 //			var_export( $this->config );
@@ -182,7 +159,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 			$value = $this->value;
 
-			if ( empty( $value ) && isset( $this->field['default'] ) && ! empty( $this->field['default'] ) ) {
+			if ( ! isset( $value ) && isset( $this->field['default'] ) && ! empty( $this->field['default'] ) ) {
 
 				$default = $this->field['default'];
 
@@ -265,9 +242,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 			$element_id = ( isset( $this->field['id'] ) ) ? $this->field['id'] : '';
 
 			if ( $el_attributes !== false ) {
-				$sub_elemenet  = ( isset( $this->field['sub'] ) ) ? 'sub-' : '';
-				$el_attributes = ( is_string( $el_attributes ) || is_numeric( $el_attributes ) ) ? array( 'data-' . $sub_elemenet . 'depend-id' => $element_id . '_' . $el_attributes ) : $el_attributes;
-				$el_attributes = ( empty( $el_attributes ) && isset( $element_id ) ) ? array( 'data-' . $sub_elemenet . 'depend-id' => $element_id ) : $el_attributes;
+				$sub_element   = ( isset( $this->field['sub'] ) ) ? 'sub-' : '';
+				$el_attributes = ( is_string( $el_attributes ) || is_numeric( $el_attributes ) ) ? array( 'data-' . $sub_element . 'depend-id' => $element_id . '_' . $el_attributes ) : $el_attributes;
+				$el_attributes = ( empty( $el_attributes ) && isset( $element_id ) ) ? array( 'data-' . $sub_element . 'depend-id' => $element_id ) : $el_attributes;
 			}
 
 			$attributes = wp_parse_args( $attributes, $el_attributes );
@@ -290,7 +267,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 		public function element_class( $el_class = '' ) {
 
-			$field_class = '';
 			$classes     = ( isset( $this->field['class'] ) ) ? array_merge( explode( ' ', $el_class ), explode( ' ', $this->field['class'] ) ) : explode( ' ', $el_class );
 			$classes     = array_filter( $classes );
 			$field_class = implode( ' ', $classes );
@@ -314,6 +290,50 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 			}
 
 			return $result;
+
+		}
+
+		public static function do_enqueue( $styles_scripts, $args ) {
+
+			foreach ( $styles_scripts as $resource ) {
+
+				$resource_file = join( DIRECTORY_SEPARATOR, array(
+					$args['plugin_sof_path'] . 'assets',
+					$resource['fn']
+				) );
+				$resource_url  = join( '/', array(
+					untrailingslashit( $args['plugin_sof_url'] ),
+					'assets',
+					$resource['fn']
+				) );
+
+				if ( ! file_exists( $resource_file ) ) {
+					continue;
+				}
+
+				if ( ! empty( $resource['version'] ) ) {
+					$version = $resource['version'];
+				} else {
+					$version = filemtime( $resource_file );
+				}
+
+				switch ( $resource['type'] ) {
+					case 'script':
+						$function = 'wp_enqueue_script';
+						break;
+					case 'style':
+						$function = 'wp_enqueue_style';
+						break;
+					default:
+						continue;
+
+						var_dump( $resource_file);
+						 die();
+				}
+
+				$function( $resource['name'], $resource_url, $resource['dependency'], $version, $resource['attr'] );
+
+			}
 
 		}
 

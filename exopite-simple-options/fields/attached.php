@@ -69,15 +69,36 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_attached' ) ) {
 
 		public static function enqueue( $args ) {
 
-			wp_enqueue_script( 'jquery-finderselect', $args['plugin_sof_url'] . 'assets/jquery.finderSelect.min.js', array( 'jquery' ), '0.7.0', true );
+			// wp_enqueue_script( 'jquery-finderselect', $args['plugin_sof_url'] . 'assets/jquery.finderSelect.min.js', array( 'jquery' ), '0.7.0', true );
 
-			$script_file = 'loader-jquery-finderselect.min.js';
-			$script_name = 'exopite-sof-jquery-finderselect-loader';
+			// $script_file = 'loader-jquery-finderselect.min.js';
+			// $script_name = 'exopite-sof-jquery-finderselect-loader';
 
-			wp_enqueue_script( $script_name, $args['plugin_sof_url'] . 'assets/' . $script_file, array( 'jquery-finderselect' ), filemtime( join( DIRECTORY_SEPARATOR, array(
-				$args['plugin_sof_path'] . 'assets',
-				$script_file
-			) ) ), true );
+			// wp_enqueue_script( $script_name, $args['plugin_sof_url'] . 'assets/' . $script_file, array( 'jquery-finderselect' ), filemtime( join( DIRECTORY_SEPARATOR, array(
+			// 	$args['plugin_sof_path'] . 'assets',
+			// 	$script_file
+			// ) ) ), true );
+
+			$resources = array(
+				array(
+					'name'       => 'jquery-finderselect',
+					'fn'         => 'jquery.finderSelect.min.js',
+					'type'       => 'script',
+					'dependency' => array( 'jquery' ),
+					'version'    => '0.7.0',
+					'attr'       => true,
+				),
+				array(
+					'name'       => 'exopite-sof-jquery-finderselect-loader',
+					'fn'         => 'loader-jquery-finderselect.min.js',
+					'type'       => 'script',
+					'dependency' => array( 'jquery-finderselect' ),
+					'version'    => '',
+					'attr'       => true,
+				),
+			);
+
+			parent::do_enqueue( $resources, $args );
 
 		}
 
