@@ -35,9 +35,20 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_video' ) ) {
 
 			echo '<div class="exopite-sof-media exopite-sof-video exopite-sof-video-container"' . $this->element_class() . '><div class="video-wrap">';
 
+			/**
+			 * If user want only to display a video (without input field), will be never saved,
+			 * because no input. So if value is empty end input is disabled, display default.
+			 */
+			$video_url = '';
+			if ( empty( $this->element_value() ) && ( isset( $this->field['options']['input'] ) && false == $this->field['options']['input'] ) && isset( $this->field['default'] ) ) {
+				$video_url = $this->field['default'];
+			} else {
+				$video_url = $this->element_value();
+			}
+
 			if ( $this->field['options']['oembed'] ) {
 
-				echo wp_oembed_get( $this->element_value() );
+				echo wp_oembed_get( $video_url );
 
 			} else {
 
@@ -48,7 +59,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_video' ) ) {
 					$this->field['options']['controls']
 				);
 
-				echo '<video class="video-control" ' . implode( ' ', $video_atts ) . ' src="' . $this->element_value() . '"></video>';
+				echo '<video class="video-control" ' . implode( ' ', $video_atts ) . ' src="' . $video_url . '"></video>';
 
 			}
 

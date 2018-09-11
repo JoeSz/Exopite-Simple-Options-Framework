@@ -145,30 +145,30 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		public $db_options = array();
 
 
-		/*
+		/**
 		 * Sets the type to  metabox|menu
 		 * @var string
 		 */
 		private $type;
 
-		/*
+		/**
 		 * @var object WP_Error
 		 */
 		protected $errors;
 
-		/*
+		/**
 		 * @var array required fields for $type = menu
 		 */
 //		protected $required_keys_all_types = array( 'type' );
 		protected $required_keys_all_types = array();
 
 
-		/*
+		/**
 		 * @var array required fields for $type = menu
 		 */
 		protected $required_keys_menu = array( 'id', 'menu_title', 'plugin_basename' );
 
-		/*
+		/**
 		 * @var array required fields for $type = metabox
 		 */
 		protected $required_keys_metabox = array( 'id', 'post_types', 'title', 'capability' );
@@ -263,7 +263,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		}
 
-		/*
+		/**
 		 * Checks for required keys in configuration array
 		 * and throw admin error if a required key is missing
 		 */
@@ -302,7 +302,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		} //check_required_keys()
 
-		/*
+		/**
 		 * Set Properties of the class
 		 */
 		protected function set_properties() {
@@ -420,7 +420,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
 		}
 
-		/*
+		/**
 		 * Register all of the hooks shared by all $type  metabox | menu
 		 */
 		protected function define_shared_hooks() {
@@ -490,7 +490,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		}
 
-		/*
+		/**
 		 * Sets the $type property
 		 *
 		 * @param string  $config_type
@@ -514,7 +514,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		}
 
-		/*
+		/**
 		 * @return bool true if its a metabox type
 		 */
 		protected function is_metabox() {
@@ -522,7 +522,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			return ( $this->type === 'metabox' ) ? true : false;
 		}
 
-		/*
+		/**
 		 * @return bool true if its a metabox type
 		 */
 		protected function is_menu() {
@@ -530,7 +530,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			return ( $this->type === 'menu' ) ? true : false;
 		}
 
-		/*
+		/**
 		 * @return bool true if its a 'options'   => 'simple' in $config
 		 */
 		protected function is_options_simple() {
@@ -539,7 +539,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			return ( ! $this->is_menu() && isset( $this->config['options'] ) && $this->config['options'] === 'simple' ) ? true : false;
 		}
 
-		/*
+		/**
 		 * @return bool true if multilang is set to true
 		*/
 		protected function is_multilang() {
@@ -556,7 +556,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			return isset( $this->config['multilang'] ) ? $this->config['multilang'] : false;
 		}
 
-		/*
+		/**
 		 * @return bool true if its menu options
 		 */
 		protected function is_menu_page_loaded() {
@@ -568,7 +568,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		}
 
-		/*
+		/**
 		 * check if the admin screen is of the post_type defined in config
 		 * @return bool true if its menu options
 		 */
@@ -678,7 +678,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function load_classes() {
 
-			require_once 'helper-class.php';
+			require_once 'multilang-class.php';
 			require_once 'fields-class.php';
 			require_once 'upload-class.php';
 
@@ -854,7 +854,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		}
 
-		/*
+		/**
 		 * Get default config for metabox
 		 * @return array $default
 		 */
@@ -877,7 +877,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		}
 
 
-		/*
+		/**
 		 * Get default config for group type field
 		 * @return array $default
 		 */
@@ -896,7 +896,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			return apply_filters( 'exopite_sof_filter_config_default_group_array', $default );
 		}
 
-		/*
+		/**
 		 * Get default config for menu
 		 * @return array $default
 		 */
@@ -1017,7 +1017,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				return;
 			}
 
-			/*
+			/**
 			 * Load Scripts for only Menu page
 			 */
 			if ( $this->is_menu_page_loaded() ):
@@ -1026,7 +1026,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			endif; //$this->is_menu_page_loaded()
 
 
-			/*
+			/**
 			 * Load Scripts for metabox that have enabled metabox using Exopite framework
 			 */
 			if ( $this->is_metabox_enabled_post_type() ):
@@ -1035,7 +1035,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			endif; // $this->is_metabox_enabled_post_type()
 
 
-			/*
+			/**
 			 * Load Scripts shared by all $type
 			 */
 			if ( $this->is_menu_page_loaded() || $this->is_metabox_enabled_post_type() ) :
@@ -1055,7 +1055,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				}
 
 				//TODO: Remove CDN for jQuery
-				wp_enqueue_style( 'jquery-ui', $base . 'jquery-ui.css', array(), '1.8.24', 'all' );
+				/**
+				 * jquery-ui-core is built into WordPress
+				 *
+				 * @link https://developer.wordpress.org/reference/functions/wp_enqueue_script/
+				 */
+				wp_enqueue_style( 'jquery-ui-core' );
+				// wp_enqueue_style( 'jquery-ui', $base . 'jquery-ui.css', array(), '1.8.24', 'all' );
 				wp_enqueue_style( 'exopite-simple-options-framework', $base . 'styles.css', array(), $this->version, 'all' );
 
 				// Add jQuery form scripts for menu options AJAX save
@@ -1116,7 +1122,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		}
 
-		/*
+		/**
 		 * Return the array of languages except current language
 		 *
 		 * @return array $languages_except_current
@@ -1138,7 +1144,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		}
 
-		/*
+		/**
 		 * Save options or metabox to meta
 		 *
 		 * @return mixed
@@ -1162,7 +1168,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			$valid   = array();
 			$post_id = null;
 
-			/*
+			/**
 			 * @var $section_fields_with_values it will hold the sanitized fields => value
 			 */
 			$section_fields_with_values = array();
@@ -1532,7 +1538,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		} //
 
 
-		/*
+		/**
 		 * Get the clean value from single field
 		 *
 		 * @param array  $field
@@ -1590,7 +1596,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		}
 
-		/*
+		/**
 		 * Pass the field and value to run sanitization by type of field
 		 *
 		 * @param array $field
@@ -1613,6 +1619,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				case 'select':
 					// no break
 				case 'tap_list':
+					break;
 					// no break
 				case 'editor':
 					// no break
@@ -1878,7 +1885,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 							$meta = get_post_meta( get_the_ID() );
 
-							/*
+							/**
 							 * get_post_meta return empty on non existing meta
 							 * we need to check if meta key is exist to return null,
 							 * because default value can only display if value is null
@@ -2167,7 +2174,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				echo '</pre>';
 
 				echo '<pre>SIMPLE:<br>';
-				var_export( $this->is_options_simple );
+				var_export( $this->is_options_simple() );
 				echo '</pre>';
 			}
 			/**
