@@ -21,7 +21,7 @@ I created this framework for plugins and metaboxes. Not for Themes. For Themes I
 ### IMPORTANT
 * As 2018-09-11 we have a new hooks name to meet WordPress standards.
 * After multilanguage compatibility the <b>options array did changed.</b><br>
-from unique[field-id] to unique[current_lang][field-id] where:<br>
+from `unique[field-id]` to `unique[current_lang][field-id]` where:<br>
 if multilang plugin installed, then the selected language, otherwise WordPress installed language.
 
 The Framework is fully functional (accoding our tests) but the refactoring not yet done, some changes will come.
@@ -58,7 +58,7 @@ Exopite Simple Options is free and available on Github. Feel free to submit patc
 - Multilang support for WPML, Polylang, WP Multilang and qTranslate-X.
 - Availability to save post meta as simple (each setting has it's own custom field) istead of an array.
 
-#### WHY SIMPLE OPTIONS
+##### Why did we add options to save meta as "simple"
 Simple options is stored az induvidual meta key, value pair, otherwise it is stored in an array.
 
 I implemented this option because it is possible to search in serialized (array) post meta:
