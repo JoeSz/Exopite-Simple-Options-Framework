@@ -58,7 +58,7 @@ Exopite Simple Options is free and available on Github. Feel free to submit patc
 - Multilang support for WPML, Polylang, WP Multilang and qTranslate-X.
 - Availability to save post meta as simple (each setting has it's own custom field) istead of an array.
 
-##### Why did we add options to save meta as "simple"
+#### Why did we add options to save meta as "simple"
 Simple options is stored az induvidual meta key, value pair, otherwise it is stored in an array.
 
 I implemented this option because it is possible to search in serialized (array) post meta:
@@ -68,37 +68,34 @@ I implemented this option because it is possible to search in serialized (array)
 
 but there is no way to sort them with wp_query or SQL.
 
-https://wordpress.stackexchange.com/questions/87265/order-by-meta-value-serialized-array/87268#87268
-
-"Not in any reliable way. You can certainly ORDER BY that value but the sorting will use the whole serialized string,
-which will give * you technically accurate results but not the results you want. You can't extract part of the string
-for sorting within the query itself. Even if you wrote raw SQL, which would give you access to database functions like
-SUBSTRING, I can't think of a dependable way to do it. You'd need a MySQL function that would unserialize the value--
-you'd have to write it yourself.<br>
-Basically, if you need to sort on a meta_value you can't store it serialized. Sorry."
+https://wordpress.stackexchange.com/questions/87265/order-by-meta-value-serialized-array/87268#87268<br>
+> "Not in any reliable way. You can certainly ORDER BY that value but the sorting will use the whole serialized string,
+> which will give * you technically accurate results but not the results you want. You can't extract part of the string
+> for sorting within the query itself. Even if you wrote raw SQL, which would give you access to database functions like
+> SUBSTRING, I can't think of a dependable way to do it. You'd need a MySQL function that would unserialize the value--
+> you'd have to write it yourself.<br>
+> Basically, if you need to sort on a meta_value you can't store it serialized. Sorry."
 
 It is possible to get all required posts and store them in an array and then sort them as an array, but what if you want
 multiple keys/value pair to be sorted?
 
 UPDATE<br>
-it is maybe possible:
-
-http://www.russellengland.com/2012/07/how-to-unserialize-data-using-mysql.html
-
+it is maybe possible:<br>
+http://www.russellengland.com/2012/07/how-to-unserialize-data-using-mysql.html<br>
 but it is waaay more complicated and less documented as meta query sort and search.
 It should be not an excuse to use it, but it is not as reliable as it should be.
 
 https://wpquestions.com/Order_by_meta_key_where_value_is_serialized/7908<br>
-"...meta info serialized is not a good idea. But you really are going to lose the ability to query your
-data in any efficient manner when serializing entries into the WP database.
-
-The overall performance saving and gain you think you are achieving by serialization is not going to be noticeable to
-any major extent. You might obtain a slightly smaller database size but the cost of SQL transactions is going to be
-heavy if you ever query those fields and try to compare them in any useful, meaningful manner.
-
-Instead, save serialization for data that you do not intend to query in that nature, but instead would only access in
-a passive fashion by the direct WP API call get_post_meta() - from that function you can unpack a serialized entry
-to access its array properties too."
+> "...meta info serialized is not a good idea. But you really are going to lose the ability to query your
+> data in any efficient manner when serializing entries into the WP database.
+>
+> The overall performance saving and gain you think you are achieving by serialization is not going to be noticeable to
+> any major extent. You might obtain a slightly smaller database size but the cost of SQL transactions is going to be
+> heavy if you ever query those fields and try to compare them in any useful, meaningful manner.
+>
+> Instead, save serialization for data that you do not intend to query in that nature, but instead would only access in
+> a passive fashion by the direct WP API call get_post_meta() - from that function you can unpack a serialized entry
+> to access its array properties too."
 
 ### Fields:
 - ACE editor
@@ -241,7 +238,7 @@ $metabox_panel = new Exopite_Simple_Options_Framework( $config_metabox, $fields 
 Eg.:
 ```php
 $my_options = get_option('my-plugin-slug');
-if ( $my_options['my-option-name'] ) {
+if ( $my_options[$current_lang]['my-option-name'] ) {
     // code...
 }
 ```
@@ -252,7 +249,9 @@ var_export( $my_options, true );
 
 * for "meta" use:
 ```php
-$my_meta_options = get_post_meta( get_the_ID(), 'my-plugin-slug', true );
+$my_meta_options = get_post_meta( get_the_ID(), 'my-plugin-slug', true ); // array
+// -- OR as simple --
+$my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as single, type mixed
 ```
 
 ![](assets/screenshot-1.jpg)
