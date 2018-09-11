@@ -201,13 +201,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_upload' ) ) {
 				// wp_enqueue_script( 'fine-uploader', $plugin_sof_url . 'assets/fine-uploader.js', array(), '5.15.5', true );
 
 				// Style
-				wp_enqueue_style( 'fine-uploader', '//cdnjs.cloudflare.com/ajax/libs/file-uploader/5.15.5/all.fine-uploader/fine-uploader-new.min.css', array(), '5.15.5', 'all' );
+//				wp_enqueue_style( 'fine-uploader', '//cdnjs.cloudflare.com/ajax/libs/file-uploader/5.15.5/all.fine-uploader/fine-uploader-new.min.css', array(), '5.15.5', 'all' );
 
 				// Developer version
 				// wp_enqueue_script( 'fine-uploader', '//cdnjs.cloudflare.com/ajax/libs/file-uploader/5.15.5/jquery.fine-uploader/jquery.fine-uploader.js', array(), '5.15.5', true );
 
 				// Minified version
-				wp_enqueue_script( 'fine-uploader', '//cdnjs.cloudflare.com/ajax/libs/file-uploader/5.15.5/jquery.fine-uploader/jquery.fine-uploader.min.js', array(), '5.15.5', true );
+//				wp_enqueue_script( 'fine-uploader', '//cdnjs.cloudflare.com/ajax/libs/file-uploader/5.15.5/jquery.fine-uploader/jquery.fine-uploader.min.js', array(), '5.15.5', true );
 
 				$script_file = 'loader-fine-uploader.min.js';
 				$script_name = 'exopite-sof-fine-uploader-loader';
@@ -216,6 +216,35 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_upload' ) ) {
 					$args['plugin_sof_path'] . 'assets',
 					$script_file
 				) ) ), true );
+
+				$resources = array(
+					array(
+						'name'       => 'fine-uploader',
+						'fn'         => 'fine-uploader-new.min.css',
+						'type'       => 'style',
+						'dependency' => array(),
+						'version'    => '5.15.5',
+						'attr'       => 'all',
+					),
+					array(
+						'name'       => 'fine-uploader',
+						'fn'         => 'jquery.fine-uploader.min.js',
+						'type'       => 'script',
+						'dependency' => array(),
+						'version'    => '5.15.5',
+						'attr'       => true,
+					),
+					array(
+						'name'       => 'exopite-sof-fine-uploader-loader',
+						'fn'         => 'loader-fine-uploader.min.js',
+						'type'       => 'script',
+						'dependency' => array( 'fine-uploader' ),
+						'version'    => '',
+						'attr'       => true,
+					),
+				);
+
+				parent::do_enqueue( $resources, $args );
 
 			}
 
