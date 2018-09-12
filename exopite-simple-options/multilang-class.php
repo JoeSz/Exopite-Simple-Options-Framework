@@ -190,6 +190,15 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 			$multilang = self::get_language_defaults();
 
 			return $multilang['current'];
+
+		}
+
+		public static function get_default_language_code() {
+
+			$multilang = self::get_language_defaults();
+
+			return $multilang['default'];
+
 		}
 
 	}
