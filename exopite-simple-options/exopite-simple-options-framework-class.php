@@ -125,6 +125,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public $fields = array();
 
+		public $is_multilang = null;
+
 		public $multilang = false;
 		public $lang_default;
 		public $lang_current;
@@ -133,7 +135,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		public $version = '1.0';
 
-		public $debug = false;
+		public $debug = true;
 
 		/**
 		 *
@@ -307,14 +309,21 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		protected function set_properties() {
 
+
 			if ( isset( $this->config['type'] ) ) {
 				$this->set_type( $this->config['type'] );
 			}
+
 
 			// Parse the configuration against default values for Menu
 			if ( $this->is_menu() ) {
 				$default_menu_config = $this->get_config_default_menu();
 				$this->config        = wp_parse_args( $this->config, $default_menu_config );
+
+				// override option type to nullify 'simple' even if added
+				$this->config['options'] = ''; // so, even if options is 'simple', we make it non-simple
+
+
 			}
 
 			// Parse the configuration against default values for Metabox
@@ -322,7 +331,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$default_metabox_config = $this->get_config_default_metabox();
 				$this->config           = wp_parse_args( $this->config, $default_metabox_config );
 
+				// override multilang true so that we dont save meta for language
+				// We will account for qTran later
+				$this->config['multilang'] = false; // so, even if multilingual was TRUE, we make it FALSE
+
 			}
+
+			$this->set_is_multilang_from_config();
 
 			$this->config['is_options_simple'] = ( $this->is_options_simple() ) ? true : false;
 
@@ -493,7 +508,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		/**
 		 * Sets the $type property
 		 *
-		 * @param string  $config_type
+		 * @param string $config_type
 		 */
 		protected function set_type( $config_type ) {
 
@@ -539,10 +554,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			return ( ! $this->is_menu() && isset( $this->config['options'] ) && $this->config['options'] === 'simple' ) ? true : false;
 		}
 
-		/**
-		 * @return bool true if multilang is set to true
-		*/
-		protected function is_multilang() {
+		protected function set_is_multilang_from_config() {
+
+			/**
+			 * We need to store the value from $config to a property, so that we can keep track of the actual input
+			 */
 
 			/**
 			 * Make sure if metabox and simple options are activated,
@@ -550,10 +566,23 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			 * Enabled multilang is only required for qTranslate-X.
 			 */
 			if ( $this->is_metabox() && $this->is_options_simple() ) {
-				return false;
+				$this->is_multilang = $this->config['is_multilang'] = false;
 			}
 
-			return isset( $this->config['multilang'] ) ? $this->config['multilang'] : false;
+			$this->is_multilang = $this->config['is_multilang'] = isset( $this->config['multilang'] ) && ( $this->config['multilang'] === true ) ? true : false;
+
+		}
+
+
+		/**
+		 * @return bool true if multilang is set to true
+		 */
+		protected function is_multilang() {
+
+
+			return $this->is_multilang;
+
+
 		}
 
 		/**
@@ -1006,6 +1035,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function load_scripts_styles( $hook ) {
 
+//			var_dump( $this->config); die();
+//			var_dump( $this->is_multilang() ); die();
 			/**
 			 * Ideas:
 			 * - split JS to (metabox and menu) and menu -> not all scripts are required for metabox
@@ -1155,8 +1186,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function save( $posted_data ) {
 
-			// $this->write_log( 'posted_data', var_export( $_POST, true ) . PHP_EOL . PHP_EOL );
-			// $this->write_log( 'posted_data', var_export( $this->unique, true ) . PHP_EOL . PHP_EOL );
+//			$this->write_log( 'posted_data', var_export( $_POST, true ) . PHP_EOL . PHP_EOL );
+//			$this->write_log( 'posted_data', var_export( $this->config, true ) . PHP_EOL . PHP_EOL );
 
 			// Is user has ability to save?
 			if ( ! current_user_can( $this->config['capability'] ) ) {
@@ -1231,7 +1262,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			 */
 			// Preserve other language setting
 			// Get current field value, make sure we are not override other language values
+
+
 			if ( $this->is_multilang() ) {
+
+
 				$other_languages = $this->languages_except_current_language();
 
 				// TODO: Take care of group type as well, its hard to preserve their value
@@ -1541,7 +1576,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		/**
 		 * Get the clean value from single field
 		 *
-		 * @param array  $field
+		 * @param array $field
+		 *
 		 * @return mixed $clean_value
 		 */
 		public function get_sanitized_field_value_from_global_post( $field, $group_id = null, $group_field_index = null ) {
@@ -1620,7 +1656,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					// no break
 				case 'tap_list':
 					break;
-					// no break
+				// no break
 				case 'editor':
 					// no break
 				case 'textarea':
@@ -2175,6 +2211,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 				echo '<pre>SIMPLE:<br>';
 				var_export( $this->is_options_simple() );
+				echo '</pre>';
+
+				echo '<pre>IS_MULTILANG<br>';
+				var_export( $this->is_multilang() );
 				echo '</pre>';
 			}
 			/**
