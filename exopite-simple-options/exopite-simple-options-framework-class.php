@@ -135,7 +135,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		public $version = '1.0';
 
-		public $debug = true;
+		public $debug = false;
 
 		/**
 		 *
@@ -199,9 +199,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			$this->check_required_configuration_keys();
 
-			$this->set_properties();
 
 			$this->load_classes();
+
+			$this->set_properties();
 
 			$this->setup_multilang();
 
@@ -213,6 +214,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 
 		}
+
 
 		protected function setup_multilang() {
 
@@ -251,6 +253,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			// Srt Defaults for all cases
 			$multilang_defaults = Exopite_Simple_Options_Framework_Helper::get_language_defaults();
+
 
 			if ( is_array( $multilang_defaults ) ) {
 
@@ -331,9 +334,19 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$default_metabox_config = $this->get_config_default_metabox();
 				$this->config           = wp_parse_args( $this->config, $default_metabox_config );
 
-				// override multilang true so that we dont save meta for language
-				// We will account for qTran later
-				$this->config['multilang'] = false; // so, even if multilingual was TRUE, we make it FALSE
+
+				// This override s done for testing active plugin for qTranX and Wp-Multilang
+				if ( $this->is_special_multilang_active() ) {
+
+					$this->config['multilang'] = true; // so, even if multilingual was TRUE, we make it FALSE
+					$this->config['options']   = false; // We can only save data for special languages in non-simple options
+
+				} else {
+					// override multilang true so that we dont save meta for language
+					$this->config['multilang'] = false; // so, even if multilingual was TRUE, we make it FALSE
+
+				}
+
 
 			}
 
@@ -383,6 +396,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		}
 
+
+		public function is_special_multilang_active() {
+
+			return Exopite_Simple_Options_Framework_Helper::is_special_multilang_plugin_active();
+
+		}
 
 		public function get_array_nested_value( array $main_array, array $keys_array, $default_value = null ) {
 
@@ -1269,11 +1288,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 				$other_languages = $this->languages_except_current_language();
 
-				// TODO: Take care of group type as well, its hard to preserve their value
 				foreach ( $other_languages as $language ) {
+
 					if ( $this->is_metabox() ) {
 						// required only for qTranslate-X
 						$post_meta = get_post_meta( $post_id );
+
 						if ( ! empty( $post_meta ) ) {
 							$options_array_from_post_meta = maybe_unserialize( $post_meta[ $this->unique ][0] );
 							if ( is_array( $options_array_from_post_meta ) ) {
@@ -1281,6 +1301,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 							}
 						}
 					}
+
+
 					if ( $this->is_menu() ) {
 						$section_fields_with_values[ $language ] = $this->db_options[ $language ];
 					}
@@ -2205,17 +2227,22 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				var_export( $this->config['multilang'] );
 				echo '</pre>';
 
-				echo '<pre>DB_OPTIONS<br>';
-				var_export( $this->db_options );
-				echo '</pre>';
-
-				echo '<pre>SIMPLE:<br>';
+				echo '<pre>IS_SIMPLE:<br>';
 				var_export( $this->is_options_simple() );
 				echo '</pre>';
 
 				echo '<pre>IS_MULTILANG<br>';
 				var_export( $this->is_multilang() );
 				echo '</pre>';
+
+				echo '<pre>IS_SPECIAL_MULTILANG_PLUGIN_ACTIVE<br>';
+				var_export( $this->is_special_multilang_active() );
+				echo '</pre>';
+
+				echo '<pre>DB_OPTIONS<br>';
+				var_export( $this->db_options );
+				echo '</pre>';
+
 			}
 			/**
 			 * Generate fields
