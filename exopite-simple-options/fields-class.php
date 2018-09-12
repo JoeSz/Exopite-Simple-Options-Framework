@@ -23,16 +23,18 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 		public $lang_default;
 		public $lang_current;
 		public $languages;
+		public $is_multilang;
 
 		public function __construct( $field = array(), $value = null, $unique = '', $config = array() ) {
 
-			$this->field     = $field;
-			$this->value     = $value;
-			$this->org_value = $value;
-			$this->unique    = $unique;
-			$this->config    = $config;
-			$this->where     = ( isset( $this->config['type'] ) ) ? $this->config['type'] : '';
-			$this->multilang = ( isset( $this->config['multilang'] ) ) ? $this->config['multilang'] : false;
+			$this->field        = $field;
+			$this->value        = $value;
+			$this->org_value    = $value;
+			$this->unique       = $unique;
+			$this->config       = $config;
+			$this->where        = ( isset( $this->config['type'] ) ) ? $this->config['type'] : '';
+			$this->multilang    = ( isset( $this->config['multilang'] ) ) ? $this->config['multilang'] : false;
+			$this->is_multilang = ( isset( $this->config['is_multilang'] ) ) ? (bool) $this->config['is_multilang'] : false;
 
 			$this->lang_default = ( $this->multilang && isset( $this->multilang['default'] ) ) ? $this->multilang['default'] : mb_substr( get_locale(), 0, 2 );
 			$this->lang_current = ( $this->multilang && isset( $this->multilang['current'] ) ) ? $this->multilang['current'] : $this->lang_default;
@@ -62,7 +64,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 			// }
 
 			// We should have received multilang as well together with $this->config['multilang']
-			return ( isset( $this->config['multilang'] ) && is_array( $this->config['multilang'] ) ) ? true : false;
+//			return ( isset( $this->config['multilang'] ) && is_array( $this->config['multilang'] ) ) ? true : false;
+
+			return $this->is_multilang;
 
 		}
 
@@ -98,8 +102,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 		public function element_name( $extra_name = '' ) {
 
-
-			$extra_multilang = ( isset( $this->config['multilang'] ) && is_array( $this->config['multilang'] ) ) ? '[' . $this->lang_current . ']' : '';
+			$extra_multilang = ( isset( $this->config['is_multilang'] ) && ( $this->config['is_multilang'] === true ) ) ? '[' . $this->lang_current . ']' : '';
 			// for some reason this not work, maybe because abstract class
 			// $extra_multilang = ( $this->is_multilang() ) ? '[' . $this->lang_current . ']' : '';
 
@@ -126,10 +129,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 //
 
-//
-			// echo '<pre>u:<br>';
-			// var_export( $this->unique );
-			// echo '</pre>';
+////
+//			 echo '<pre>u:<br>';
+//			 var_export( $this->unique );
+//			 echo '</pre>';
 //
 //			echo '<pre>ML:<br>';
 //			var_export( $this->config );
@@ -147,9 +150,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 //			var_export( $this->value );
 //			echo '</pre>';
 
-//			echo '<pre>Parent Array:<br>';
-//			var_export( $parent_array );
-//			echo '</pre>';
 
 			return ( ! empty( $this->unique ) ) ? $name : '';
 
@@ -327,8 +327,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 					default:
 						continue;
 
-						var_dump( $resource_file);
-						 die();
 				}
 
 				$function( $resource['name'], $resource_url, $resource['dependency'], $version, $resource['attr'] );

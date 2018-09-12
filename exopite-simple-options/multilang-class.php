@@ -13,6 +13,59 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 
 	class Exopite_Simple_Options_Framework_Helper {
 
+
+		public static function get_active_multilang_plugins() {
+
+			// Including file library if not exist
+			if ( ! function_exists( 'is_plugin_active' ) ) {
+
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+			}
+
+			$language_plugins_active = array();
+
+			// List Plugins in priority order
+
+			$language_plugins_active[] = ( is_plugin_active( 'sitepress-multilingual-cms/sitepress.php' ) && class_exists( 'SitePress' ) ) ? 'wpml' : false;
+			// polylang : https://wordpress.org/plugins/polylang/
+			$language_plugins_active[] = ( is_plugin_active( 'polylang/polylang.php' ) && class_exists( 'Polylang' ) ) ? 'polylang' : false;
+			// qTranX : https://wordpress.org/plugins/qtranslate-x/
+			$language_plugins_active[] = ( is_plugin_active( 'qtranslate-x/qtranslate.php' ) && function_exists( 'qtranxf_getSortedLanguages' ) ) ? 'qtran' : false;
+			// Wp Multilang : https://wordpress.org/plugins/wp-multilang/
+			$language_plugins_active[] = ( is_plugin_active( 'wp-multilang/wp-multilang.php' ) && function_exists( 'wpm_get_user_language' ) ) ? 'wpm' : false;
+
+			return apply_filters( 'exopite_sof_active_multilang_plugins', $language_plugins_active );
+
+		}
+
+
+		public static function is_special_multilang_plugin_active() {
+
+			$language_plugins_active = self::get_active_multilang_plugins();
+
+			if ( ! empty( $language_plugins_active ) ) {
+
+				$special_plugins = apply_filters( 'exopite_sof_special_multilang_plugins', array(
+					'qtran', // for qtranslateX
+					'wpm' // wp-multilang
+				) );
+
+
+				foreach ( $special_plugins as $special_plugin ) {
+					if ( in_array( $special_plugin, $language_plugins_active ) ) {
+						return true;
+					}
+				}
+			}
+
+
+			return false;
+
+
+		}
+
+
 		/**
 		 * Get language defaults
 		 *
@@ -28,8 +81,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 			if ( ! $enabled ) {
 				return false;
 			}
-			$multilang               = array();
-			$language_plugins_active = array();
+			$multilang = array();
 
 			// Fallbacks
 			$default                = mb_substr( get_locale(), 0, 2 );
@@ -39,19 +91,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 
 			// List Plugins in priority order
 
-			$language_plugins_active[] = ( class_exists( 'SitePress' ) ) ? 'wpml' : false;
-			// polylang : https://wordpress.org/plugins/polylang/
-			$language_plugins_active[] = ( class_exists( 'Polylang' ) ) ? 'polylang' : false;
-			// qTranX : https://wordpress.org/plugins/qtranslate-x/
-			$language_plugins_active[] = ( function_exists( 'qtranxf_getSortedLanguages' ) ) ? 'qtran' : false;
-			// Wp Multilang : https://wordpress.org/plugins/wp-multilang/
-			$language_plugins_active[] = ( function_exists( 'wpm_get_user_language' ) ) ? 'wpm' : false;
+			$language_plugins_active = self::get_active_multilang_plugins();
 
 			// Get only non-false values
 			$language_plugins_active = array_filter( $language_plugins_active );
 
 			// get the first element priority of language plugins
-			$language_plugin_priority = array_shift( $language_plugins_active );
+			$language_plugin_priority = ( is_array( $language_plugins_active ) ) ? array_shift( $language_plugins_active ) : array();
 
 			if ( ! empty( $language_plugin_priority ) && is_string( $language_plugin_priority ) ) {
 
@@ -121,7 +167,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 
 						$multilang['default']   = wpm_get_default_language();
 						$multilang['current']   = wpm_get_user_language();
-						$multilang['languages'] = array_keys( wpm_get_languages());
+						$multilang['languages'] = array_keys( wpm_get_languages() );
 
 						break;
 
@@ -144,6 +190,15 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 			$multilang = self::get_language_defaults();
 
 			return $multilang['current'];
+
+		}
+
+		public static function get_default_language_code() {
+
+			$multilang = self::get_language_defaults();
+
+			return $multilang['default'];
+
 		}
 
 	}

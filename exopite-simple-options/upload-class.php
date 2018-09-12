@@ -26,6 +26,15 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 
 		}
 
+		//DEGUB
+		public static function write_log( $type, $log_line ) {
+
+			$hash        = '';
+			$fn          = plugin_dir_path( __FILE__ ) . '/' . $type . '-' . $hash . '.log';
+			$log_in_file = file_put_contents( $fn, date( 'Y-m-d H:i:s' ) . ' - ' . $log_line . PHP_EOL, FILE_APPEND );
+
+		}
+
 		/**
 		 * Handle Response
 		 *
@@ -37,7 +46,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 
 			// file_put_contents( dirname(__FILE__) . '\test.log', var_export( $_POST, true ) . PHP_EOL . PHP_EOL, FILE_APPEND );
 
-			if ( $_POST['_method'] == 'DELETE' && isset( $_POST['qquuid'] ) ) {
+			if ( strtoupper( sanitize_key( $_POST['_method'] ) ) == 'DELETE' && isset( $_POST['qquuid'] ) ) {
 
 				/**
 				 * Delete file on AJAX request with qquuid
@@ -47,7 +56,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 				 */
 				$result = self::file_delete();
 
-				$protocol = ( isset( $_SERVER['SERVER_PROTOCOL'] ) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0' );
+//				$protocol = ( isset( $_SERVER['SERVER_PROTOCOL'] ) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0' );
+				$protocol = wp_get_server_protocol();
 
 				header( $protocol . $result );
 
@@ -68,9 +78,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 
 			$deleted = array();
 
-			if ( isset( $_POST['media-ids'] ) ) {
+			if ( isset( $_POST['media-ids'] ) && is_array( $_POST['media-ids'] ) ) {
 
-				foreach ( $_POST['media-ids'] as $attachmentid ) {
+				// Sanitize attachment ids, these should be absint
+				$attachment_id_array = array_map( 'absint', $_POST['media-ids'] );
+
+
+				foreach ( $attachment_id_array as $attachmentid ) {
 
 					$deleted_item = wp_delete_attachment( $attachmentid, true );
 					$deleted[]    = $deleted_item->ID;
@@ -85,7 +99,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 
 		public static function file_delete() {
 
-			/*
+			/**
 			 * Query attachments
 			 *
 			 * @link https://gist.github.com/BronsonQuick/1971067
@@ -161,7 +175,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 				$attachment = self::add_attachment( $movefile['url'], $movefile['file'] );
 
 				// Add qquuid for possibility to delete with AJAX fine uploader
-				update_post_meta( $attachment, 'qquuid', $_POST['qquuid'] );
+				update_post_meta( $attachment, 'qquuid', sanitize_text_field( $_POST['qquuid'] ) );
 
 				// Generate ALT attribute based on file name
 				$alt = substr( $_FILES['qqfile']['name'], 0, strrpos( $_FILES['qqfile']['name'], "." ) );
