@@ -53,19 +53,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 		*/
 		public function is_multilang() {
 
-			// echo '<pre>IS_M<br>';
-			// var_export( $this->multilang );
-			// echo '</pre>';
-
-			// if ( is_array( $this->config['multilang'] ) ) {
-			//     echo "1<br>";
-			// } else {
-			//     echo "2<br>";
-			// }
-
-			// We should have received multilang as well together with $this->config['multilang']
-//			return ( isset( $this->config['multilang'] ) && is_array( $this->config['multilang'] ) ) ? true : false;
-
 			return $this->is_multilang;
 
 		}
@@ -106,12 +93,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 			// for some reason this not work, maybe because abstract class
 			// $extra_multilang = ( $this->is_multilang() ) ? '[' . $this->lang_current . ']' : '';
 
-
-			// Because you changed to unique, this will determinate if ti is a "sub" field. Sub field is inside group.
+			// Because we changed to unique, this will determinate if it is a "sub" field. Sub field is inside group.
 			if ( isset( $this->field['sub'] ) ) {
 
 				$name = $this->unique . '[' . $this->field['id'] . ']' . $extra_name;
-
 
 			} else {
 
@@ -126,30 +111,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 
 			}
-
-//
-
-////
-//			 echo '<pre>u:<br>';
-//			 var_export( $this->unique );
-//			 echo '</pre>';
-//
-//			echo '<pre>ML:<br>';
-//			var_export( $this->config );
-//			echo '</pre>';
-//
-//			echo '<pre>FIELD:<br>';
-//			var_export( $this->field );
-//			echo '</pre>';
-//////
-//			echo '<pre>NAME:<br>';
-//			var_export( $name );
-//			echo '</pre>';
-////////
-//			echo '<pre>VALUE:<br>';
-//			var_export( $this->value );
-//			echo '</pre>';
-
 
 			return ( ! empty( $this->unique ) ) ? $name : '';
 
@@ -275,11 +236,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 		}
 
-		public function checked( $helper = '', $current = '', $type = 'checked', $echo = false ) {
+		public function checked( $value = '', $current = '', $type = 'checked', $echo = false ) {
 
-			if ( is_array( $helper ) && in_array( $current, $helper ) ) {
+			$value = maybe_unserialize( $value );
+			if ( is_array( $value ) && in_array( $current, $value ) ) {
 				$result = ' ' . $type . '="' . $type . '"';
-			} else if ( $helper == $current ) {
+			} else if ( $value == $current ) {
 				$result = ' ' . $type . '="' . $type . '"';
 			} else {
 				$result = '';
