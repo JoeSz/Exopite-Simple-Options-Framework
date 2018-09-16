@@ -12,15 +12,15 @@
 if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_backup' ) ) {
 	class Exopite_Simple_Options_Framework_Field_backup extends Exopite_Simple_Options_Framework_Fields {
 
-		public function __construct( $field, $value = '', $unique = '', $where = '' ) {
-			parent::__construct( $field, $value, $unique, $where );
+		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
+			parent::__construct( $field, $value, $unique, $config );
 		}
 
 		public function output() {
 
 			echo $this->element_before();
 
-			if ( $this->where == 'metabox' ) {
+			if ( $this->config['type'] == 'metabox' ) {
 
 				echo 'This item only available in menu!<br>';
 
@@ -64,15 +64,17 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_backup' ) ) {
 		/**
 		 * Encode string for backup options
 		 */
-		function encode_string( $string ) {
-			return rtrim( strtr( call_user_func( 'base' . '64' . '_encode', addslashes( gzcompress( serialize( $string ), 9 ) ) ), '+/', '-_' ), '=' );
+		function encode_string( $option ) {
+			return json_encode( $option );
+			// return rtrim( strtr( call_user_func( 'base' . '64' . '_encode', addslashes( gzcompress( serialize( $option ), 9 ) ) ), '+/', '-_' ), '=' );
 		}
 
 		/**
 		 * Decode string for backup options
 		 */
-		function decode_string( $string ) {
-			return unserialize( gzuncompress( stripslashes( call_user_func( 'base' . '64' . '_decode', rtrim( strtr( $string, '-_', '+/' ), '=' ) ) ) ) );
+		function decode_string( $option ) {
+			return json_decode( $_POST['value'], true );
+			// return unserialize( gzuncompress( stripslashes( call_user_func( 'base' . '64' . '_decode', rtrim( strtr( $option, '-_', '+/' ), '=' ) ) ) ) );
 		}
 
 		public static function enqueue( $args ) {
