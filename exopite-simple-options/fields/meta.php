@@ -10,13 +10,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_meta' ) ) {
 
 	class Exopite_Simple_Options_Framework_Field_meta extends Exopite_Simple_Options_Framework_Fields {
 
-		public function __construct( $field, $value = '', $unique = '', $where = '' ) {
-			parent::__construct( $field, $value, $unique, $where );
+		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
+			parent::__construct( $field, $value, $unique, $config );
 		}
 
 		public function output() {
 
-			if ( $this->where != 'metabox' ) {
+			if ( $this->config['type'] != 'metabox') {
 
 				echo 'This item only available in metabox!<br>';
 

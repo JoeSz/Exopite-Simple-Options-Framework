@@ -10,8 +10,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_Image' ) ) {
 
 	class Exopite_Simple_Options_Framework_Field_Image extends Exopite_Simple_Options_Framework_Fields {
 
-		public function __construct( $field, $value = '', $unique = '', $where = '' ) {
-			parent::__construct( $field, $value, $unique, $where );
+		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
+			parent::__construct( $field, $value, $unique, $config );
 		}
 
 		/**
@@ -64,7 +64,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_Image' ) ) {
 
 		public function output() {
 
-			/*
+			/**
 			 * Open WordPress Media Uploader with PHP and JavaScript
 			 *
 			 * @link https://rudrastyh.com/wordpress/customizable-media-uploader.html

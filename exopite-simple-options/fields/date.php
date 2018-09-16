@@ -10,8 +10,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_date' ) ) {
 
 	class Exopite_Simple_Options_Framework_Field_date extends Exopite_Simple_Options_Framework_Fields {
 
-		public function __construct( $field, $value = '', $unique = '', $where = '' ) {
-			parent::__construct( $field, $value, $unique, $where );
+		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
+			parent::__construct( $field, $value, $unique, $config );
 		}
 
 		public function output() {
@@ -39,16 +39,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_date' ) ) {
 		}
 
 		public static function enqueue( $args ) {
-
-			// $script_file = 'loader-datepicker.min.js';
-			// $script_name = 'exopite-sof-datepicker-loader';
-
-			// wp_enqueue_script( $script_name, $args['plugin_sof_url'] . 'assets/' . $script_file, array( 'jquery' ), filemtime( join( DIRECTORY_SEPARATOR, array(
-			// 	$args['plugin_sof_path'] . 'assets',
-			// 	$script_file
-			// ) ) ), true );
-
-			// wp_enqueue_script( 'exopite-sof-datepicker-loader', $args['plugin_sof_url'] . 'assets/loader-datepicker.min.js', array( 'wp-color-picker' ), '2.1.3', true );
 
 			$resources = array(
 				array(

@@ -6,7 +6,7 @@
  * Field: Upload
  *
  */
-/*
+/**
  * Info about JavaScript uploaders
  *
  * https://codex.wordpress.org/Function_Reference/wp_handle_upload
@@ -40,9 +40,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_upload' ) ) {
 
 	class Exopite_Simple_Options_Framework_Field_upload extends Exopite_Simple_Options_Framework_Fields {
 
-		public function __construct( $field, $value = '', $unique = '', $where = '' ) {
+		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 
-			parent::__construct( $field, $value, $unique, $where );
+			parent::__construct( $field, $value, $unique, $config );
 
 			$defaults = array(
 				'attach'                   => false,
@@ -165,7 +165,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_upload' ) ) {
 			echo 'data-filecount="' . $this->field['options']['filecount'] . '" ';
 			echo 'data-mimetypes="' . $allowed_mime_types . '" ';
 			echo 'data-maxsize="' . $maxsize . '" ';
-			echo ( $this->field['options']['attach'] && $this->where == 'metabox' ) ? 'data-postid="' . get_the_ID() . '" ' : '';
+			echo ( $this->field['options']['attach'] && $this->config['type'] == 'metabox' ) ? 'data-postid="' . get_the_ID() . '" ' : '';
 			echo 'data-ajaxurl="' . site_url( 'wp-admin/admin-ajax.php' ) . '" ';
 			echo 'data-delete-enabled="' . $this->field['options']['delete-enabled'] . '" ';
 			echo 'data-delete-force-confirm="' . $this->field['options']['delete-force-confirm'] . '" ';
@@ -194,28 +194,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_upload' ) ) {
 
 			if ( ! wp_script_is( 'fine-uploader' ) ) {
 
-				/*
+				/**
 				 * https://fineuploader.com/
 				 */
-				// If local
-				// wp_enqueue_script( 'fine-uploader', $plugin_sof_url . 'assets/fine-uploader.js', array(), '5.15.5', true );
-
-				// Style
-//				wp_enqueue_style( 'fine-uploader', '//cdnjs.cloudflare.com/ajax/libs/file-uploader/5.15.5/all.fine-uploader/fine-uploader-new.min.css', array(), '5.15.5', 'all' );
-
-				// Developer version
-				// wp_enqueue_script( 'fine-uploader', '//cdnjs.cloudflare.com/ajax/libs/file-uploader/5.15.5/jquery.fine-uploader/jquery.fine-uploader.js', array(), '5.15.5', true );
-
-				// Minified version
-//				wp_enqueue_script( 'fine-uploader', '//cdnjs.cloudflare.com/ajax/libs/file-uploader/5.15.5/jquery.fine-uploader/jquery.fine-uploader.min.js', array(), '5.15.5', true );
-
-				$script_file = 'loader-fine-uploader.min.js';
-				$script_name = 'exopite-sof-fine-uploader-loader';
-
-				wp_enqueue_script( $script_name, $args['plugin_sof_url'] . 'assets/' . $script_file, array( 'fine-uploader' ), filemtime( join( DIRECTORY_SEPARATOR, array(
-					$args['plugin_sof_path'] . 'assets',
-					$script_file
-				) ) ), true );
 
 				$resources = array(
 					array(

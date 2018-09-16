@@ -10,9 +10,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_color' ) ) {
 
 	class Exopite_Simple_Options_Framework_Field_color extends Exopite_Simple_Options_Framework_Fields {
 
-		public function __construct( $field, $value = '', $unique = '', $where = '', $multilang ) {
+		public function __construct( $field, $value = '', $unique = '', $config = array(), $multilang ) {
 
-			parent::__construct( $field, $value, $unique, $where, $multilang );
+			parent::__construct( $field, $value, $unique, $config, $multilang );
 		}
 
 		public function output() {
