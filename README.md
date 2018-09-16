@@ -3,7 +3,7 @@
 ## Fast, easy and lightweight option/metabox form generator.
 
 - Author: Joe Szalai and raoabid
-- Version: 20180911
+- Version: 20180916
 - Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 - GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 - Author URL: https://joe.szalai.org
@@ -287,6 +287,11 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as 
 
 ### CHANGELOG
 
+= 20180916 - 2018-09-16 =
+* Code clean up
+* Fix image_select and multiselect doen't save
+* Import, export using JSON encoded array
+
 = 20180911 - 2018-09-11 =
 * Multilang support for WPML, Polylang, WP Multilang and qTranslate-X
 * Major refactoring to meet WordPress standard
@@ -297,6 +302,9 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as 
 
 = 20180903 - 2018-09-03 =
 * Refactoring main class to include some helper functions (thanks to raoabid GitHub)
+
+= 20180608 - 2018-06-08 =
+* Add open section with url (...?page=[plulin-slug]&section=[the-id-of-the-section])
 
 = 20180528 - 2018-05-28 =
 * Fix footer displayed twice
