@@ -1395,37 +1395,85 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				case 'panel':
 					// no break
 				case 'notice':
-					// no break
+					/**
+					 * This fields has nothing to send
+					 */
+					break;
 				case 'image_select':
 					// no break
 				case 'select':
 					// no break
 				case 'tap_list':
+					/**
+					 * Need to check array values.
+					 */
+					// if( ! is_array( $value ) ) {
+					// 	maybe_unserialize( $value );
+					// }
+					if ( is_array( $value ) ) {
+						foreach( $value as &$item ) {
+							$item = sanitize_text_field( $item );
+						}
+					}
+
 					break;
 				case 'editor':
 					// no break
 				case 'textarea':
-					// HTML and array are allowed
-					// $value = esc_textarea( $value );
-					// $value = wp_kses_post( $value );
+					/**
+					 * HTML excepted accept <textarea>.
+					 * @link https://codex.wordpress.org/Function_Reference/wp_kses_allowed_html
+					 */
+					$allowed_html = wp_kses_allowed_html( 'post' );
+					// Remove '<textarea>' tag
+					unset ( $allowed_html['textarea'] );
+					/**
+					 * wp_kses_allowed_html return the wrong values for wp_kses,
+					 * need to change "true" -> "array()"
+					 */
+					array_walk_recursive(
+						$allowed_html,
+						function (&$value) {
+							if (is_bool($value)) {
+								$value = array();
+							}
+						}
+					);
+					// Run sanitization.
+					$value = wp_kses( $value, $allowed_html );
 					break;
 
 				case 'ace_editor':
-					// TODO:
-					// This is not a good idea, here we can save code
-					// like JS or CSS or even PHP
-					// depense of the use of the field
-					// this can be like "paste your google analytics code here"
-					// wp_kses_post will remove this.
-					// textarea will escape all ' or < (<li></li> etc...)
-					// $value = esc_textarea( $value );
-					// $value = wp_kses_post( $value );
+					/**
+					 * TODO:
+					 * This is basically also a textarea.
+					 * Here user can save code, like JS or CSS or even PHP
+					 * depense of the use of the field, this can be like
+					 * "paste your google analytics code here".
+					 *
+					 * What we could do, is escape for SQL
+					 *
+					 * esc_textarea, wp_kses or wp_kses_post will remove this.
+					 * textarea will escape all ´'´, ´"´ or ´<´ (<li></li> etc...)
+					 * $value = esc_textarea( $value );
+					 * $value = wp_kses_post( $value );
+					 */
 					break;
 
 				case 'switcher':
 					// no break
 				case 'checkbox':
-					$value = ( $value === 'yes' ) ? 'yes' : 'no';
+					/**
+					 * In theory this will be never an array.
+					 * Maybe in the future?
+					 */
+					if ( is_array( $value ) ) {
+						foreach( $value as &$item ) {
+							$item = ( $value === 'yes' ) ? 'yes' : 'no';
+						}
+					} else {
+						$value = ( $value === 'yes' ) ? 'yes' : 'no';
+					}
 					break;
 
 				case 'range':
