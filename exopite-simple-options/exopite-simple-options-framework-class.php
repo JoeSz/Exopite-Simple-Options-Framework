@@ -1129,6 +1129,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			 * Loop all fields (from $config fields array ) and update values from $_POST
 			 *
 			 * for both menu and meta
+			 *
+			 * Sanitization order:
+			 * - save
+			 * - get_sanitized_fields_values
+			 * - get_sanitized_field_value_from_global_post
+			 * - sanitize
+			 * - get_sanitized_field_value_by_type
 			 */
 			$section_fields_current_lang = array();
 
@@ -1526,7 +1533,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			}
 
-			return apply_filters( 'exopite_sof_sanitize_value', $clean_value, $this->config );
+			return apply_filters( 'exopite_sof_sanitize_value', $field, $dirty_value, $clean_value, $this->config );
 
 		}
 
