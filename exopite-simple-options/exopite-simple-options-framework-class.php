@@ -1479,13 +1479,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				case 'range':
 					// no break
 				case 'number':
+
+					$value = ( is_numeric( $value ) ) ? $value : 0;
 					if ( isset( $field['min'] ) && $value < $field['min'] ) {
 						$value = $field['min'];
 					}
 					if ( isset( $field['max'] ) && $value > $field['max'] ) {
 						$value = $field['max'];
 					}
-					$value = ( is_numeric( $value ) ) ? $value : 0;
 
 					break;
 
