@@ -1533,7 +1533,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			}
 
-			return apply_filters( 'exopite_sof_sanitize_value', $field, $dirty_value, $clean_value, $this->config );
+			return apply_filters( 'exopite_sof_sanitize_value', $dirty_value, $field, $clean_value, $this->config );
 
 		}
 
