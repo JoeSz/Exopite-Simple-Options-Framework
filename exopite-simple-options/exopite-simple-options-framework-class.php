@@ -112,7 +112,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		public $languages = array();
 
-		public $version = '1.0';
+		public $version = '20180924';
 
 		public $debug = false;
 
@@ -1465,6 +1465,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					 * $value = esc_textarea( $value );
 					 * $value = wp_kses_post( $value );
 					 */
+					$value = stripslashes( $value );
 					break;
 
 				case 'switcher':
@@ -1661,6 +1662,19 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			$wrap_class = ( ! empty( $field['wrap_class'] ) ) ? ' ' . $field['wrap_class'] : '';
 			$hidden     = ( $field['type'] == 'hidden' ) ? ' hidden' : '';
 			$sub        = ( ! empty( $field['sub'] ) ) ? 'sub-' : '';
+
+			/**
+			 * Add editor name to classes for styling purposes.
+			 */
+			if (  $field['type'] == 'editor' ) {
+
+				if ( ! isset( $field['editor'] ) || $field['editor'] == 'tinymce' ) {
+					$wrap_class .= ' exopite-sof-tinymce-editor';
+				} elseif ( isset( $field['editor'] ) && $field['editor'] == 'trumbowyg' ) {
+					$wrap_class .= ' exopite-sof-trumbowyg-editor';
+				}
+
+			}
 
 			if ( ! empty( $field['dependency'] ) ) {
 				$hidden = ' hidden';
