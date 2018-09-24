@@ -212,7 +212,9 @@ if (typeof throttle !== "function") {
             var $ajaxMessage = $(this).find('.exopite-sof-ajax-message');
             $submitButtons.val(saveButtonString).attr('disabled', true);
 
-            /*
+            tinyMCE.triggerSave();
+
+            /**
              * Ajax save submit
              *
              * @link https://www.wpoptimus.com/434/save-plugin-theme-setting-options-ajax-wordpress/
@@ -228,7 +230,6 @@ if (typeof throttle !== "function") {
                 },
 
                 error: function (data) {
-                    console.log('data: ' + data);
                     $submitButtons.val(currentButtonString).attr('disabled', false);
                     $ajaxMessage.html('Error! See console!').addClass('error show');
                 },
@@ -587,11 +588,7 @@ if (typeof throttle !== "function") {
 
         updateNameIndex: function () {
 
-            console.log('update name index');
-
             var fieldParentName = this.$element.find('.exopite-sof-cloneable__wrapper').data('name');
-
-            console.log('fieldParentName: ' + fieldParentName);
 
             // test if multilang (and option stored in array)
             var regex_multilang = new RegExp(/\[(.*?)\]\[(.*?)\]\[(.*?)\]\[(.*?)\]/, "i");
@@ -602,13 +599,10 @@ if (typeof throttle !== "function") {
 
             this.$element.find('.exopite-sof-cloneable__wrapper').find('.exopite-sof-cloneable__item').each(function (index, el) {
 
-                console.log('item: ' + index);
-
                 $(el).find('[name^="' + fieldParentName + '"]').attr('name', function () {
 
                     if (regex_multilang.test(this.name)) {
                         return this.name.replace(regex_multilang, function ($0, $1, $2, $3, $4) {
-                            console.log('case4: ' + $1 + ', ' + $2 + ', ' + $3 + ', ' + $4);
                             // [en][group][0][field]
                             var index_item = ($3 == 'REPLACEME') ? index : $3;
                             return '[' + $1 + '][' + $2 + '][' + index_item + '][' + $4 + ']';
@@ -616,7 +610,6 @@ if (typeof throttle !== "function") {
                     }
                     if (regex_array.test(this.name)) {
                         return this.name.replace(regex_array, function ($0, $1, $2, $3) {
-                            console.log('case3: ' + $1 + ', ' + $2 + ', ' + $3);
                             // [group][0][field]
                             var index_item = ($2 == 'REPLACEME') ? index : $2;
                             return '[' + $1 + '][' + index_item + '][' + $3 + ']';
@@ -624,7 +617,6 @@ if (typeof throttle !== "function") {
                     }
                     if (regex_simple.test(this.name)) {
                         return this.name.replace(regex_simple, function ($0, $1, $2) {
-                            console.log('case2: ' + $1 + ', ' + $2);
                             //[0][field]
                             var index_item = ($1 == 'REPLACEME') ? index : $1;
                             return '[' + index_item + '][' + $2 + ']';
@@ -855,9 +847,7 @@ if (typeof throttle !== "function") {
                 // Need to reorder name index, make sure, saved in the wanted order in meta
                 plugin.$container.find('.exopite-sof-accordion__item').each(function (index_item) {
                     var $name_prefix = plugin.$container.data('name');
-                    // console.log('cname1: ' + $name_prefix);
                     var $name_prefix = $name_prefix.replace('[REPLACEME]', '');
-                    // console.log('cname2: ' + $name_prefix);
                     $(this).find('[name^="' + $name_prefix + '"]').each(function () {
                         var $this_name = $(this).attr('name');
                         // Escape square brackets
@@ -966,7 +956,7 @@ if (typeof throttle !== "function") {
 
                 }).then((willImport) = {
 
-                    if (willImport) {
+                    if(willImport) {
 
                         $(this).addClass('loading');
                         $(this).prop("disabled", true);
@@ -999,7 +989,7 @@ if (typeof throttle !== "function") {
 
                 }).then((willDelete) = {
 
-                    if (willDelete) {
+                    if(willDelete) {
 
                         $(this).addClass('loading');
                         $(this).prop("disabled", true);
