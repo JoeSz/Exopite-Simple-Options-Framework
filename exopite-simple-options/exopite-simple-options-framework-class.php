@@ -1027,11 +1027,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			// $this->write_log( 'posted_data', var_export( $_POST, true ) . PHP_EOL . PHP_EOL );
 
-			/**
-			* Import options sould not be checked.
-			*/
-			if ( $_POST['action'] == 'exopite-sof-import-options' ) return apply_filters( 'exopite_sof_import_options', $posted_data, $this->unique );
-
 			// Is user has ability to save?
 			if ( ! current_user_can( $this->config['capability'] ) ) {
 				return null;
