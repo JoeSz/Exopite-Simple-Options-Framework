@@ -954,9 +954,9 @@ if (typeof throttle !== "function") {
                     buttons: true,
                     dangerMode: true,
 
-                }).then((willImport) = {
+                }).then((willImport) => {
 
-                    if(willImport) {
+                    if (willImport) {
 
                         $(this).addClass('loading');
                         $(this).prop("disabled", true);
@@ -987,9 +987,9 @@ if (typeof throttle !== "function") {
                     buttons: true,
                     dangerMode: true,
 
-                }).then((willDelete) = {
+                }).then((willDelete) => {
 
-                    if(willDelete) {
+                    if (willDelete) {
 
                         $(this).addClass('loading');
                         $(this).prop("disabled", true);
