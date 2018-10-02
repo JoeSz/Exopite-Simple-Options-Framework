@@ -3,7 +3,7 @@
 ## Fast, easy and lightweight option/metabox form generator.
 
 - Author: Joe Szalai and raoabid
-- Version: 20180930
+- Version: 20181002
 - Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 - GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 - Author URL: https://joe.szalai.org
@@ -163,7 +163,7 @@ $config_submenu = array(
     'id'                => $this->plugin_name,              // Required, meta box id,
                                                             // unique per page, to save:
                                                             // get_option( id )
-    'menu'              => 'plugins.php',                   // Required, sub page to your options page
+    'parent'            => 'plugins.php',                   // Required, sub page to your options page
     'submenu'           => true,                            // Required for submenu
     'title'             => 'Demo Admin Page',               //The name of this page
     'capability'        => 'manage_options',                // The capability needed to view the page
@@ -171,7 +171,8 @@ $config_submenu = array(
     // 'tabbed'            => false,                        // is tabbed or not
                                                             // Note: if only one section then
                                                             // Tabs are disabled.
-    'multilang'         => false                            // Disable mutilang support, default: true
+    // 'multilang'         => false                         // Disable mutilang support, default: true
+
 );
 
 /*
@@ -189,9 +190,10 @@ $config_metabox = array(
     'priority'          => 'default',
     'title'             => 'Demo Metabox',
     'capability'        => 'edit_posts',              // The capability needed to view the page
-    'tabbed'            => true,
-    'simple'            => true,                      // Save post meta as simple insted of an array
-    'multilang'         => true,                      // Multilang support, required for qTranslate-X and WP Multilang
+    // 'tabbed'            => false,                  // Add tabs or not, default true
+    // 'simple'            => true,                   // Save post meta as simple insted of an array, default false
+    // 'multilang'         => true,                   // Multilang support, required for ONLY qTranslate-X and WP Multilang
+                                                      // for WPML and Polilang leave it in default.
                                                       // default: false
 );
 
@@ -286,6 +288,9 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as 
 * exopite_sof_form_meta_after (unique)
 
 ### CHANGELOG
+
+= 20181002 - 2018-10-02 =
+* Fix import and delete options didn't work because minification error.
 
 = 20180930 - 2018-09-30 =
 * Load "non multilang" options in multilang if multilang not exist and other way arround for compatibility.
