@@ -3,7 +3,7 @@
 ## Fast, easy and lightweight option/metabox form generator.
 
 - Author: Joe Szalai and raoabid
-- Version: 20181002
+- Version: 20181015
 - Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 - GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 - Author URL: https://joe.szalai.org
@@ -288,6 +288,9 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as 
 * exopite_sof_form_meta_after (unique)
 
 ### CHANGELOG
+
+= 20181015 - 2018-10-15 =
+* Fix TinyMCE is undefinied error in save, if not enqueued.
 
 = 20181002 - 2018-10-02 =
 * Fix import and delete options didn't work because minification error.
