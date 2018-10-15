@@ -112,7 +112,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		public $languages = array();
 
-		public $version = '20181002';
+		public $version = '20181015';
 
 		public $debug = false;
 
