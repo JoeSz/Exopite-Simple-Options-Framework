@@ -140,61 +140,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 			return $value;
 
-
-			/**
-			 * Set default if not exist
-			 */
-//			if ( (
-//				     // multilang activated and multilang set to value but not in the current language
-//				     ( is_array( $this->multilang ) && isset( $this->value['multilang'] ) && ! isset( $value[ $this->multilang['current'] ] ) ) ||
-//				     // multilang is activated but still "single language" value there and not current language (either current is set or next rule apply)
-//				     ( is_array( $this->multilang ) && ! isset( $this->value['multilang'] ) && $this->multilang['current'] != $this->multilang['default'] ) ||
-//				     // value is not set
-//				     ! isset( $value )
-//			     ) &&
-//			     // and default value is set in options
-//			     isset( $this->field['default'] ) && $this->field['default'] !== ''
-//			) {
-//
-//				$default = $this->field['default'];
-//
-//				if ( is_array( $default ) ) {
-//
-//					if ( is_callable( $default['function'] ) ) {
-//						$args = ( isset( $default['args'] ) ) ? $default['args'] : '';
-//
-//						return call_user_func( $default['function'], $args );
-//					}
-//
-//				}
-//
-//				return $default;
-//
-//			}
-//
-//			if ( is_array( $this->multilang ) && isset( $this->value['multilang'] ) && is_array( $value ) ) {
-//
-//				$current = $this->multilang['current'];
-//
-//				if ( isset( $value[ $current ] ) ) {
-//					$value = $value[ $current ];
-//				} else if ( $this->multilang['current'] == $this->multilang['default'] && isset( $value[ $current ] ) ) {
-//					$value = $this->value;
-//				} else {
-//					$value = '';
-//				}
-//
-//			} else if ( is_array( $this->multilang ) && ! is_array( $value ) && ( $this->multilang['current'] != $this->multilang['default'] ) ) {
-//				$value = '';
-//			} else if ( ! is_array( $this->multilang ) && isset( $this->value['multilang'] ) && is_array( $this->value ) ) {
-//
-//				$value = array_values( $this->value );
-//				$value = $value[0];
-//
-//			}
-//
-//			return $value;
-
 		}
 
 		public function element_attributes( $el_attributes = array() ) {
