@@ -1706,7 +1706,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			if ( class_exists( $class ) ) {
 
-				if ( empty( $value ) ) {
+				if ( empty( $value ) && $value !== 0 && $value !== '0' ) {
 
 					// NEW
 
