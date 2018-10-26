@@ -1802,7 +1802,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			}
 
-			return $value;
+			return apply_filters( 'exopite_sof_field_value', $value, $this->unique, $options, $field );
 
 		}
 
