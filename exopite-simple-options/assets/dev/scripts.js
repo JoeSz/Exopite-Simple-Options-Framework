@@ -590,9 +590,9 @@ if (typeof throttle !== "function") {
 
         updateNameIndex: function () {
 
-            var fieldParentName = this.$element.find('.exopite-sof-cloneable__wrapper').data('name');
-
+            var fieldParentName = this.$element.find('.exopite-sof-cloneable__wrapper').data('name').replace("[REPLACEME]", "");
             // test if multilang (and option stored in array)
+            var regex_multilang_select = new RegExp(/\[(.*?)\]\[(.*?)\]\[(.*?)\]\[(.*?)\[(.*?)\]/, "i");
             var regex_multilang = new RegExp(/\[(.*?)\]\[(.*?)\]\[(.*?)\]\[(.*?)\]/, "i");
             // test if not multilang (and option stored in array)
             var regex_array = new RegExp(/\[(.*?)\]\[(.*?)\]\[(.*?)\]/, "i");
@@ -603,11 +603,10 @@ if (typeof throttle !== "function") {
 
                 $(el).find('[name^="' + fieldParentName + '"]').attr('name', function () {
 
-                    if (regex_multilang.test(this.name)) {
-                        return this.name.replace(regex_multilang, function ($0, $1, $2, $3, $4) {
+                    if (regex_multilang_select.test(this.name)) {
+                        return this.name.replace(regex_multilang, function ($0, $1, $2, $3, $4, $5) {
                             // options[en][group][0][field][]
-                            // options[en][group][0][field]
-                            // options[group][0][field][] (options array no multilang and select)
+                            /*
                             var index_item_second = $2;
                             var index_item_third = $3;
                             if ($2 == 'REPLACEME') {
@@ -616,7 +615,32 @@ if (typeof throttle !== "function") {
                             if ($3 == 'REPLACEME') {
                                 index_item_third = index;
                             }
+                            var index_item = ($3 == 'REPLACEME') ? index : $3;
+                            */
+                            return '[' + $1 + '][' + $2 + '][' + index + '][' + $4 + '][' + $5 + ']';
+                        });
+                    }
+
+                    if (regex_multilang.test(this.name)) {
+                        return this.name.replace(regex_multilang, function ($0, $1, $2, $3, $4) {
+                            // options[en][group][0][field]
+                            // options[group][0][field][] (options array no multilang and select)
+                            var index_item_second = $2;
+                            var index_item_third = $3;
+                            /*
+                            if ($2 == 'REPLACEME') {
+                                index_item_second = index;
+                            }
+                            if ($3 == 'REPLACEME') {
+                                index_item_third = index;
+                            }
                             // var index_item = ($3 == 'REPLACEME') ? index : $3;
+                            */
+                            if (!$4 || 0 === $4.length) {
+                                index_item_second = index;
+                            } else {
+                                index_item_third = index;
+                            }
                             return '[' + $1 + '][' + index_item_second + '][' + index_item_third + '][' + $4 + ']';
                         });
                     }
@@ -626,12 +650,17 @@ if (typeof throttle !== "function") {
                             // group[0][emails_group_callback][] (simple and select)
                             var index_item_first = $1;
                             var index_item_second = $2;
-                            if ($1 == 'REPLACEME') {
+                            if (!$3 || 0 === $3.length) {
                                 index_item_first = index;
-                            }
-                            if ($2 == 'REPLACEME') {
+                            } else {
                                 index_item_second = index;
                             }
+                            // if ($1 == 'REPLACEME') {
+                            //     index_item_first = index;
+                            // }
+                            // if ($2 == 'REPLACEME') {
+                            //     index_item_second = index;
+                            // }
                             // var index_item = ($2 == 'REPLACEME') ? index : $2;
                             return '[' + index_item_first + '][' + index_item_second + '][' + $3 + ']';
                         });
@@ -639,8 +668,8 @@ if (typeof throttle !== "function") {
                     if (regex_simple.test(this.name)) {
                         return this.name.replace(regex_simple, function ($0, $1, $2) {
                             //options[0][field]
-                            var index_item = ($1 == 'REPLACEME') ? index : $1;
-                            return '[' + index_item + '][' + $2 + ']';
+                            // var index_item = ($1 == 'REPLACEME') ? index : $1;
+                            return '[' + index + '][' + $2 + ']';
                         });
                     }
 
