@@ -263,7 +263,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 								continue;
 							}
 
-							$self->add_field( $field, $this->value[ $num ][ $field['id'] ] );
+							$value = ( isset( $this->value[ $num ][ $field['id'] ] ) ) ? $this->value[ $num ][ $field['id'] ] : '';
+
+							$self->add_field( $field, $value );
 
 						}
 
