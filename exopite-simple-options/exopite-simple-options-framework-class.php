@@ -1074,7 +1074,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				if ( $this->is_options_simple() ) {
 					$posted_data = $_POST;
 				} else {
-					$posted_data = $_POST[ $this->unique ];
+
+					if ( isset( $_POST[ $this->unique ] ) ) {
+						$posted_data = $_POST[ $this->unique ];
+					} else {
+						return false;
+					}
+
 				}
 
 				if ( $posted_data === null ) return;
