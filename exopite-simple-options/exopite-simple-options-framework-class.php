@@ -264,8 +264,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 				endforeach;
 
+				$errors_array = $this->errors->get_error_messages();
+
 				// if the errors are logged, add the admin display hook
-				if ( ! empty( $this->errors->get_error_messages() ) ) {
+				if ( ! empty( $errors_array ) ) {
 					add_action( 'admin_notices', array( $this, 'display_admin_error' ) );
 				}
 
