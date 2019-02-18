@@ -3,7 +3,7 @@
 ## Fast, easy and lightweight option/metabox form generator.
 
 - Author: Joe Szalai and raoabid
-- Version: 20181015
+- Version: 20190218
 - Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 - GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 - Author URL: https://joe.szalai.org
@@ -23,8 +23,6 @@ I created this framework for plugins and metaboxes. Not for Themes. For Themes I
 * After multilanguage compatibility the <b>options array did changed.</b><br>
 from `unique[field-id]` to `unique[current_lang][field-id]` where:<br>
 if multilang plugin installed, then the selected language, otherwise WordPress installed language.
-
-The Framework is fully functional (accoding our tests) but the refactoring not yet done, some changes will come.
 
 ### DESCRIPTION
 
@@ -288,6 +286,18 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as 
 * exopite_sof_form_meta_after (unique)
 
 ### CHANGELOG
+
+= 20190218 - 2019-02-18 =
+* Include Trumbowyg localy
+* Some bugfixes (New PHP, WordPress version and Gutenberg)
+
+
+= 20181122 - 2018-11-22 =
+* Fix name index update on drag drop and delete in gorup field.
+
+= 20181026 - 2018-10-26 =
+* Filter to override save methode. "exopite_sof_field_value"
+* Various bugfiexes.
 
 = 20181015 - 2018-10-15 =
 * Fix TinyMCE is undefinied error in save, if not enqueued.
