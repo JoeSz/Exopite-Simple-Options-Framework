@@ -232,7 +232,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 						$function = 'wp_enqueue_style';
 						break;
 					default:
-						continue;
+						continue 2;
 
 				}
 
