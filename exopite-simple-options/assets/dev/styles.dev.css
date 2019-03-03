@@ -279,6 +279,9 @@
 .exopite-sof-wrapper-metabox {
     margin: -6px -12px -12px -12px;
 }
+.block-editor-page .exopite-sof-wrapper-metabox {
+	margin: 0;
+}
 /* Image upload */
 .exopite-sof-image-preview img {
     max-width: 150px;
