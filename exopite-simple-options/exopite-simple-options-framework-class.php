@@ -114,6 +114,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		public $version;
 
+		// public $debug = true;
 		public $debug = false;
 
 		/**
@@ -1431,6 +1432,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					// no break
 				case 'select':
 					// no break
+				case 'typography':
+					// no break
 				case 'tap_list':
 					/**
 					 * Need to check array values.
@@ -1696,7 +1699,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$depend .= ' data-' . $sub . 'value="' . $field['dependency'][2] . '"';
 			}
 
-			$output .= '<div class="exopite-sof-field exopite-sof-field-' . $field['type'] . $wrap_class . $hidden . '"' . $depend . '>';
+			if ( ! isset( $field['pseudo'] ) || ! $field['pseudo'] ) {
+				$output .= '<div class="exopite-sof-field exopite-sof-field-' . $field['type'] . $wrap_class . $hidden . '"' . $depend . '>';
+			}
 
 			if ( ! empty( $field['title'] ) ) {
 
@@ -1772,9 +1777,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$output .= '</div>';
 			} // exopite-sof-fieldset
 
-			$output .= '<div class="clearfix"></div>';
-
-			$output .= '</div>'; // exopite-sof-field
+			if ( ! isset( $field['pseudo'] ) || ! $field['pseudo'] ) {
+				$output .= '<div class="clearfix"></div>';
+				$output .= '</div>'; // exopite-sof-field
+			}
 
 			do_action( 'exopite_sof_after_generate_field', $field, $this->config );
 
