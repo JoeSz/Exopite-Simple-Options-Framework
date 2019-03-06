@@ -35,6 +35,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 			$this->where        = ( isset( $this->config['type'] ) ) ? $this->config['type'] : '';
 			$this->multilang    = ( isset( $this->config['multilang'] ) ) ? $this->config['multilang'] : false;
 			$this->is_multilang = ( isset( $this->config['is_multilang'] ) ) ? (bool) $this->config['is_multilang'] : false;
+			$this->google_fonts = '';
 
 			$this->lang_default = ( $this->multilang && isset( $this->multilang['default'] ) ) ? $this->multilang['default'] : mb_substr( get_locale(), 0, 2 );
 			$this->lang_current = ( $this->multilang && isset( $this->multilang['current'] ) ) ? $this->multilang['current'] : $this->lang_default;
@@ -61,7 +62,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 		public function element_before() {
 
-			return ( isset( $this->field['before'] ) ) ? '<div class="exopite-sof-before">' . $this->field['before'] . '</div>' : '';
+			$element = 'div';
+			if ( ! isset( $field['pseudo'] ) || ! $field['pseudo'] ) {
+				$element = 'span';
+			}
+			return ( isset( $this->field['before'] ) ) ? '<' . $element . ' class="exopite-sof-before">' . $this->field['before'] . '</' . $element . '>' : '';
 
 		}
 
@@ -197,6 +202,23 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 			}
 
 			return $result;
+
+		}
+
+		public function get_google_fonts_json() {
+
+			if( empty( $this->google_fonts ) ) {
+
+				$google_fonts_json_fn = implode( DIRECTORY_SEPARATOR, array( __DIR__, 'assets', 'google-fonts.json' ) );
+
+				if ( file_exists( $google_fonts_json_fn ) ) {
+					$google_fonts_json = file_get_contents( $google_fonts_json_fn );
+					$this->google_fonts = json_decode( $google_fonts_json );
+				}
+
+			}
+
+			return $this->google_fonts;
 
 		}
 
