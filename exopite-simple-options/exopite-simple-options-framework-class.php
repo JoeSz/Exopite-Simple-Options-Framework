@@ -1852,6 +1852,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			echo '<header class="exopite-sof-header exopite-sof-header-js">';
 			echo '<h1>' . $this->config['title'] . $current_language_title . '</h1>';
 
+			echo '<span class="exopite-sof-search-wrapper"><input type="text" class="exopite-sof-search"></span>';
+
 			echo '<fieldset><span class="exopite-sof-ajax-message"></span>';
 			submit_button( esc_attr__( 'Save Settings', 'exopite-simple-options' ), 'primary ' . 'exopite-sof-submit-button-js', $this->unique . '-save', false, array() );
 			echo '</fieldset>';
