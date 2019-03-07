@@ -63,7 +63,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 		public function element_before() {
 
 			$element = 'div';
-			if ( ! isset( $field['pseudo'] ) || ! $field['pseudo'] ) {
+			if ( isset( $this->field['pseudo'] ) && $this->field['pseudo'] ) {
 				$element = 'span';
 			}
 			return ( isset( $this->field['before'] ) ) ? '<' . $element . ' class="exopite-sof-before">' . $this->field['before'] . '</' . $element . '>' : '';
