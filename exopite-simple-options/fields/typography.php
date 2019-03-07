@@ -125,6 +125,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_typography' ) ) {
                     'default' =>  ( isset( $this->field['default']['size'] ) ) ? $this->field['default']['size'] : '',
 					'before'  => 'Size ',
 					'pseudo'  => true,
+					'class' => 'font-size-js',
                 );
 
 				echo $self->add_field( $field, $value['size'] );
@@ -136,6 +137,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_typography' ) ) {
                     'default' =>  ( isset( $this->field['default']['height'] ) ) ? $this->field['default']['height'] : '',
 					'before'  => 'Height ',
 					'pseudo'  => true,
+					'class' => 'line-height-js',
                 );
 
 				echo $self->add_field( $field, $value['height'] );
@@ -147,6 +149,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_typography' ) ) {
                     'default' =>  ( isset( $this->field['default']['color'] ) ) ? $this->field['default']['color'] : '',
 					'before'  => 'Color ',
 					'pseudo'  => true,
+					'class' => 'font-color-js',
                 );
 
 				echo $self->add_field( $field, $value['color'] );
