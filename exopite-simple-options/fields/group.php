@@ -120,6 +120,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 				echo '<h4 class="exopite-sof-cloneable__title exopite-sof-accordion__title"><span class="exopite-sof-cloneable__text">' . $this->group_title . '</span>';
 				if ( $this->is_repeater ) {
 					echo '<span class="exopite-sof-cloneable--helper">';
+					echo '<i class="exopite-sof-cloneable--clone fa fa-clone disabled"></i>';
 					echo '<i class="exopite-sof-cloneable--remove fa fa-times disabled"></i>';
 					echo '</span>';
 				}
@@ -236,6 +237,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 
 						echo '<h4 class="exopite-sof-cloneable__title exopite-sof-accordion__title"><span class="exopite-sof-cloneable__text">' . $this->field['options']['group_title'] . '</span>';
 						echo '<span class="exopite-sof-cloneable--helper">';
+						echo '<i class="exopite-sof-cloneable--clone fa fa-clone"></i>';
 						echo '<i class="exopite-sof-cloneable--remove fa fa-times"></i>';
 						echo '</span>';
 						echo '</h4>';

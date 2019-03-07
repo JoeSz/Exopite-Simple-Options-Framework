@@ -225,6 +225,7 @@ if (typeof throttle !== "function") {
                 success: function () {
                     $submitButtons.val(currentButtonString).attr('disabled', false);
                     $ajaxMessage.html(savedButtonString).addClass('success show');
+                    $submitButtons.blur();
                     setTimeout(function () {
                         // $ajaxMessage.fadeOut( 400 );
                         $ajaxMessage.removeClass('show');
@@ -489,12 +490,12 @@ if (typeof throttle !== "function") {
 
 })(jQuery, window, document);
 
-/*
+/**
  * Exopite SOF Repeater
  */
 ; (function ($, window, document, undefined) {
 
-    /*
+    /**
      * A jQuery Plugin Boilerplate
      *
      * https://github.com/johndugan/jquery-plugin-boilerplate/blob/master/jquery.plugin-boilerplate.js
@@ -538,6 +539,13 @@ if (typeof throttle !== "function") {
 
                 e.preventDefault();
                 plugin.remove.call(plugin, $(this));
+
+            });
+
+            plugin.$element.on('click' + '.' + plugin._name, '.exopite-sof-cloneable--clone:not(.disabled)', function (e) {
+
+                e.preventDefault();
+                plugin.addNew.call(plugin, $(this));
 
             });
 
@@ -680,14 +688,21 @@ if (typeof throttle !== "function") {
 
         },
 
-        addNew: function () {
+        addNew: function ($element) {
 
             var $group = this.$element.parents('.exopite-sof-field-group');
 
             if ($.fn.chosen) $group.find("select.chosen").chosen("destroy");
 
-            var $muster = this.$element.find('.exopite-sof-cloneable__muster');
-            var $cloned = $muster.clone(true);
+            var is_cloned = false;
+            var $cloned = null;
+            if ($element.hasClass('exopite-sof-cloneable--clone')) {
+                $cloned = $element.parents('.exopite-sof-cloneable__item').clone(true);
+                is_cloned = true;
+            } else {
+                var $muster = this.$element.find('.exopite-sof-cloneable__muster');
+                $cloned = $muster.clone(true);
+            }
 
             /**
              * Get hidden "muster" element and clone it. Remove hidden muster classes.
@@ -695,6 +710,7 @@ if (typeof throttle !== "function") {
              * Finaly append to group.
              */
             $cloned.find('.exopite-sof-cloneable--remove').removeClass('disabled');
+            $cloned.find('.exopite-sof-cloneable--clone').removeClass('disabled');
             $cloned.removeClass('exopite-sof-cloneable__muster');
             $cloned.removeClass('exopite-sof-cloneable__muster--hidden');
             $cloned.removeClass('exopite-sof-accordion--hidden');
@@ -702,7 +718,13 @@ if (typeof throttle !== "function") {
 
             this.$element.trigger('exopite-sof-field-group-item-added-before', [$cloned, $group]);
 
-            $group.find('.exopite-sof-cloneable__wrapper').append($cloned);
+            if (is_cloned) {
+                $cloned.insertAfter($element.parents('.exopite-sof-cloneable__item'));
+            } else {
+                $group.find('.exopite-sof-cloneable__wrapper').append($cloned);
+            }
+
+            $cloned.insertAfter($element.parents('.exopite-sof-cloneable__item') );
 
             this.checkAmount();
             this.updateNameIndex();
@@ -718,6 +740,7 @@ if (typeof throttle !== "function") {
 
             // Handle dependencies.
             $cloned.exopiteSofManageDependencies('sub');
+            $cloned.find('.exopite-sof-cloneable__content').removeAttr("style").show();
 
             this.$element.trigger('exopite-sof-field-group-item-added-after', [$cloned, $group]);
         },
@@ -825,7 +848,7 @@ if (typeof throttle !== "function") {
 
 })(jQuery, window, document);
 
-/*
+/**
  * Exopite SOF Accordion
  */
 ; (function ($, window, document, undefined) {
@@ -877,7 +900,9 @@ if (typeof throttle !== "function") {
 
             plugin.$container.off().on('click' + '.' + plugin._name, '.exopite-sof-accordion__title', function (e) {
                 e.preventDefault();
-                plugin.toggleAccordion.call(plugin, $(this));
+                if (!$(e.target).hasClass('exopite-sof-cloneable--clone')) {
+                    plugin.toggleAccordion.call(plugin, $(this));
+                }
 
             });
 
@@ -945,6 +970,121 @@ if (typeof throttle !== "function") {
                     $this.addClass('exopite-sof-accordion--hidden');
                 });
 
+            }
+
+        },
+
+    };
+
+    $.fn[pluginName] = function (options) {
+        return this.each(function () {
+            if (!$.data(this, "plugin_" + pluginName)) {
+                $.data(this, "plugin_" + pluginName,
+                    new Plugin(this, options));
+            }
+        });
+    };
+
+})(jQuery, window, document);
+
+
+/**
+ * Exopite SOF Search
+ */
+; (function ($, window, document, undefined) {
+
+    var pluginName = "exopiteSofSearch";
+
+    // The actual plugin constructor
+    function Plugin(element, options) {
+
+        this.element = element;
+        this._name = pluginName;
+        this.$element = $(element);
+        this.$nav = this.$element.find('.exopite-sof-nav');
+        // this.$wrapper = $searchField.parents('.exopite-sof-wrapper');
+        // this.$container = $(element).find('.exopite-sof-accordion__wrapper').first();
+        this.isSortableCalled = false;
+        this.init();
+
+    }
+
+    Plugin.prototype = {
+
+        init: function () {
+
+            $.expr[':'].containsIgnoreCase = function (n, i, m) {
+                return jQuery(n).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
+            };
+
+            this.bindEvents();
+            console.log('search loaded');
+
+        },
+
+        // Bind events that trigger methods
+        bindEvents: function () {
+            var plugin = this;
+
+            plugin.$element.on('keyup' + '.' + plugin._name, '.exopite-sof-search', function (e) {
+                e.preventDefault();
+                plugin.doSearch.call(plugin, $(this));
+            });
+
+            plugin.$element.on('click' + '.' + plugin._name, '.exopite-sof-section-header', function (e) {
+                e.preventDefault();
+                plugin.selectSection.call(plugin, $(this));
+            });
+
+        },
+
+        // Unbind events that trigger methods
+        unbindEvents: function () {
+            this.$element.off('.' + this._name);
+        },
+        activateSection: function (activeIndex) {
+            //this.$nav
+            if (this.$nav.length > 0) {
+                this.$element.find('.exopite-sof-section-header').hide();
+                this.$element.find('.exopite-sof-nav-list li').eq(activeIndex).addClass('active');
+                this.$element.find('.exopite-sof-nav').show();
+            }
+            this.$element.find('.exopite-sof-sections .exopite-sof-section').addClass('hide');
+            this.$element.find('.exopite-sof-sections .exopite-sof-section').eq(activeIndex).removeClass('hide');
+            this.$element.find('.exopite-sof-sections').removeAttr('style');
+            this.$element.find('.exopite-sof-field h4').closest('.exopite-sof-field').not('.hidden').removeAttr('style');
+            this.$element.find('.exopite-sof-field-card').removeAttr('style');
+        },
+        selectSection: function ($sectionHeader) {
+            var plugin = this;
+            plugin.$element.find('.exopite-sof-search').val('').blur();
+            var activeIndex = $sectionHeader.parent('.exopite-sof-section').index();
+            var $searchField = this.$element.find('.exopite-sof-nav-list');
+            this.$element.removeData('index');
+            plugin.activateSection(activeIndex);
+        },
+        doSearch: function ($searchField) {
+            var plugin = this;
+            var searchValue = $searchField.val();
+            var activeIndex = this.$nav.find("ul li.active").index();
+            if (typeof this.$element.data('index') === 'undefined') {
+                this.$element.data('index', activeIndex);
+            }
+            if (searchValue) {
+                if (this.$nav.length > 0) {
+                    this.$element.find('.exopite-sof-nav-list-item').removeClass('active');
+                    this.$element.find('.exopite-sof-nav').hide();
+                }
+                this.$element.find('.exopite-sof-section-header').show();
+                this.$element.find('.exopite-sof-sections').css('width', '100%');
+                this.$element.find('.exopite-sof-section').removeClass('hide');
+                this.$element.find('.exopite-sof-field h4').closest('.exopite-sof-field').not('.hidden').hide();
+                this.$element.find('.exopite-sof-field-card').hide();
+                this.$element.find('.exopite-sof-field h4:containsIgnoreCase(' + searchValue + ')').closest('.exopite-sof-field').not('.hidden').show();
+            } else {
+                activeIndex = this.$element.data('index');
+                this.$element.removeData('index');
+                plugin.activateSection(activeIndex);
             }
 
         },
@@ -1152,6 +1292,7 @@ if (typeof throttle !== "function") {
     $(document).ready(function () {
 
         $('.exopite-sof-wrapper').exopiteSofManageDependencies();
+        $('.exopite-sof-wrapper').exopiteSofSearch();
         $('.exopite-sof-sub-dependencies').exopiteSofManageDependencies('sub');
 
         $('.exopite-sof-wrapper-menu').exopiteSaveOptionsAJAX();
@@ -1165,9 +1306,8 @@ if (typeof throttle !== "function") {
         $('.exopite-sof-content-js').exopiteOptionsNavigation();
 
         $('.exopite-sof-group').exopiteSOFTinyMCE();
-        $('.exopite-sof-group').exopiteSOFRepeater();
         $('.exopite-sof-group').exopiteSOFAccordion();
-
+        $('.exopite-sof-group').exopiteSOFRepeater();
         $('.exopite-sof-field-backup').exopiteImportExportAJAX();
 
     });
