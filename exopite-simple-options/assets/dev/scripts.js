@@ -1115,6 +1115,180 @@ if (typeof throttle !== "function") {
 })(jQuery, window, document);
 
 /**
+ * Exopite SOF Search
+ */
+; (function ($, window, document, undefined) {
+
+    var pluginName = "exopiteFontPreview";
+
+    // The actual plugin constructor
+    function Plugin(element, options) {
+
+        this.element = element;
+        this._name = pluginName;
+        this.$element = $(element);
+        this.$nav = this.$element.find('.exopite-sof-nav');
+        // this.$wrapper = $searchField.parents('.exopite-sof-wrapper');
+        // this.$container = $(element).find('.exopite-sof-accordion__wrapper').first();
+        this.isSortableCalled = false;
+        this.init();
+
+    }
+
+    Plugin.prototype = {
+
+        init: function () {
+            var plugin = this;
+            // var parentName = jQuery( this ).attr( 'data-id' );
+            plugin.preview = this.$element.find('.exopite-sof-font-preview');
+            plugin.fontColor = this.$element.find( '.font-color-js' );
+            plugin.fontSize = this.$element.find( '.font-size-js' );
+            plugin.lineHeight = this.$element.find( '.line-height-js' );
+            plugin.fontFamily = this.$element.find( '.exopite-sof-typo-family' );
+            plugin.fontWeight = this.$element.find( '.exopite-sof-typo-variant' );
+
+            // console.log('preview: ' + preview.val());
+            // console.log('fontColor: ' + fontColor.val());
+            // console.log('fontSize: ' + fontSize.val());
+            // console.log('lineHeight: ' + lineHeight.val());
+            // console.log('fontFamily: ' + fontFamily.val());
+            // console.log('fontWeight: ' + fontWeight.val());
+
+            // Set current values to preview
+            this.updatePreview();
+            this.loadGoogleFont();
+
+            this.bindEvents();
+
+        },
+
+        // Bind events that trigger methods
+        bindEvents: function () {
+            var plugin = this;
+
+            plugin.$element.on('change' + '.' + plugin._name, '.font-size-js, .line-height-js, .font-color-js, .exopite-sof-typo-variant', function (e) {
+                e.preventDefault();
+                plugin.updatePreview();
+            });
+
+            plugin.$element.on('change' + '.' + plugin._name, '.exopite-sof-typo-family', function (e) {
+                e.preventDefault();
+                plugin.loadGoogleFont();
+            });
+
+
+        },
+
+        // Unbind events that trigger methods
+        unbindEvents: function () {
+            this.$element.off('.' + this._name);
+        },
+        updatePreview: function () {
+            var plugin = this;
+            var fontWeightStyle = plugin.calculateFontWeight(plugin.fontWeight.find(':selected').text());
+            // Update preiew
+            plugin.preview.css({
+                'font-size': plugin.fontSize.val() + 'px',
+                'line-height': plugin.lineHeight.val() + 'px',
+                'font-weight': fontWeightStyle.fontWeightValue,
+                'font-style': fontWeightStyle.fontStyleValue
+            });
+        },
+        updateVariants: function (variants) {
+            var plugin = this;
+            var variantsArray = variants.split('|');
+            plugin.fontWeight.empty();
+            $.each(variantsArray, function (key, value) {
+                plugin.fontWeight.append($("<option></option>").attr("value", value).text(value));
+            });
+            plugin.fontWeight.val('regular');
+            plugin.fontWeight.trigger("chosen:updated");
+        },
+        loadGoogleFont: function () {
+            var plugin = this;
+            var variants = plugin.fontFamily.find(":selected").data('variants');
+
+            plugin.updateVariants(variants);
+
+            var font = plugin.fontFamily.val();
+            if (!font) return;
+            var href = '//fonts.googleapis.com/css?family=' + font + ':' + variants.replace(/\|/g, ',');
+            var parentName = plugin.$element.find('.exopite-sof-font-field-js').data('id');
+            var html = '<link href="' + href + '" class="cs-font-preview-' + parentName + '" rel="stylesheet" type="text/css" />';
+
+            if ( $( '.cs-font-preview-' + parentName ).length > 0 ) {
+                $( '.cs-font-preview-' + parentName ).attr( 'href', href ).load();
+            } else {
+                $('head').append( html ).load();
+            }
+
+            // Update preiew
+            plugin.preview.css('font-family', font).css('font-weight', '400');
+
+        },
+        calculateFontWeight: function ( fontWeight ) {
+            var fontWeightValue = '400';
+            var fontStyleValue = 'normal';
+
+            switch( fontWeight ) {
+                case '100':
+                    fontWeightValue = '100';
+                    break;
+                case '100italic':
+                    fontWeightValue = '100';
+                    fontStyleValue = 'italic';
+                    break;
+                case '300':
+                    fontWeightValue = '300';
+                    break;
+                case '300italic':
+                    fontWeightValue = '300';
+                    fontStyleValue = 'italic';
+                    break;
+                case '500':
+                    fontWeightValue = '500';
+                    break;
+                case '500italic':
+                    fontWeightValue = '500';
+                    fontStyleValue = 'italic';
+                    break;
+                case '700':
+                    fontWeightValue = '700';
+                    break;
+                case '700italic':
+                    fontWeightValue = '700';
+                    fontStyleValue = 'italic';
+                    break;
+                case '900':
+                    fontWeightValue = '900';
+                    break;
+                case '900italic':
+                    fontWeightValue = '900';
+                    fontStyleValue = 'italic';
+                    break;
+                case 'italic':
+                    fontStyleValue = 'italic';
+                    break;
+            }
+
+            return { fontWeightValue, fontStyleValue };
+        },
+
+
+    };
+
+    $.fn[pluginName] = function (options) {
+        return this.each(function () {
+            if (!$.data(this, "plugin_" + pluginName)) {
+                $.data(this, "plugin_" + pluginName,
+                    new Plugin(this, options));
+            }
+        });
+    };
+
+})(jQuery, window, document);
+
+/**
  * Exopite Save Options with AJAX
  */
 ; (function ($, window, document, undefined) {
@@ -1316,7 +1490,7 @@ if (typeof throttle !== "function") {
         });
 
         $('.exopite-sof-content-js').exopiteOptionsNavigation();
-
+        $('.exopite-sof-font-field').exopiteFontPreview();
         $('.exopite-sof-group').exopiteSOFTinyMCE();
         $('.exopite-sof-group').exopiteSOFAccordion();
         $('.exopite-sof-group').exopiteSOFRepeater();
