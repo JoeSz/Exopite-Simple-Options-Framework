@@ -1036,55 +1036,67 @@ if (typeof throttle !== "function") {
                 plugin.selectSection.call(plugin, $(this));
             });
 
+            plugin.$element.on('click' + '.' + plugin._name, '.exopite-sof-nav.search', function (e) {
+                e.preventDefault();
+                plugin.clearSearch.call(plugin, $(this));
+            });
+
         },
 
         // Unbind events that trigger methods
         unbindEvents: function () {
             this.$element.off('.' + this._name);
         },
-        activateSection: function (activeIndex) {
-            //this.$nav
-            if (this.$nav.length > 0) {
-                this.$element.find('.exopite-sof-section-header').hide();
-                this.$element.find('.exopite-sof-nav-list li').eq(activeIndex).addClass('active');
-                this.$element.find('.exopite-sof-nav').show();
+        clearSearch: function ($clickedElement) {
+            var plugin = this;
+            plugin.$element.find('.exopite-sof-search').val('').blur();
+            plugin.$element.find('.exopite-sof-nav').removeClass('search');
+            plugin.$element.find('.exopite-sof-section-header').hide();
+            plugin.$element.find('.exopite-sof-field h4').closest('.exopite-sof-field').not('.hidden').removeAttr('style');
+            plugin.$element.find('.exopite-sof-field-card').removeAttr('style');
+            var activeElement = plugin.$nav.find("ul li.active").data('section');
+            plugin.$element.find('.exopite-sof-sections .exopite-sof-section-' + activeElement).removeClass('hide');
+        },
+        activateSection: function (activeElement) {
+            var plugin = this;
+            if (plugin.$nav.length > 0) {
+                plugin.$element.find('.exopite-sof-section-header').hide();
+                plugin.$element.find('.exopite-sof-nav li[data-section="' + activeElement + '"]').addClass('active');
+                plugin.$element.find('.exopite-sof-nav').removeClass('search');
             }
-            this.$element.find('.exopite-sof-sections .exopite-sof-section').addClass('hide');
-            this.$element.find('.exopite-sof-sections .exopite-sof-section').eq(activeIndex).removeClass('hide');
-            this.$element.find('.exopite-sof-sections').removeAttr('style');
-            this.$element.find('.exopite-sof-field h4').closest('.exopite-sof-field').not('.hidden').removeAttr('style');
-            this.$element.find('.exopite-sof-field-card').removeAttr('style');
+            plugin.$element.find('.exopite-sof-sections .exopite-sof-section').addClass('hide');
+            plugin.$element.find('.exopite-sof-sections .exopite-sof-section-' + activeElement).removeClass('hide');
+            plugin.$element.find('.exopite-sof-field h4').closest('.exopite-sof-field').not('.hidden').removeAttr('style');
+            plugin.$element.find('.exopite-sof-field-card').removeAttr('style');
         },
         selectSection: function ($sectionHeader) {
             var plugin = this;
             plugin.$element.find('.exopite-sof-search').val('').blur();
-            var activeIndex = $sectionHeader.parent('.exopite-sof-section').index();
-            var $searchField = this.$element.find('.exopite-sof-nav-list');
-            this.$element.removeData('index');
-            plugin.activateSection(activeIndex);
+            var activeElement = $sectionHeader.data('section');
+            plugin.activateSection(activeElement);
         },
         doSearch: function ($searchField) {
             var plugin = this;
             var searchValue = $searchField.val();
-            var activeIndex = this.$nav.find("ul li.active").index();
-            if (typeof this.$element.data('index') === 'undefined') {
-                this.$element.data('index', activeIndex);
+            var activeElement = this.$nav.find("ul li.active").data('section');
+            if (typeof this.$element.data('section') === 'undefined') {
+                this.$element.data('section', activeElement);
             }
+
             if (searchValue) {
                 if (this.$nav.length > 0) {
                     this.$element.find('.exopite-sof-nav-list-item').removeClass('active');
-                    this.$element.find('.exopite-sof-nav').hide();
+                    this.$element.find('.exopite-sof-nav').addClass('search');
                 }
                 this.$element.find('.exopite-sof-section-header').show();
-                this.$element.find('.exopite-sof-sections').css('width', '100%');
                 this.$element.find('.exopite-sof-section').removeClass('hide');
                 this.$element.find('.exopite-sof-field h4').closest('.exopite-sof-field').not('.hidden').hide();
                 this.$element.find('.exopite-sof-field-card').hide();
                 this.$element.find('.exopite-sof-field h4:containsIgnoreCase(' + searchValue + ')').closest('.exopite-sof-field').not('.hidden').show();
             } else {
-                activeIndex = this.$element.data('index');
-                this.$element.removeData('index');
-                plugin.activateSection(activeIndex);
+                activeElement = this.$element.data('section');
+                this.$element.removeData('section');
+                plugin.activateSection(activeElement);
             }
 
         },
@@ -1102,7 +1114,7 @@ if (typeof throttle !== "function") {
 
 })(jQuery, window, document);
 
-/*
+/**
  * Exopite Save Options with AJAX
  */
 ; (function ($, window, document, undefined) {
