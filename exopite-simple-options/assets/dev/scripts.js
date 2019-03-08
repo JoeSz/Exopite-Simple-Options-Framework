@@ -429,6 +429,12 @@ if (typeof throttle !== "function") {
 
             });
 
+            plugin.$element.find('.exopite-sof-nav-list-parent-item > .exopite-sof-nav-list-item-title').on('click' + '.' + plugin._name, function () {
+
+                plugin.toggleSubMenu.call(plugin, $(this));
+
+            });
+
         },
 
         // Unbind events that trigger methods
@@ -436,15 +442,20 @@ if (typeof throttle !== "function") {
             this.$element.off('.' + this._name);
         },
 
-        changeTab: function (botton) {
+        toggleSubMenu: function (button) {
+            // var $parent = button;
+            var $parent = button.parents('.exopite-sof-nav-list-parent-item');
+            $parent.toggleClass('active').find('ul').slideToggle(200);
+        },
+        changeTab: function (button) {
 
-            if (!botton.hasClass('active')) {
+            if (!button.hasClass('active')) {
 
-                var section = '.exopite-sof-section-' + botton.data('section');
+                var section = '.exopite-sof-section-' + button.data('section');
 
                 this.$element.find('.exopite-sof-nav-list-item.active').removeClass('active');
 
-                botton.addClass('active');
+                button.addClass('active');
 
                 this.$element.find('.exopite-sof-section').addClass('hide');
                 this.$element.find(section).removeClass('hide');
