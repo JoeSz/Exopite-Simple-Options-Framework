@@ -2134,6 +2134,8 @@ input:disabled + .switch__toggle {
 .exopite-sof-cloneable--clone {
     margin-right: 5px;
 }
+.exopite-sof-nav.search .exopite-sof-nav-list-parent-item > span,
+.exopite-sof-nav.search .exopite-sof-nav-list-item,
 .exopite-sof-nav.search li {
     color: #555;
 }
