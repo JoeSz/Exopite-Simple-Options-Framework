@@ -2043,7 +2043,7 @@ input:disabled + .switch__toggle {
 }
 .exopite-sof-header {
     padding: 15px 10px;
-    background-image: url('exopite-sof-title-bg');
+    background-image: url('exopite-sof-title-bg.jpg');
     background-size: cover;
     box-shadow: inset 0 0 0 1000px rgba(48, 64, 75, 0.83);
 }
