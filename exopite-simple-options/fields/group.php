@@ -35,6 +35,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 			$defaults = array(
 				'group_title'  => esc_attr( 'Group Title', 'exopite-sof' ),
 				'repeater'     => false,
+				'cloneable'    => true,
 				'sortable'     => true,
 				'accordion'    => true,
 				'limit'        => 0,
@@ -48,6 +49,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 			$this->is_repeater  = ( isset( $this->field['options']['repeater'] ) ) ? (bool) $this->field['options']['repeater'] : $defaults['repeater'];
 			$this->is_sortable  = ( isset( $this->field['options']['sortable'] ) ) ? (bool) $this->field['options']['sortable'] : $defaults['sortable'];
 			$this->is_accordion = ( isset( $this->field['options']['accordion'] ) ) ? (bool) $this->field['options']['accordion'] : $defaults['accordion'];
+			$this->is_cloneable = ( isset( $this->field['options']['cloneable'] ) ) ? (bool) $this->field['options']['cloneable'] : $defaults['cloneable'];
 			$this->limit        = ( isset( $this->field['options']['limit'] ) ) ? (int) $this->field['options']['limit'] : $defaults['limit'];
 			$this->is_multilang = ( isset( $this->config['is_multilang'] ) ) ? (bool) $this->config['is_multilang'] : false;
 
@@ -120,7 +122,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 				echo '<h4 class="exopite-sof-cloneable__title exopite-sof-accordion__title"><span class="exopite-sof-cloneable__text">' . $this->group_title . '</span>';
 				if ( $this->is_repeater ) {
 					echo '<span class="exopite-sof-cloneable--helper">';
-					echo '<i class="exopite-sof-cloneable--clone fa fa-clone disabled"></i>';
+					if ( $this->is_cloneable ) {
+						echo '<i class="exopite-sof-cloneable--clone fa fa-clone disabled"></i>';
+					}
 					echo '<i class="exopite-sof-cloneable--remove fa fa-times disabled"></i>';
 					echo '</span>';
 				}
@@ -237,7 +241,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 
 						echo '<h4 class="exopite-sof-cloneable__title exopite-sof-accordion__title"><span class="exopite-sof-cloneable__text">' . $this->field['options']['group_title'] . '</span>';
 						echo '<span class="exopite-sof-cloneable--helper">';
-						echo '<i class="exopite-sof-cloneable--clone fa fa-clone"></i>';
+						if ( $this->is_cloneable ) {
+							echo '<i class="exopite-sof-cloneable--clone fa fa-clone"></i>';
+						}
 						echo '<i class="exopite-sof-cloneable--remove fa fa-times"></i>';
 						echo '</span>';
 						echo '</h4>';
