@@ -914,7 +914,6 @@ if (typeof throttle !== "function") {
                 if (!$(e.target).hasClass('exopite-sof-cloneable--clone')) {
                     plugin.toggleAccordion.call(plugin, $(this));
                 }
-
             });
 
             /**
@@ -1029,7 +1028,6 @@ if (typeof throttle !== "function") {
             };
 
             this.bindEvents();
-            console.log('search loaded');
 
         },
 
@@ -1157,13 +1155,6 @@ if (typeof throttle !== "function") {
             plugin.lineHeight = this.$element.find( '.line-height-js' );
             plugin.fontFamily = this.$element.find( '.exopite-sof-typo-family' );
             plugin.fontWeight = this.$element.find( '.exopite-sof-typo-variant' );
-
-            // console.log('preview: ' + preview.val());
-            // console.log('fontColor: ' + fontColor.val());
-            // console.log('fontSize: ' + fontSize.val());
-            // console.log('lineHeight: ' + lineHeight.val());
-            // console.log('fontFamily: ' + fontFamily.val());
-            // console.log('fontWeight: ' + fontWeight.val());
 
             // Set current values to preview
             this.updatePreview();
@@ -1503,7 +1494,7 @@ if (typeof throttle !== "function") {
         $('.exopite-sof-content-js').exopiteOptionsNavigation();
         $('.exopite-sof-font-field').exopiteFontPreview();
         $('.exopite-sof-group').exopiteSOFTinyMCE();
-        $('.exopite-sof-group').exopiteSOFAccordion();
+        $('.exopite-sof-accordion').exopiteSOFAccordion();
         $('.exopite-sof-group').exopiteSOFRepeater();
         $('.exopite-sof-field-backup').exopiteImportExportAJAX();
 
