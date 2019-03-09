@@ -38,6 +38,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 				'cloneable'    => true,
 				'sortable'     => true,
 				'accordion'    => true,
+				'closed'       => true,
 				'limit'        => 0,
 				'button_title' => esc_attr( 'Add new', 'exopite-sof' ),
 			);
@@ -45,15 +46,20 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 			$options = ( ! empty( $this->field['options'] ) ) ? $this->field['options'] : array();
 
 			$this->field['options'] = wp_parse_args( $options, $defaults );
-
+			$this->group_title = ( isset( $this->field['options']['group_title'] ) ) ? $this->field['options']['group_title'] : $defaults['group_title'];
 			$this->is_repeater  = ( isset( $this->field['options']['repeater'] ) ) ? (bool) $this->field['options']['repeater'] : $defaults['repeater'];
-			$this->is_sortable  = ( isset( $this->field['options']['sortable'] ) ) ? (bool) $this->field['options']['sortable'] : $defaults['sortable'];
 			$this->is_accordion = ( isset( $this->field['options']['accordion'] ) ) ? (bool) $this->field['options']['accordion'] : $defaults['accordion'];
-			$this->is_cloneable = ( isset( $this->field['options']['cloneable'] ) ) ? (bool) $this->field['options']['cloneable'] : $defaults['cloneable'];
+			$this->is_accordion_closed = ( isset( $this->field['options']['closed'] ) ) ? (bool) $this->field['options']['closed'] : $defaults['closed'];
 			$this->limit        = ( isset( $this->field['options']['limit'] ) ) ? (int) $this->field['options']['limit'] : $defaults['limit'];
 			$this->is_multilang = ( isset( $this->config['is_multilang'] ) ) ? (bool) $this->config['is_multilang'] : false;
 
-			$this->group_title = ( isset( $this->field['options']['group_title'] ) ) ? $this->field['options']['group_title'] : $defaults['group_title'];
+			if ( ! $this->is_repeater ) {
+				$this->is_cloneable = false;
+				$this->is_sortable  = false;
+			} else {
+				$this->is_cloneable = ( isset( $this->field['options']['cloneable'] ) ) ? (bool) $this->field['options']['cloneable'] : $defaults['cloneable'];
+				$this->is_sortable  = ( isset( $this->field['options']['sortable'] ) ) ? (bool) $this->field['options']['sortable'] : $defaults['sortable'];
+			}
 
 		}
 
@@ -109,13 +115,37 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 
 			}
 
-			$muster_class = ( $this->is_repeater ) ? ' exopite-sof-accordion--hidden exopite-sof-cloneable__muster exopite-sof-cloneable__muster--hidden' : '';
-			$limit        = $this->limit;
-			$sortable     = $this->is_sortable;
+			$muster_classes = array();
+			if ( $this->is_repeater ) {
+				$muster_classes = array( 'exopite-sof-cloneable__muster', 'exopite-sof-cloneable__muster--hidden' );
+				if ( $this->is_accordion ) {
+					$muster_classes[] = 'exopite-sof-accordion--hidden';
+					$muster_classes[] = 'exopite-sof-accordion__item';
+				}
+			} else {
+				if ( $this->is_accordion ) {
+					$muster_classes[] = 'exopite-sof-accordion__item';
+					if ( $this->is_accordion_closed ) {
+						$muster_classes[] = 'exopite-sof-accordion--hidden';
+					}
 
-			echo '<div class="exopite-sof-group" data-limit="' . $limit . '">';
+				}
+			}
 
-			echo '<div class="exopite-sof-cloneable__item exopite-sof-accordion__item' . $muster_class . '">';
+			$limit    = $this->limit;
+			$sortable = $this->is_sortable;
+			$classes  = array( 'exopite-sof-group' );
+			if ( $this->is_accordion ) {
+				$classes[] = 'exopite-sof-accordion';
+			}
+
+			echo '<div class="' . implode( ' ', $classes ) . '" data-limit="' . $limit . '">';
+
+			if ( $this->is_accordion && ! $this->is_repeater ) {
+				echo '<div class="exopite-sof-accordion__wrapper">';
+			}
+
+			echo '<div class="exopite-sof-cloneable__item ' . implode( ' ', $muster_classes ) . '">';
 
 			if ( $this->is_repeater || ! empty( $this->group_title ) ) {
 
@@ -201,6 +231,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 
 			echo '</div>'; // exopite-sof-cloneable__item
 
+			if ( $this->is_accordion && ! $this->is_repeater ) {
+				echo '</div>';  // exopite-sof-accordion__wrapper
+			}
+
 			// IF REPEATER
 
 			if ( $this->field['options']['repeater'] ) {
@@ -237,7 +271,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 						 * (without this check group will display from other languages elements as empty)
 						 */
 
-						echo '<div class="exopite-sof-cloneable__item exopite-sof-accordion__item exopite-sof-accordion--hidden">';
+						echo '<div class="exopite-sof-cloneable__item';
+						if ( $this->is_accordion ) {
+							echo ' exopite-sof-accordion__item exopite-sof-accordion--hidden';
+						}
+						echo '">';
 
 						echo '<h4 class="exopite-sof-cloneable__title exopite-sof-accordion__title"><span class="exopite-sof-cloneable__text">' . $this->field['options']['group_title'] . '</span>';
 						echo '<span class="exopite-sof-cloneable--helper">';
