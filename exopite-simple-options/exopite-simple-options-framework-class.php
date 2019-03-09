@@ -26,7 +26,7 @@
  * - content
  * - date
  * - editor
- * - group
+ * - group/accordion item
  * - hidden
  * - image
  * - image_select
@@ -38,9 +38,11 @@
  * - range
  * - select
  * - switcher
+ * - tab
  * - tap_list
  * - text
  * - textarea
+ * - typography
  * - upload
  * - video mp4/oembed
  */
@@ -1432,6 +1434,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				case 'select':
 					// no break
 				case 'typography':
+					// no break
+				case 'tab':
 					// no break
 				case 'tap_list':
 					/**
