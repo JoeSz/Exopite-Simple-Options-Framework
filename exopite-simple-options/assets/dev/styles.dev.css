@@ -425,7 +425,7 @@
     padding: 15px 30px;
     /* border-bottom: 1px solid #eee; */
 }
-.exopite-sof-section > .exopite-sof-field {
+.exopite-sof-section > .exopite-sof-field:not(.no-border) {
     border-bottom: 1px solid #eee;
 }
 .exopite-sof-content {
@@ -2095,7 +2095,7 @@ input:disabled + .switch__toggle {
 }
 .exopite-sof-header {
     padding: 15px 10px;
-    background-image: url('exopite-sof-title-bg.jpg');
+    background-image: url('images/exopite-sof-title-bg.jpg');
     background-size: cover;
     box-shadow: inset 0 0 0 1000px rgba(48, 64, 75, 0.83);
 }
