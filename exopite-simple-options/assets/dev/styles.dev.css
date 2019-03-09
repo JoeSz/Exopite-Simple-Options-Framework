@@ -425,7 +425,7 @@
     padding: 15px 30px;
     /* border-bottom: 1px solid #eee; */
 }
-.exopite-sof-section > .exopite-sof-field:not(.no-border) {
+.exopite-sof-section > .exopite-sof-field {
     border-bottom: 1px solid #eee;
 }
 .exopite-sof-content {
@@ -2061,6 +2061,15 @@ input:disabled + .switch__toggle {
 /**
  * TO SORT
  */
+.exopite-sof-field.no-padding-top {
+    padding-top: 0;
+}
+.exopite-sof-field.no-padding-bottom {
+    padding-bottom: 0;
+}
+.exopite-sof-section > .exopite-sof-field.no-border-bottom {
+    border-bottom: none;
+}
 .exopite-sof-group .exopite-sof-tinymce-editor .exopite-sof-fieldset {
     border: 1px solid #ddd;
 }

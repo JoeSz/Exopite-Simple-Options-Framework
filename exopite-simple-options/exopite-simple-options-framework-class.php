@@ -1703,8 +1703,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			}
 
 			if ( ! isset( $field['pseudo'] ) || ! $field['pseudo'] ) {
-				$no_border = ( isset( $field['options']['no-border'] ) && $field['options']['no-border'] ) ? ' no-border' : '';
-				$output .= '<div class="exopite-sof-field exopite-sof-field-' . $field['type'] . $no_border . $wrap_class . $hidden . '"' . $depend . '>';
+				$output .= '<div class="exopite-sof-field exopite-sof-field-' . $field['type'] . $wrap_class . $hidden . '"' . $depend . '>';
 			}
 
 			if ( isset( $field['title'] ) ) {
