@@ -30,17 +30,21 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_tab' ) ) {
 
 			echo '<div class="exopite-sof-tabs">';
 
-			$tab_id = preg_replace( '/[^0-9a-zA-Z]/', '', $this->unique ) . '-' . $this->field['id'];
-
 			$i = 0;
 			foreach ( $tabs as $key => $tab ) {
+
+				$tab_id = $this->field['id'] . '-' . $i;
 
 				reset( $tabs );
 				$tab_active = ( $key === key( $tabs ) ) ? ' checked="checked"' : '';
 				$equal_width = ( isset( $this->field['equal_width'] ) ) ? ' equal-width' : '';
 
-				echo '<input name="' . $tab_id . '" type="radio" id="' . $tab_id . '-' .  $i . '" class="input"' . $tab_active . '>';
-				echo '<label for="' . $tab_id . '-' .  $i . '" class="label' . $equal_width . '">' . $tab['title'] . '</label>';
+				/**
+				 * @link https://codepen.io/mikestreety/pen/yVNNNm
+				 */
+
+				echo '<input name="tabs" type="radio" id="' . $tab_id . '" class="input"' . $tab_active . '>';
+				echo '<label for="' . $tab_id . '" class="label' . $equal_width . '">' . $tab['title'] . '</label>';
 				echo '<div class="tab">';
 
 				foreach ( $tab['fields'] as $field ) {
