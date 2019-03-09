@@ -121,7 +121,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_typography' ) ) {
 				$field = array(
 					'id'      => 'size',
                     'type'    => 'number',
-					// 'sub' 	  => true,
                     'default' =>  ( isset( $this->field['default']['size'] ) ) ? $this->field['default']['size'] : '',
 					'before'  => 'Size ',
 					'pseudo'  => true,
@@ -133,7 +132,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_typography' ) ) {
 				$field = array(
 					'id'      => 'height',
                     'type'    => 'number',
-					// 'sub' 	  => true,
                     'default' =>  ( isset( $this->field['default']['height'] ) ) ? $this->field['default']['height'] : '',
 					'before'  => 'Height ',
 					'pseudo'  => true,
