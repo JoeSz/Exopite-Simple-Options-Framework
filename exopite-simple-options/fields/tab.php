@@ -18,7 +18,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_tab' ) ) {
 
 			echo $this->element_before();
 
-			$unallows = array( 'tab' );
+			$unallows = array( 'tab', 'group' );
 			$tabs    = array_values( $this->field['tabs'] );
 			$unique_id = ( ! empty( $this->unique ) ) ? $this->unique : $this->field['id'];
 
