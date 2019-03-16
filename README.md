@@ -22,7 +22,8 @@ I created this framework for plugins and metaboxes. Not for Themes. For Themes I
 * As 2018-09-11 we have a new hooks name to meet WordPress standards.
 * After multilanguage compatibility the <b>options array did changed.</b><br>
 from `unique[field-id]` to `unique[current_lang][field-id]` where:<br>
-if multilang plugin installed, then the selected language, otherwise WordPress installed language.
+if multilang plugin installed, then the selected language, otherwise WordPress installed language.<br>
+You can disable this with `'multilang' => false` option.
 
 ### DESCRIPTION
 
@@ -119,9 +120,11 @@ https://wpquestions.com/Order_by_meta_key_where_value_is_serialized/7908<br>
 - range
 - select (single/multiselect + posttype)
 - switcher
+- tab
 - tap_list
 - text
 - textarea
+- typography
 - upload (multiple, on post type -post, page, custom- you can attach uploaded to post)
 - video (mp4/oembed, eg.: youtube)
 
@@ -237,8 +240,16 @@ $metabox_panel = new Exopite_Simple_Options_Framework( $config_metabox, $fields 
 * for "menu" use:
 Eg.:
 ```php
-$my_options = get_option('my-plugin-slug');
+$my_options = get_option( 'my-plugin-slug' );
 if ( $my_options[$current_lang]['my-option-name'] ) {
+    // code...
+}
+```
+OR
+```php
+// Detect language automatically.
+$my_options = get_exopite_sof_option( 'my-plugin-slug' );
+if ( $my_options['my-option-name'] ) {
     // code...
 }
 ```
@@ -286,6 +297,14 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as 
 * exopite_sof_form_meta_after (unique)
 
 ### CHANGELOG
+
+= 20190316 - 2019-03-16 =
+* New design
+* Add typography field
+* Add tab field
+* Add submenu (section)
+* Add search
+* Various bugfiexes
 
 = 20190218 - 2019-02-18 =
 * Include Trumbowyg localy

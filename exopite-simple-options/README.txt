@@ -25,6 +25,7 @@ I created this framework for plugins and metaboxes. Not for Themes. For Themes I
 * After multilanguage compatibility the <b>options array did changed.
   from `unique[field-id]` to `unique[current_lang][field-id]` where:
   if multilang plugin installed, then the selected language, otherwise WordPress installed language.
+  You can disable this with `'multilang' => false` option.
 
 == Description ==
 
@@ -95,29 +96,36 @@ https://wpquestions.com/Order_by_meta_key_where_value_is_serialized/7908<br>
 
 == Available fields: ==
 
-- ace_field
-- video (mp4/oembed)
-- upload (multiple)
-- attached (Attached files/images/etc... to the post -> only for Metabox, multiselect, AJAX delete)
-- notice
-- editor (WYSIWYG WordPress Editor)
-- text
-- password
-- color (rgb/rgba/html5)
-- image
-- textarea
-- switcher
-- date (datepicker/html5)
-- checkbox
-- radio
+- ACE editor
+- attached (Attached files/images/etc..., multiselect, AJAX delete. Metabox only.)
+- backup
+- button
 - button_bar
-- select (single/multiselect + posttype)
-- panel
+- card
+- checkbox
+- color  (rgb/rgba/html5)
 - content
+- date   (datepicker/html5)
+- editor (Trumbowyg or WYSIWYG WordPress Editor)
+- group  (Dynamically add groups. Repeatable and sortable (on/off). All fields are valid, except: group itself)
+- hidden
+- image
+- image_select
+- meta
+- notice
 - number
+- password
+- radio
 - range
-- tap_list (radio/checkbox)
-- image_select (radio/checkbox)
+- select (single/multiselect + posttype)
+- switcher
+- tab
+- tap_list
+- text
+- textarea
+- typography
+- upload (multiple, on post type -post, page, custom- you can attach uploaded to post)
+- video (mp4/oembed, eg.: youtube)
 
 == Requirements ==
 
@@ -219,6 +227,14 @@ Actions
 * exopite_sof_form_meta_after (unique)
 
 == Changelog ==
+
+= 20190316 - 2019-03-16 =
+* New design
+* Add typography field
+* Add tab field
+* Add submenu (section)
+* Add search
+* Various bugfiexes
 
 = 20190218 - 2019-02-18 =
 * Include Trumbowyg localy
