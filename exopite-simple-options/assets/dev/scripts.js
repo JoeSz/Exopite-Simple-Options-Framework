@@ -1069,13 +1069,19 @@ if (typeof throttle !== "function") {
             var plugin = this;
             if (plugin.$nav.length > 0) {
                 plugin.$element.find('.exopite-sof-section-header').hide();
-                plugin.$element.find('.exopite-sof-nav li[data-section="' + activeElement + '"]').addClass('active');
+                var $activeElement = plugin.$element.find('.exopite-sof-nav li[data-section="' + activeElement + '"]');
+                $activeElement.addClass('active');
+                if ( $activeElement.parents('.exopite-sof-nav-list-parent-item').length > 0  &&
+                    ! $activeElement.parents('.exopite-sof-nav-list-parent-item').hasClass('active') ) {
+                    $activeElement.parents('.exopite-sof-nav-list-parent-item').addClass('active').find('ul').slideToggle(200);;
+                }
                 plugin.$element.find('.exopite-sof-nav').removeClass('search');
             }
             plugin.$element.find('.exopite-sof-sections .exopite-sof-section').addClass('hide');
             plugin.$element.find('.exopite-sof-sections .exopite-sof-section-' + activeElement).removeClass('hide');
             plugin.$element.find('.exopite-sof-field h4').closest('.exopite-sof-field').not('.hidden').removeAttr('style');
             plugin.$element.find('.exopite-sof-field-card').removeAttr('style');
+
         },
         selectSection: function ($sectionHeader) {
             var plugin = this;
