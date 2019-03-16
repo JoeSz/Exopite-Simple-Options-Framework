@@ -606,91 +606,28 @@ if (typeof throttle !== "function") {
             });
 
         },
+        escapeRegExp: function (stringToGoIntoTheRegex) {
+            // https://stackoverflow.com/questions/17885855/use-dynamic-variable-string-as-regex-pattern-in-javascript/17886301#17886301
+            return stringToGoIntoTheRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        },
         updateNameIndex: function () {
 
             var fieldParentName = this.$element.find('.exopite-sof-cloneable__wrapper').data('name').replace("[REPLACEME]", "");
-            // test if multilang (and option stored in array)
-            var regex_multilang_select = new RegExp(/\[(.*?)\]\[(.*?)\]\[(.*?)\]\[(.*?)\[(.*?)\]/, "i");
-            var regex_multilang = new RegExp(/\[(.*?)\]\[(.*?)\]\[(.*?)\]\[(.*?)\]/, "i");
-            // test if not multilang (and option stored in array)
-            var regex_array = new RegExp(/\[(.*?)\]\[(.*?)\]\[(.*?)\]/, "i");
-            // test if metabox and option stored in separate meta values
-            var regex_simple = new RegExp(/\[(.*?)\]\[(.*?)\]/, "i");
+
+            var fieldParentNameRegex = this.escapeRegExp(fieldParentName);
+
+            var regex_group = new RegExp(fieldParentNameRegex + "\\[(.*?)\\]", "i");
 
             this.$element.find('.exopite-sof-cloneable__wrapper').find('.exopite-sof-cloneable__item').each(function (index, el) {
 
                 $(el).find('[name^="' + fieldParentName + '"]').attr('name', function () {
 
-                    if (regex_multilang_select.test(this.name)) {
-                        return this.name.replace(regex_multilang, function ($0, $1, $2, $3, $4, $5) {
+                    if (regex_group.test(this.name)) {
+                        return this.name.replace(regex_group, function ($0, $1) {
                             // options[en][group][0][field][]
-                            /*
-                            var index_item_second = $2;
-                            var index_item_third = $3;
-                            if ($2 == 'REPLACEME') {
-                                index_item_second = index;
-                            }
-                            if ($3 == 'REPLACEME') {
-                                index_item_third = index;
-                            }
-                            var index_item = ($3 == 'REPLACEME') ? index : $3;
-                            */
-                            return '[' + $1 + '][' + $2 + '][' + index + '][' + $4 + '][' + $5 + ']';
+                            return fieldParentName + '[' + index + ']';
                         });
                     }
-
-                    if (regex_multilang.test(this.name)) {
-                        return this.name.replace(regex_multilang, function ($0, $1, $2, $3, $4) {
-                            // options[en][group][0][field]
-                            // options[group][0][field][] (options array no multilang and select)
-                            var index_item_second = $2;
-                            var index_item_third = $3;
-                            /*
-                            if ($2 == 'REPLACEME') {
-                                index_item_second = index;
-                            }
-                            if ($3 == 'REPLACEME') {
-                                index_item_third = index;
-                            }
-                            // var index_item = ($3 == 'REPLACEME') ? index : $3;
-                            */
-                            if (!$4 || 0 === $4.length) {
-                                index_item_second = index;
-                            } else {
-                                index_item_third = index;
-                            }
-                            return '[' + $1 + '][' + index_item_second + '][' + index_item_third + '][' + $4 + ']';
-                        });
-                    }
-                    if (regex_array.test(this.name)) {
-                        return this.name.replace(regex_array, function ($0, $1, $2, $3) {
-                            // options[group][0][field]
-                            // group[0][emails_group_callback][] (simple and select)
-                            var index_item_first = $1;
-                            var index_item_second = $2;
-                            if (!$3 || 0 === $3.length) {
-                                index_item_first = index;
-                            } else {
-                                index_item_second = index;
-                            }
-                            // if ($1 == 'REPLACEME') {
-                            //     index_item_first = index;
-                            // }
-                            // if ($2 == 'REPLACEME') {
-                            //     index_item_second = index;
-                            // }
-                            // var index_item = ($2 == 'REPLACEME') ? index : $2;
-                            return '[' + index_item_first + '][' + index_item_second + '][' + $3 + ']';
-                        });
-                    }
-                    if (regex_simple.test(this.name)) {
-                        return this.name.replace(regex_simple, function ($0, $1, $2) {
-                            //options[0][field]
-                            // var index_item = ($1 == 'REPLACEME') ? index : $1;
-                            return '[' + index + '][' + $2 + ']';
-                        });
-                    }
-
 
                 });
 
