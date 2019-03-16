@@ -265,7 +265,7 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-plugin-slug', true ); // arr
 $my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as single, type mixed
 ```
 
-![](assets/screenshot-1.jpg)
+![](assets/screenshot-2.jpg)
 ![](assets/screenshot-3.png)
 
 ### HOOKS
