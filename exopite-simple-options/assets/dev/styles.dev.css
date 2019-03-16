@@ -2619,3 +2619,6 @@ input[type="color"] {
 .exopite-sof-media input {
     margin-right: 1px;
 }
+.search + .exopite-sof-sections h2 {
+    cursor: pointer;
+}
