@@ -2228,8 +2228,91 @@ input:disabled + .switch__toggle {
     border-top-left-radius: 0 !important;
     border-bottom-left-radius: 0 !important;
 } */
+
 /* Tabs */
 .exopite-sof-tabs {
+    width: 100%;
+    margin: 0;
+    max-width: 100%;
+}
+.exopite-sof-tab-header {
+    margin: 0px;
+    padding: 0px;
+    list-style: none;
+    display: flex;
+}
+.exopite-sof-tab-header > li{
+    background: none;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+.exopite-sof-tab-mobile-header,
+.exopite-sof-tab-header > li {
+    background: #ededed;
+    margin-bottom: -1px;
+    border: 1px solid #e5e5e5;
+}
+.exopite-sof-tab-header > li {
+    margin-left: 1px;
+    margin-right: 1px;
+}
+.exopite-sof-tab-header.equal-width > li {
+    flex-grow: 1;
+    flex-basis: 0;
+}
+.exopite-sof-tab-header > li:first-of-type {
+    margin-left: 0;
+}
+.exopite-sof-tab-header > li:last-of-type {
+    margin-right: 0;
+}
+.active > .exopite-sof-tab-mobile-header,
+.exopite-sof-tab-header li.active {
+    border: 1px solid #e5e5e5;
+    border-bottom-color: #fff;
+    background: #fff;
+
+}
+.exopite-sof-tab-content {
+    display: none;
+}
+.exopite-sof-tab-content-body-inner {
+    border: 1px solid #e5e5e5;
+    padding: 15px;
+}
+.exopite-sof-tab-mobile-header {
+    padding: 15px;
+    display: none;
+}
+.exopite-sof-tab-content.active{
+    display: inherit;
+}
+
+@media only screen and (max-width: 500px) {
+    .exopite-sof-tab-mobile-header {
+        display: block;
+        cursor: pointer;
+    }
+    .exopite-sof-tab-header {
+        display: none;
+    }
+    .exopite-sof-tab-content {
+        display: block;
+    }
+    .exopite-sof-tab-content-body {
+        max-height: 0;
+        overflow: hidden;
+        transition-property: all;
+        transition-duration: .3s;
+        transition-timing-function: cubic-bezier(0.5, 1, 0.1, 1);
+    }
+    .active > .exopite-sof-tab-content-body {
+        max-height: 1000px;
+        overflow-y: auto;
+    }
+}
+/* .exopite-sof-tabs {
     display: flex;
     flex-wrap: wrap;
 }
@@ -2256,7 +2339,7 @@ input:disabled + .switch__toggle {
     flex-grow: 1;
     width: 100%;
     display: none;
-    /* padding: 1rem; */
+
     background: #fff;
 }
 .exopite-sof-tabs input[type="radio"] {
@@ -2290,7 +2373,7 @@ input:disabled + .switch__toggle {
         margin-right: 0;
         margin-top: 0.2rem;
     }
-}
+} */
 
 /* STYLE 2 */
 /* Color Picker */
@@ -2379,7 +2462,8 @@ input:disabled + .switch__toggle {
 .exopite-sof-fieldset input[type="email"],
 .exopite-sof-fieldset input[type="password"],
 .exopite-sof-fieldset input[type="text"] {
-    min-width: 375px;
+    max-width: 375px;
+    width: 100%;
 }
 .exopite-sof-field-date .exopite-sof-fieldset .datepicker,
 .exopite-sof-fieldset input[type="text"].chosen-search-input {
