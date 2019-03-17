@@ -239,7 +239,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 
 			if ( $this->field['options']['repeater'] ) {
 
-				if ( $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
+				if ( isset( $this->config['type'] ) && $this->config['type'] == 'metabox' && isset( $this->config['options'] ) && $this->config['options'] == 'simple' ) {
 
 					echo '<div class="exopite-sof-cloneable__wrapper exopite-sof-accordion__wrapper" data-sortable="' . $sortable . '" data-name="' . $this->element_name() . '">';
 
