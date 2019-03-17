@@ -51,7 +51,7 @@ if (typeof throttle !== "function") {
  */
 ; (function ($, window, document, undefined) {
     'use strict';
-    /*
+    /**
      * Dependency System
      *
      * Codestar Framework
@@ -121,8 +121,8 @@ if (typeof throttle !== "function") {
 
 })(jQuery, window, document);
 
-/*
- * Exopite Save Options with AJAX
+/**
+ * Exopite SOF Save Options with AJAX
  */
 ; (function ($, window, document, undefined) {
 
@@ -254,8 +254,8 @@ if (typeof throttle !== "function") {
 
 })(jQuery, window, document);
 
-/*
- * Exopite Media Uploader
+/**
+ * Exopite SOF Media Uploader
  */
 ; (function ($, window, document, undefined) {
 
@@ -385,8 +385,8 @@ if (typeof throttle !== "function") {
 
 })(jQuery, window, document);
 
-/*
- * Exopite Options Navigation
+/**
+ * Exopite SOF Options Navigation
  */
 ; (function ($, window, document, undefined) {
 
@@ -705,8 +705,8 @@ if (typeof throttle !== "function") {
 
 })(jQuery, window, document);
 
-/*
- * Exopite Save Options with AJAX
+/**
+ * Exopite SOF Handle TinyMCE
  */
 ; (function ($, window, document, undefined) {
 
@@ -935,7 +935,7 @@ if (typeof throttle !== "function") {
 
 
 /**
- * Exopite SOF Search
+ * Exopite SOF Search In Options
  */
 ; (function ($, window, document, undefined) {
 
@@ -1066,7 +1066,7 @@ if (typeof throttle !== "function") {
 })(jQuery, window, document);
 
 /**
- * Exopite SOF Search
+ * Exopite SOF Font Field Preview
  */
 ; (function ($, window, document, undefined) {
 
@@ -1233,7 +1233,7 @@ if (typeof throttle !== "function") {
 })(jQuery, window, document);
 
 /**
- * Exopite Save Options with AJAX
+ * Exopite SOF Import/Export Options with AJAX
  */
 ; (function ($, window, document, undefined) {
 
@@ -1416,6 +1416,95 @@ if (typeof throttle !== "function") {
 
 })(jQuery, window, document);
 
+/**
+ * Exopite SOF Tab Navigation
+ */
+; (function ($, window, document, undefined) {
+
+    var pluginName = "exopiteTabs";
+
+    // The actual plugin constructor
+    function Plugin(element, options) {
+
+        this.element = element;
+        this._name = pluginName;
+        this.$element = $(element);
+        this.init();
+
+    }
+
+    Plugin.prototype = {
+
+        init: function () {
+
+            this.bindEvents();
+
+        },
+
+        /**
+         * Looks a little bit strange, but some readon this is the only way
+         * what I find, to make this work in group field.
+         */
+        // Bind events that trigger methods
+        bindEvents: function () {
+            var plugin = this;
+            plugin.$tabLinks = plugin.$element.children('.exopite-sof-tab-header').children('.exopite-sof-tab-link');
+            plugin.$tabContents = plugin.$element.children('.exopite-sof-tab-content');
+            plugin.mobileHeader = plugin.$tabContents.children('.exopite-sof-tab-mobile-header');
+
+            plugin.$tabLinks.off().on('click' + '.' + plugin._name, function (event) {
+
+                plugin.changeTabs(event, this);
+
+            });
+
+            plugin.mobileHeader.off().on('click' + '.' + plugin._name, function (event) {
+
+                var index = $(this).parent().index() - 1;
+                var that = this;
+
+                // tabLinks
+                var $tabLinks = $(that).parent().parent().children('.exopite-sof-tab-header').children('.exopite-sof-tab-link');
+                var $tabContents = $(that).parent().parent().children('.exopite-sof-tab-content');
+
+                $tabLinks.removeClass('active');
+                $tabLinks.eq(index).addClass('active');
+                $tabContents.removeClass('active');
+                $(that).parent().addClass('active');
+
+            });
+
+        },
+
+        // Unbind events that trigger methods
+        unbindEvents: function () {
+            this.$element.off('.' + this._name);
+        },
+
+        changeTabs: function (event, that, index) {
+            var plugin = this;
+            var index = $(that).index();
+
+            $(that).parent().children('.exopite-sof-tab-link').removeClass('active');
+            $(that).parent().parent().children('.exopite-sof-tab-content').removeClass('active');
+            $(that).addClass('active');
+            $(that).parent().parent().children('.exopite-sof-tab-content').eq(index).addClass('active');
+
+        },
+
+    };
+
+    $.fn[pluginName] = function (options) {
+        return this.each(function () {
+            if (!$.data(this, "plugin_" + pluginName)) {
+                $.data(this, "plugin_" + pluginName,
+                    new Plugin(this, options));
+            }
+        });
+    };
+
+})(jQuery, window, document);
+
 ; (function ($) {
     "use strict";
 
@@ -1439,6 +1528,7 @@ if (typeof throttle !== "function") {
         $('.exopite-sof-accordion').exopiteSOFAccordion();
         $('.exopite-sof-group').exopiteSOFRepeater();
         $('.exopite-sof-field-backup').exopiteImportExportAJAX();
+        $('.exopite-sof-tabs').exopiteTabs();
 
     });
 
