@@ -67,7 +67,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 
 			echo $this->element_before();
 
-			$unallows  = array( 'group', 'tab' );
+			$unallows  = array( 'group' );
 			$fields    = array_values( $this->field['fields'] );
 			$unique_id = ( ! empty( $this->unique ) ) ? $this->unique : $this->field['id'];
 
