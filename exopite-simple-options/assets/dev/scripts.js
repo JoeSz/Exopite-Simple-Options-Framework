@@ -531,6 +531,7 @@ if (typeof throttle !== "function") {
 
             this.bindEvents();
             this.updateTitle();
+            this.setMusterDisabled();
 
         },
 
@@ -597,6 +598,13 @@ if (typeof throttle !== "function") {
 
         },
 
+        setMusterDisabled: function () {
+            /**
+             * Mainly for nested elements (in our case: tab)
+             */
+            this.$element.find('.exopite-sof-cloneable__muster').find('[name]').prop('disabled', true);
+        },
+
         updateTitle: function () {
 
             this.$element.find('.exopite-sof-cloneable__wrapper').find('.exopite-sof-cloneable__item').each(function (index, el) {
@@ -606,10 +614,12 @@ if (typeof throttle !== "function") {
             });
 
         },
+
         escapeRegExp: function (stringToGoIntoTheRegex) {
             // https://stackoverflow.com/questions/17885855/use-dynamic-variable-string-as-regex-pattern-in-javascript/17886301#17886301
             return stringToGoIntoTheRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
         },
+
         updateNameIndex: function () {
 
             var fieldParentName = this.$element.find('.exopite-sof-cloneable__wrapper').data('name').replace("[REPLACEME]", "");
