@@ -563,7 +563,7 @@ if (typeof throttle !== "function") {
 
             plugin.$element.find('.exopite-sof-cloneable__item').on('input change blur', '[data-title=title]', function (event) {
 
-                plugin.updateTitleElement();
+                plugin.updateTitleElement($(this));
 
             });
 
@@ -605,7 +605,7 @@ if (typeof throttle !== "function") {
             this.$element.find('.exopite-sof-cloneable__muster').find('[name]').prop('disabled', true);
         },
 
-        updateTitleElement: function ($item) {
+        updateTitleElement: function ($element) {
 
             var $item = $element.closest('.exopite-sof-cloneable__item');
             var title = $item.find('[data-title=title]').first().val();
