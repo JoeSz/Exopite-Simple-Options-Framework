@@ -547,14 +547,14 @@ if (typeof throttle !== "function") {
 
             });
 
-            plugin.$element.on('click' + '.' + plugin._name, '.exopite-sof-cloneable--remove:not(.disabled)', function (e) {
+            plugin.$element.off().on('click' + '.' + plugin._name, '.exopite-sof-cloneable--remove:not(.disabled)', function (e) {
 
                 e.preventDefault();
                 plugin.remove.call(plugin, $(this));
 
             });
 
-            plugin.$element.on('click' + '.' + plugin._name, '.exopite-sof-cloneable--clone:not(.disabled)', function (e) {
+            plugin.$element.off().on('click' + '.' + plugin._name, '.exopite-sof-cloneable--clone:not(.disabled)', function (e) {
 
                 e.preventDefault();
                 plugin.addNew.call(plugin, $(this));
@@ -607,11 +607,10 @@ if (typeof throttle !== "function") {
 
         updateTitle: function () {
 
-            this.$element.find('.exopite-sof-cloneable__wrapper').find('.exopite-sof-cloneable__item').each(function (index, el) {
-                var title = $(el).find('[data-title=title]').val();
-                $(el).find('.exopite-sof-cloneable__text').text(title);
-                $(el).trigger('exopite-sof-field-group-item-title-updated');
-            });
+            var $item = $element.closest('.exopite-sof-cloneable__item');
+            var title = $item.find('[data-title=title]').first().val();
+            $item.children('.exopite-sof-cloneable__title').children('.exopite-sof-cloneable__text').text(title);
+            $item.trigger('exopite-sof-field-group-item-title-updated');
 
         },
 
