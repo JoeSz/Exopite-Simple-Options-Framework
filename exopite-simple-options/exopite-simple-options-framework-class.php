@@ -1435,8 +1435,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					// no break
 				case 'typography':
 					// no break
-				case 'tab':
-					// no break
 				case 'tap_list':
 					/**
 					 * Need to check array values.
@@ -1450,6 +1448,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 						}
 					}
 
+					break;
+				case 'tab':
+					// no break
+				case 'group':
+					/**
+					 * ToDos:
+					 * - recursive sanitize
+					 */
 					break;
 				case 'editor':
 					// no break
