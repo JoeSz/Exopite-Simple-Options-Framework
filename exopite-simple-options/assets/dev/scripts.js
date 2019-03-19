@@ -547,14 +547,14 @@ if (typeof throttle !== "function") {
 
             });
 
-            plugin.$element.off().on('click' + '.' + plugin._name, '.exopite-sof-cloneable--remove:not(.disabled)', function (e) {
+            plugin.$element.on('click' + '.' + plugin._name, '.exopite-sof-cloneable--remove:not(.disabled)', function (e) {
 
                 e.preventDefault();
                 plugin.remove.call(plugin, $(this));
 
             });
 
-            plugin.$element.off().on('click' + '.' + plugin._name, '.exopite-sof-cloneable--clone:not(.disabled)', function (e) {
+            plugin.$element.on('click' + '.' + plugin._name, '.exopite-sof-cloneable--clone:not(.disabled)', function (e) {
 
                 e.preventDefault();
                 plugin.addNew.call(plugin, $(this));
@@ -563,7 +563,7 @@ if (typeof throttle !== "function") {
 
             plugin.$element.find('.exopite-sof-cloneable__item').on('input change blur', '[data-title=title]', function (event) {
 
-                plugin.updateTitle();
+                plugin.updateTitleElement();
 
             });
 
@@ -605,12 +605,22 @@ if (typeof throttle !== "function") {
             this.$element.find('.exopite-sof-cloneable__muster').find('[name]').prop('disabled', true);
         },
 
-        updateTitle: function () {
+        updateTitleElement: function ($item) {
 
             var $item = $element.closest('.exopite-sof-cloneable__item');
             var title = $item.find('[data-title=title]').first().val();
             $item.children('.exopite-sof-cloneable__title').children('.exopite-sof-cloneable__text').text(title);
             $item.trigger('exopite-sof-field-group-item-title-updated');
+
+        },
+
+        updateTitle: function () {
+
+            this.$element.find('.exopite-sof-cloneable__wrapper').find('.exopite-sof-cloneable__item').each(function (index, el) {
+                var title = $(el).find('[data-title=title]').val();
+                $(el).find('.exopite-sof-cloneable__text').text(title);
+                $(el).trigger('exopite-sof-field-group-item-title-updated');
+            });
 
         },
 
@@ -1518,6 +1528,34 @@ if (typeof throttle !== "function") {
     "use strict";
 
     $(document).ready(function () {
+
+        /**
+         * Find-like method which masks any descendant
+         * branches matching the Mask argument.
+         *
+         * @link https://stackoverflow.com/questions/13305514/jquery-find-children-until-a-certain-threshold-element-is-encountered/24250365#24250365
+         */
+        $.fn.findExclude = function (Selector, Mask, result) {
+
+            // Default result to an empty jQuery object if not provided
+            var result = typeof result !== 'undefined' ?
+                result :
+                new jQuery();
+
+            // Iterate through all children, except those match Mask
+            this.children().each(function () {
+
+                var thisObject = jQuery(this);
+                if (thisObject.is(Selector))
+                    result.push(this);
+
+                // Recursively seek children without Mask
+                if (!thisObject.is(Mask))
+                    thisObject.findExclude(Selector, Mask, result);
+            });
+
+            return result;
+        }
 
         $('.exopite-sof-wrapper').exopiteSofManageDependencies();
         $('.exopite-sof-wrapper').exopiteSofSearch();
