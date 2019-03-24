@@ -5,7 +5,7 @@ Lightweight, easy to use Option Framework for WordPress Plugins and Themes and a
 ## Fast, easy and lightweight option/metabox form generator.
 
 - Author: Joe Szalai and raoabid
-- Version: 20190218
+- Version: 20190324
 - Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 - GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 - Author URL: https://joe.szalai.org
