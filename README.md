@@ -19,6 +19,10 @@ I need someting fast, easy and lightweight to generate option page and/or metabo
 
 I also love to create/code to have fun and leary every day someting new.
 
+This framework not designed to work on mobiles. It is however working except sorting and chosen dropdown (only design, the dropdown still working).
+I do not think that plugin or theme will be managed on mobile devices, tons of settings create a very loooong page in mobile, which - in my opinion -
+already make unuseable in mobile devices.
+
 For my theme I used to use CodeStar Framework, so I created similarly. Unfortunately CodeStar Framework based on static class, can not initialize multiple times and this is required for plugns. <br>
 (Ps. the new CodeStar (2.x) can be used multiple times, but only Options Frameworks are free.)
 
