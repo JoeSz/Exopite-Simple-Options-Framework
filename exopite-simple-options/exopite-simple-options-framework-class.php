@@ -980,7 +980,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				// Add the date picker script
 				wp_enqueue_script( 'jquery-ui-datepicker' );
 
-				wp_enqueue_script( 'jquery-ui-sortable' );
+				// wp_enqueue_script( 'jquery-ui-sortable' );
 
 				$scripts_styles = array(
 					array(
@@ -990,6 +990,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 							'jquery',
 							'jquery-ui-datepicker',
 							'wp-color-picker'
+						),
+					),
+					array(
+						'name' => 'jquery.sortable',
+						'fn'   => 'html5sortable.min.js',
+						'dep'  => array(
+							'jquery',
 						),
 					),
 					array(
@@ -1435,8 +1442,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					// no break
 				case 'typography':
 					// no break
-				case 'tab':
-					// no break
 				case 'tap_list':
 					/**
 					 * Need to check array values.
@@ -1444,12 +1449,19 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					// if( ! is_array( $value ) ) {
 					// 	maybe_unserialize( $value );
 					// }
-					if ( is_array( $value ) ) {
-						foreach( $value as &$item ) {
-							$item = sanitize_text_field( $item );
-						}
-					}
+					// if ( is_array( $value ) ) {
+					// 	foreach( $value as &$item ) {
+					// 		$item = sanitize_text_field( $item );
+					// 	}
+					// }
 
+					break;
+				case 'tab':
+					// no break
+				case 'group':
+					/**
+					 * This nested elements need recursive sanitation.
+					 */
 					break;
 				case 'editor':
 					// no break
