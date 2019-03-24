@@ -1,5 +1,7 @@
 # Exopite-Simple-Options-Framework
 
+Lightweight, easy to use Option Framework for WordPress Plugins and Themes and a Metabox Framework for post type meta boxes.
+
 ## Fast, easy and lightweight option/metabox form generator.
 
 - Author: Joe Szalai and raoabid
@@ -10,13 +12,27 @@
 - License: GNU General Public License v3 or later
 - License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-> ### NOTE
->
-> The Framework still in development stage. <br />
-> Documentation is still in-progress.
->
-> The Framework based on some CodeStar Framework, MetaBox.io code and design. The fields configs desgin also based on CodeStar Framework.
-I created this framework for plugins and metaboxes. Not for Themes. For Themes I recommend CodeStar Framework.
+### DESCRIPTION
+
+WHY?
+I need someting fast, easy and lightweight to generate option page and/or metabox for my plugins, themes and/or post types.
+
+I also love to create/code to have fun and leary every day someting new.
+
+For my theme I used to use CodeStar Framework, so I created similarly. Unfortunately CodeStar Framework based on static class, can not initialize multiple times and this is required for plugns. <br>
+(Ps. the new CodeStar (2.x) can be used multiple times, but only Options Frameworks are free.)
+
+#### Lightweight
+
+No ads, Files are loaded only when required. Minimum footprint.
+
+#### Integration
+
+Easy to integrate with any plugin, post type or WordPress theme.
+
+#### Open Source
+
+Exopite Simple Options is free and available on Github. Feel free to submit patches or add more features.
 
 ### IMPORTANT
 * As 2018-09-11 we have a new hooks name to meet WordPress standards.
@@ -25,26 +41,12 @@ from `unique[field-id]` to `unique[current_lang][field-id]` where:<br>
 if multilang plugin installed, then the selected language, otherwise WordPress installed language.<br>
 You can disable this with `'multilang' => false` option.
 
-### DESCRIPTION
-
-WHY?
-I need someting fast, easy and lightweight to generate option page and/or metabox for my plugins and/or post types.
-
-I also love to create/code to have fun and leary every day someting new.
-
-For my theme I use CodeStar Framework, so I created similarly. Unfortunately CodeStar Framework based on static class, can not initialize multiple times and this is required for plugns.
-
-#### Lightweight
-
-No ads, Files are loaded only when required. Minimum footprint.
-
-#### Integration
-
-Easy to integrate with any plugin or post type (even WordPress theme, but it is not designed to do so).
-
-#### Open Source
-
-Exopite Simple Options is free and available on Github. Feel free to submit patches or add more features.
+> ### NOTE
+>
+> The Framework still in development stage. <br />
+> Documentation is still in-progress.
+>
+> The Framework based on some CodeStar Framework, MetaBox.io code and design. The fields configs desgin also based on CodeStar Framework.
 
 ### FEATURES
 
@@ -97,6 +99,7 @@ https://wpquestions.com/Order_by_meta_key_where_value_is_serialized/7908<br>
 > to access its array properties too."
 
 ### Fields:
+- accordion
 - ACE editor
 - attached (Attached files/images/etc..., multiselect, AJAX delete. Metabox only.)
 - backup
@@ -108,7 +111,8 @@ https://wpquestions.com/Order_by_meta_key_where_value_is_serialized/7908<br>
 - content
 - date   (datepicker/html5)
 - editor (Trumbowyg or WYSIWYG WordPress Editor)
-- group  (Dynamically add groups. Repeatable and sortable (on/off). All fields are valid, except: group itself)
+- fieldset
+- group  (Dynamically add groups. Repeatable and sortable (on/off).)
 - hidden
 - image
 - image_select
@@ -139,8 +143,11 @@ Server
 Browsers
 
 * Modern Browsers
-* Firefox, Chrome, Safari, Opera, IE 10+
-* Tested on Firefox, Chrome, Edge, IE 11
+* Firefox, Chrome, Safari, Opera
+* Tested on Firefox, Chrome, Edge
+* IE is not supported anymore
+* jQuery Chosen and HTML5Sortable not working on mobile devices.
+https://caniuse.com/#feat=dragndrop
 
 ### INSTALLATION
 
@@ -296,7 +303,17 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as 
 * exopite_sof_form_menu_after (unique)
 * exopite_sof_form_meta_after (unique)
 
+### TODOS
+* Recursive santization for tab, fieldset and group field
+
 ### CHANGELOG
+
+= 20190324 - 2019-03-24 =
+* Add accordion field
+* Add fieldset field
+* Sortabe based on HTML5Sortable, better handling dynamically created nested sortable
+https://github.com/lukasoppermann/html5sortable
+* Tab and group field now are nestable
 
 = 20190316 - 2019-03-16 =
 * New design
