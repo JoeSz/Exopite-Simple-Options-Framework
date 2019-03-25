@@ -2883,3 +2883,10 @@ input[type="color"] {
 .exopite-sof-fieldset .exopite-sof-group-compact input[type="text"] {
     max-width: 100%;
 }
+.exopite-sof-cloneable--helper {
+    font-size: 14px;
+    color: #888;
+}
+.exopite-sof-cloneable--helper i:hover {
+    color: #444;
+}
