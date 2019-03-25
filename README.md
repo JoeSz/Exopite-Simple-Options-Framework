@@ -134,7 +134,9 @@ https://wpquestions.com/Order_by_meta_key_where_value_is_serialized/7908<br>
 - textarea
 - typography
 - upload (multiple, on post type -post, page, custom- you can attach uploaded to post)
-- video (mp4/oembed, eg.: youtube)
+- video (mp4/oembed, eg.: youtube,
+  embed handled by WordPress embed,
+  for complete list, see: https://codex.wordpress.org/Embeds)
 
 ### REQUIREMENTS
 
@@ -311,6 +313,9 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as 
 * Recursive santization for tab, fieldset and group field
 
 ### CHANGELOG
+
+= 20190325 - 2019-03-25 =
+* Fix Trumbowyg, colorpicker and datepicker not working on dynamically added group elements.
 
 = 20190324 - 2019-03-24 =
 * Add accordion field
