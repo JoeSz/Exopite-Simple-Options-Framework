@@ -821,7 +821,7 @@ jQuery.fn.findExclude = function (selector, mask, result) {
              * Mainly for nested elements (in our case: tab)
              * This will prevent dinamically added muster elements to save.
              */
-            this.$element.find('.exopite-sof-cloneable__muster').find('[name]').prop('disabled', true);
+            this.$element.find('.exopite-sof-cloneable__muster').find('[name]').prop('disabled', true).addClass('disabled');
 
         },
 
@@ -896,7 +896,7 @@ jQuery.fn.findExclude = function (selector, mask, result) {
             $cloned.removeClass('exopite-sof-cloneable__muster');
             $cloned.removeClass('exopite-sof-cloneable__muster--hidden');
             $cloned.removeClass('exopite-sof-accordion--hidden');
-            $cloned.find('[disabled]').attr('disabled', false);
+            $cloned.findExclude('[disabled]', '.exopite-sof-cloneable__muster').attr('disabled', false).removeClass('disabled');;
 
             plugin.$element.trigger('exopite-sof-field-group-item-added-before', [$cloned, $group]);
 
