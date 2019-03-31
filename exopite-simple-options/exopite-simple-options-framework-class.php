@@ -2,7 +2,7 @@
 	die;
 } // Cannot access pages directly.
 /**
- * Last edit: 2019-02-18
+ * Last edit: 2019-03-31
  *
  * INFOS AND TODOS:
  *
@@ -162,7 +162,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				return;
 			}
 
-			$this->version = '20190218';
+			$this->version = '20190331';
 
 			// TODO: Do sanitize $config['id']
 			$this->unique = $config['id'];
