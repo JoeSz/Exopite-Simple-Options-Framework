@@ -5,7 +5,7 @@ Lightweight, easy to use Option Framework for WordPress Plugins and Themes and a
 ## Fast, easy and lightweight option/metabox form generator.
 
 - Author: Joe Szalai and raoabid
-- Version: 20190324
+- Version: 20190331
 - Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 - GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 - Author URL: https://joe.szalai.org
@@ -309,10 +309,24 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as 
 * exopite_sof_form_menu_after (unique)
 * exopite_sof_form_meta_after (unique)
 
-### TODOS
-* Recursive santization for tab, fieldset and group field
+### TODOS/KNOWN ISSUES
+* Recursive santization for tab, fieldset and group field<br>
+  This is a little bit complexer work and I do not need them in the moment,
+  so it may take a while. Of course, your welcome to write it. Then please make a pull request ;)
 
+  However, you can sanitize the values yourself with the following filter hooks:
+    - Both options and metas:<br>
+      `exopite_sof_save_options`
+    - Options only:<br>
+      `exopite_sof_save_menu_options`
+    - Meta only:<br>
+      `exopite_sof_save_meta_options`
+* Switcher and (single) checkbox not saved in nested groups if default is yes and user select no, because it is not sent via $_POST and recursive santization ont implemented yet for groups.
+<br>Nevertheless, you can sanitize them yourself. See previous point.
 ### CHANGELOG
+
+= 20190331 - 2019-03-31 =
+* Move sanitization functions to a separate class.
 
 = 20190325 - 2019-03-25 =
 * Fix Trumbowyg, colorpicker and datepicker not working on dynamically added group elements.
