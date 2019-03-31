@@ -162,9 +162,12 @@ https://caniuse.com/#feat=dragndrop
 * Create options and fields nad hook to 'init'.
 
 #### Complete example with all available fields:
-https://github.com/JoeSz/WordPress-Plugin-Boilerplate-Tutorial/blob/436ddfa388f0a99c6a6756fc3f8ba7a4e84d22f7/plugin-name/admin/class-plugin-name-admin.php#L117
+https://github.com/JoeSz/WordPress-Plugin-Boilerplate-Tutorial/blob/ac49982cd61737a214a3b6a25b387034a9709321/plugin-name/admin/class-plugin-name-admin.php#L152
 
 #### Example:
+#####
+You could download, install and activate https://github.com/JoeSz/WordPress-Plugin-Boilerplate-Tutorial plugin, then you will see all the options and how to use them.
+
 ##### Crete a menu or meta
 ```php
 /**
@@ -278,7 +281,7 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-plugin-slug', true ); // arr
 $my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as single, type mixed
 ```
 
-![](assets/screenshot-4.jpg)
+![](assets/screenshot-5.jpg)
 ![](assets/screenshot-3.png)
 
 ### HOOKS
