@@ -1154,6 +1154,14 @@ jQuery.fn.findExclude = function (selector, mask, result) {
             $cloned.exopiteSofManageDependencies('sub');
             $cloned.find('.exopite-sof-cloneable__content').removeAttr("style").show();
 
+            $cloned.find('.exopite-sof-font-field').each(function(index,el){
+
+                if (!$(el).children('label').children('select').is(":disabled")) {
+                    $(el).exopiteFontPreview();
+                }
+
+            });
+
             plugin.$element.trigger('exopite-sof-field-group-item-added-after', [$cloned, $group]);
         },
 
@@ -1697,7 +1705,6 @@ jQuery.fn.findExclude = function (selector, mask, result) {
 
     $(document).ready(function () {
 
-        // $('.exopite-sof-wrapper').exopiteSOFHelpers();
         $('.exopite-sof-wrapper').exopiteSofManageDependencies();
         $('.exopite-sof-wrapper').exopiteSofSearch();
         $('.exopite-sof-sub-dependencies').exopiteSofManageDependencies('sub');
@@ -1711,7 +1718,13 @@ jQuery.fn.findExclude = function (selector, mask, result) {
         });
 
         $('.exopite-sof-content-js').exopiteOptionsNavigation();
-        $('.exopite-sof-font-field').exopiteFontPreview();
+        $('.exopite-sof-wrapper').find('.exopite-sof-font-field').each(function(index,el){
+
+            if (!$(el).children('label').children('select').is(":disabled")) {
+                $(el).exopiteFontPreview();
+            }
+
+        });
         $('.exopite-sof-group').exopiteSOFTinyMCE();
         $('.exopite-sof-accordion').exopiteSOFAccordion();
         $('.exopite-sof-group').exopiteSOFRepeater();
