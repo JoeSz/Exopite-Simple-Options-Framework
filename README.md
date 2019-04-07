@@ -313,7 +313,8 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as 
 * exopite_sof_form_meta_after (unique)
 
 ### TODOS/KNOWN ISSUES
-* Font preview and color picker not working in groups after clone
+* Color picker not working in groups after clone
+  (may change color picker)
 
 ### CHANGELOG
 
@@ -322,6 +323,7 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as 
 * Fix: switcher, select and (single) checkbox not saved in nested groups if default is yes and user select no.
 * Fix: Group title apply only current group
 * Fix: Font preview not working in groups, if it is newly created (with the add button)
+* Fix: WP Editor not working in groups after clone
 
 = 20190331 - 2019-03-31 =
 * Move sanitization functions to a separate class.

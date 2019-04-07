@@ -607,11 +607,22 @@ jQuery.fn.findExclude = function (selector, mask, result) {
 
             var $group = plugin.$element.parents('.exopite-sof-field-group');
 
-            plugin.$element.on('exopite-sof-field-group-item-added-after', function (event, $cloned) {
+            plugin.$element.on('exopite-sof-field-group-item-inserted-after', function (event, $cloned) {
+                $cloned.find('.tinymce-js').each(function (index, el) {
+                    var nextEditorID = plugin.musterID + (parseInt($group.find('.tinymce-js').not(':disabled').length) - 1);
+                    $(el).attr('id', nextEditorID);
+                    tinyMCE.execCommand('mceAddEditor', true, nextEditorID);
+                });
+
+            });
+
+            plugin.$element.on('exopite-sof-field-group-item-cloned-after', function (event, $cloned) {
 
                 $cloned.find('.tinymce-js').each(function (index, el) {
                     var nextEditorID = plugin.musterID + (parseInt($group.find('.tinymce-js').not(':disabled').length) - 1);
                     $(el).attr('id', nextEditorID);
+                    $(el).show();
+                    $(el).prev('.mce-tinymce').remove();
                     tinyMCE.execCommand('mceAddEditor', true, nextEditorID);
                 });
 
@@ -1170,6 +1181,12 @@ jQuery.fn.findExclude = function (selector, mask, result) {
             });
 
             plugin.$element.trigger('exopite-sof-field-group-item-added-after', [$cloned, $group]);
+            if (is_cloned) {
+                plugin.$element.trigger('exopite-sof-field-group-item-cloned-after', [$cloned, $group]);
+            } else {
+                plugin.$element.trigger('exopite-sof-field-group-item-inserted-after', [$cloned, $group]);
+            }
+
         },
 
     };
