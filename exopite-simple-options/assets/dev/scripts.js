@@ -215,6 +215,14 @@ jQuery.fn.findExclude = function (selector, mask, result) {
 
         },
 
+        /**
+         * https://thoughtbot.com/blog/ridiculously-simple-ajax-uploads-with-formdata
+         * https://stackoverflow.com/questions/17066875/how-to-inspect-formdata
+         * https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData
+         * https://developer.mozilla.org/en-US/docs/Web/API/FormData
+         * https://stackoverflow.com/questions/2019608/pass-entire-form-as-data-in-jquery-ajax-function
+         * https://stackoverflow.com/questions/33487360/formdata-and-checkboxes <- upvote?
+         */
         submitOptions: function (event) {
 
             event.preventDefault();
@@ -229,12 +237,46 @@ jQuery.fn.findExclude = function (selector, mask, result) {
                 tinyMCE.triggerSave();
             }
 
+            var formElement = $(this)[0];
+            var formData = new FormData(formElement);
+
+            var formName = $('.exopite-sof-form-js').attr('name');
+
             /**
-             * Ajax save submit
-             *
-             * @link https://www.wpoptimus.com/434/save-plugin-theme-setting-options-ajax-wordpress/
+             * 2.) Via ajaxSubmit
              */
+            var $that = $(this);
             $(this).ajaxSubmit({
+                beforeSubmit: function(arr, $form, options) {
+                    // The array of form data takes the following form:
+                    // [ { name: 'username', value: 'jresig' }, { name: 'password', value: 'secret' } ]
+                     // https://jsonformatter.curiousconcept.com/
+
+                    $that.find('[name]').not(':disabled').each(function (index, el) {
+                        if ($(el).prop('nodeName') == 'INPUT' && $(el).attr('type') == 'checkbox' && !$(el).is(":checked") && !$(el).attr('name').endsWith('[]')) {
+                            // not checked checkbox
+                            var element = {
+                                "name": $(el).attr('name'),
+                                "value": "no",
+                                "type": "checkbox",
+                                // "required":false
+                            };
+                            arr.push(element);
+                        }
+                        if ($(el).prop('nodeName') == 'SELECT' && $(el).val() == null) {
+                            // multiselect is empty
+                            var element = {
+                                "name": $(el).attr('name'),
+                                "value": "",
+                                "type": "select",
+                                // "required":false
+                            };
+                            arr.push(element);
+                        }
+                    });
+
+                    // return false to cancel submit
+                },
                 success: function () {
                     $submitButtons.val(currentButtonString).attr('disabled', false);
                     $ajaxMessage.html(savedButtonString).addClass('success show');
@@ -250,6 +292,7 @@ jQuery.fn.findExclude = function (selector, mask, result) {
                     $ajaxMessage.html('Error! See console!').addClass('error show');
                 },
             });
+
             return false;
 
         }
@@ -605,6 +648,183 @@ jQuery.fn.findExclude = function (selector, mask, result) {
 })(jQuery, window, document);
 
 /**
+ * Exopite SOF Font Field Preview
+ */
+; (function ($, window, document, undefined) {
+
+    var pluginName = "exopiteFontPreview";
+
+    // The actual plugin constructor
+    function Plugin(element, options) {
+
+        this.element = element;
+        this._name = pluginName;
+        this.$element = $(element);
+        this.$nav = this.$element.find('.exopite-sof-nav');
+
+        this.init();
+
+    }
+
+    Plugin.prototype = {
+
+        init: function () {
+            var plugin = this;
+
+            var $sizeHeightWrapper = this.$element.children('.exopite-sof-typography-size-height');
+            // var $colorWrapper = this.$element.children('.exopite-sof-typography-color');
+            plugin.preview = this.$element.children('.exopite-sof-font-preview');
+            // plugin.fontColor = $colorWrapper.find( ' > .wp-picker-container > .wp-picker-input-wrap > label > .font-color-js' );
+            plugin.fontSize = $sizeHeightWrapper.children('span').children('.font-size-js');
+            plugin.lineHeight = $sizeHeightWrapper.children('span').children('.line-height-js');
+            // plugin.lineHeight = this.$element.find( '.line-height-js' );
+            plugin.fontFamily = this.$element.children('.exopite-sof-typography-family').children('.exopite-sof-typo-family');
+            plugin.fontWeight = this.$element.children('.exopite-sof-typography-variant').children('.exopite-sof-typo-variant');
+
+            // Set current values to preview
+            this.loadGoogleFont();
+            this.updatePreview();
+
+            this.bindEvents();
+
+        },
+
+        // Bind events that trigger methods
+        bindEvents: function () {
+            var plugin = this;
+
+            plugin.$element.on('change' + '.' + plugin._name, '.font-size-js, .line-height-js, .font-color-js, .exopite-sof-typo-variant', function (e) {
+                e.preventDefault();
+                plugin.updatePreview();
+            });
+
+            plugin.$element.on('change' + '.' + plugin._name, '.exopite-sof-typo-family', function (e) {
+                e.preventDefault();
+                plugin.loadGoogleFont();
+            });
+
+
+        },
+
+        // Unbind events that trigger methods
+        unbindEvents: function () {
+            this.$element.off('.' + this._name);
+        },
+        // Remove plugin instance completely
+        destroy: function() {
+            this.unbindEvents();
+            this.$element.removeData();
+        },
+        updatePreview: function () {
+            var plugin = this;
+            var fontWeightStyle = plugin.calculateFontWeight(plugin.fontWeight.find(':selected').text());
+            // Update preiew
+            plugin.preview.css({
+                'font-size': plugin.fontSize.val() + 'px',
+                'line-height': plugin.lineHeight.val() + 'px',
+                'font-weight': fontWeightStyle.fontWeightValue,
+                'font-style': fontWeightStyle.fontStyleValue
+            });
+        },
+        updateVariants: function (variants) {
+            var plugin = this;
+            var variantsArray = variants.split('|');
+            var selected = plugin.fontWeight.children('option:selected').val();
+            plugin.fontWeight.empty();
+            $.each(variantsArray, function (key, value) {
+                var $option = $("<option></option>").attr("value", value).text(value);
+                plugin.fontWeight.append($option);
+                if (value == selected) {
+                    $option.attr('selected', 'selected');
+                }
+            });
+            plugin.fontWeight.trigger("chosen:updated");
+        },
+        loadGoogleFont: function () {
+            var plugin = this;
+            var variants = plugin.fontFamily.find(":selected").data('variants');
+
+            plugin.updateVariants(variants);
+
+            var font = plugin.fontFamily.val();
+            if (!font) return;
+            var href = '//fonts.googleapis.com/css?family=' + font + ':' + variants.replace(/\|/g, ',');
+            var parentName = plugin.$element.find('.exopite-sof-font-field-js').data('id');
+            var html = '<link href="' + href + '" class="cs-font-preview-' + parentName + '" rel="stylesheet" type="text/css" />';
+
+            if ($('.cs-font-preview-' + parentName).length > 0) {
+                $('.cs-font-preview-' + parentName).attr('href', href).load();
+            } else {
+                $('head').append(html).load();
+            }
+
+            // Update preiew
+            plugin.preview.css('font-family', font).css('font-weight', '400');
+
+        },
+        calculateFontWeight: function (fontWeight) {
+            var fontWeightValue = '400';
+            var fontStyleValue = 'normal';
+
+            switch (fontWeight) {
+                case '100':
+                    fontWeightValue = '100';
+                    break;
+                case '100italic':
+                    fontWeightValue = '100';
+                    fontStyleValue = 'italic';
+                    break;
+                case '300':
+                    fontWeightValue = '300';
+                    break;
+                case '300italic':
+                    fontWeightValue = '300';
+                    fontStyleValue = 'italic';
+                    break;
+                case '500':
+                    fontWeightValue = '500';
+                    break;
+                case '500italic':
+                    fontWeightValue = '500';
+                    fontStyleValue = 'italic';
+                    break;
+                case '700':
+                    fontWeightValue = '700';
+                    break;
+                case '700italic':
+                    fontWeightValue = '700';
+                    fontStyleValue = 'italic';
+                    break;
+                case '900':
+                    fontWeightValue = '900';
+                    break;
+                case '900italic':
+                    fontWeightValue = '900';
+                    fontStyleValue = 'italic';
+                    break;
+                case 'italic':
+                    fontStyleValue = 'italic';
+                    break;
+            }
+
+            return { fontWeightValue, fontStyleValue };
+        },
+
+
+    };
+
+    $.fn[pluginName] = function (options) {
+        return this.each(function () {
+            if (!$.data(this, "plugin_" + pluginName)) {
+                $.data(this, "plugin_" + pluginName,
+                    new Plugin(this, options));
+            }
+        });
+    };
+
+})(jQuery, window, document);
+
+/**
  * Exopite SOF Repeater
  */
 ; (function ($, window, document, undefined) {
@@ -836,10 +1056,10 @@ jQuery.fn.findExclude = function (selector, mask, result) {
 
         updateTitle: function () {
 
-            this.$element.find('.exopite-sof-cloneable__wrapper').find('.exopite-sof-cloneable__item').each(function (index, el) {
-                var title = $(el).find('[data-title=title]').val();
+            this.$element.find('.exopite-sof-cloneable__wrapper').find('.exopite-sof-cloneable__item').find('[data-title=title]').each(function (index, el) {
+                var title = $(el).val();
                 if (title) {
-                    $(el).find('.exopite-sof-cloneable__text').text(title);
+                    $(el).closest('.exopite-sof-cloneable__item').children('.exopite-sof-cloneable__title').children('.exopite-sof-cloneable__text').text(title);
                 }
 
                 $(el).trigger('exopite-sof-field-group-item-title-updated');
@@ -1173,171 +1393,6 @@ jQuery.fn.findExclude = function (selector, mask, result) {
             }
 
         },
-
-    };
-
-    $.fn[pluginName] = function (options) {
-        return this.each(function () {
-            if (!$.data(this, "plugin_" + pluginName)) {
-                $.data(this, "plugin_" + pluginName,
-                    new Plugin(this, options));
-            }
-        });
-    };
-
-})(jQuery, window, document);
-
-/**
- * Exopite SOF Font Field Preview
- */
-; (function ($, window, document, undefined) {
-
-    var pluginName = "exopiteFontPreview";
-
-    // The actual plugin constructor
-    function Plugin(element, options) {
-
-        this.element = element;
-        this._name = pluginName;
-        this.$element = $(element);
-        this.$nav = this.$element.find('.exopite-sof-nav');
-
-        this.init();
-
-    }
-
-    Plugin.prototype = {
-
-        init: function () {
-            var plugin = this;
-
-            plugin.preview = this.$element.find('.exopite-sof-font-preview');
-            plugin.fontColor = this.$element.find( '.font-color-js' );
-            plugin.fontSize = this.$element.find( '.font-size-js' );
-            plugin.lineHeight = this.$element.find( '.line-height-js' );
-            plugin.fontFamily = this.$element.find( '.exopite-sof-typo-family' );
-            plugin.fontWeight = this.$element.find( '.exopite-sof-typo-variant' );
-
-            // Set current values to preview
-            this.updatePreview();
-            this.loadGoogleFont();
-
-            this.bindEvents();
-
-        },
-
-        // Bind events that trigger methods
-        bindEvents: function () {
-            var plugin = this;
-
-            plugin.$element.on('change' + '.' + plugin._name, '.font-size-js, .line-height-js, .font-color-js, .exopite-sof-typo-variant', function (e) {
-                e.preventDefault();
-                plugin.updatePreview();
-            });
-
-            plugin.$element.on('change' + '.' + plugin._name, '.exopite-sof-typo-family', function (e) {
-                e.preventDefault();
-                plugin.loadGoogleFont();
-            });
-
-
-        },
-
-        // Unbind events that trigger methods
-        unbindEvents: function () {
-            this.$element.off('.' + this._name);
-        },
-        updatePreview: function () {
-            var plugin = this;
-            var fontWeightStyle = plugin.calculateFontWeight(plugin.fontWeight.find(':selected').text());
-            // Update preiew
-            plugin.preview.css({
-                'font-size': plugin.fontSize.val() + 'px',
-                'line-height': plugin.lineHeight.val() + 'px',
-                'font-weight': fontWeightStyle.fontWeightValue,
-                'font-style': fontWeightStyle.fontStyleValue
-            });
-        },
-        updateVariants: function (variants) {
-            var plugin = this;
-            var variantsArray = variants.split('|');
-            plugin.fontWeight.empty();
-            $.each(variantsArray, function (key, value) {
-                plugin.fontWeight.append($("<option></option>").attr("value", value).text(value));
-            });
-            plugin.fontWeight.val('regular');
-            plugin.fontWeight.trigger("chosen:updated");
-        },
-        loadGoogleFont: function () {
-            var plugin = this;
-            var variants = plugin.fontFamily.find(":selected").data('variants');
-
-            plugin.updateVariants(variants);
-
-            var font = plugin.fontFamily.val();
-            if (!font) return;
-            var href = '//fonts.googleapis.com/css?family=' + font + ':' + variants.replace(/\|/g, ',');
-            var parentName = plugin.$element.find('.exopite-sof-font-field-js').data('id');
-            var html = '<link href="' + href + '" class="cs-font-preview-' + parentName + '" rel="stylesheet" type="text/css" />';
-
-            if ( $( '.cs-font-preview-' + parentName ).length > 0 ) {
-                $( '.cs-font-preview-' + parentName ).attr( 'href', href ).load();
-            } else {
-                $('head').append( html ).load();
-            }
-
-            // Update preiew
-            plugin.preview.css('font-family', font).css('font-weight', '400');
-
-        },
-        calculateFontWeight: function ( fontWeight ) {
-            var fontWeightValue = '400';
-            var fontStyleValue = 'normal';
-
-            switch( fontWeight ) {
-                case '100':
-                    fontWeightValue = '100';
-                    break;
-                case '100italic':
-                    fontWeightValue = '100';
-                    fontStyleValue = 'italic';
-                    break;
-                case '300':
-                    fontWeightValue = '300';
-                    break;
-                case '300italic':
-                    fontWeightValue = '300';
-                    fontStyleValue = 'italic';
-                    break;
-                case '500':
-                    fontWeightValue = '500';
-                    break;
-                case '500italic':
-                    fontWeightValue = '500';
-                    fontStyleValue = 'italic';
-                    break;
-                case '700':
-                    fontWeightValue = '700';
-                    break;
-                case '700italic':
-                    fontWeightValue = '700';
-                    fontStyleValue = 'italic';
-                    break;
-                case '900':
-                    fontWeightValue = '900';
-                    break;
-                case '900italic':
-                    fontWeightValue = '900';
-                    fontStyleValue = 'italic';
-                    break;
-                case 'italic':
-                    fontStyleValue = 'italic';
-                    break;
-            }
-
-            return { fontWeightValue, fontStyleValue };
-        },
-
 
     };
 
