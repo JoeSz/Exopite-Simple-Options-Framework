@@ -221,7 +221,7 @@ jQuery.fn.findExclude = function (selector, mask, result) {
          * https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData
          * https://developer.mozilla.org/en-US/docs/Web/API/FormData
          * https://stackoverflow.com/questions/2019608/pass-entire-form-as-data-in-jquery-ajax-function
-         * https://stackoverflow.com/questions/33487360/formdata-and-checkboxes <- upvote?
+         * https://stackoverflow.com/questions/33487360/formdata-and-checkboxes
          */
         submitOptions: function (event) {
 
@@ -446,7 +446,7 @@ jQuery.fn.findExclude = function (selector, mask, result) {
  */
 ; (function ($, window, document, undefined) {
 
-    /*
+    /**
      * A jQuery Plugin Boilerplate
      *
      * https://github.com/johndugan/jquery-plugin-boilerplate/blob/master/jquery.plugin-boilerplate.js
@@ -713,7 +713,10 @@ jQuery.fn.findExclude = function (selector, mask, result) {
         // Remove plugin instance completely
         destroy: function() {
             this.unbindEvents();
-            this.$element.removeData();
+            this.$element.removeData('plugin_' + this._name);
+            // this.element.removeData();
+            this.element = null;
+            this.$element = null;
         },
         updatePreview: function () {
             var plugin = this;
@@ -1121,6 +1124,10 @@ jQuery.fn.findExclude = function (selector, mask, result) {
             plugin.$element.trigger('exopite-sof-field-group-item-added-before', [$cloned, $group]);
 
             if (is_cloned) {
+
+                // Remove font preview plugin
+                $cloned.find('.exopite-sof-font-field').unbind().removeData('plugin_exopiteFontPreview');
+
                 // Insert after clicked element
                 $cloned.insertAfter($element.closest('.exopite-sof-cloneable__item'));
                 $wrapper = $element.closest('.exopite-sof-cloneable__wrapper');
