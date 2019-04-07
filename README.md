@@ -5,7 +5,7 @@ Lightweight, easy to use Option Framework for WordPress Plugins and Themes and a
 ## Fast, easy and lightweight option/metabox form generator.
 
 - Author: Joe Szalai and raoabid
-- Version: 20190331
+- Version: 20190407
 - Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 - GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 - Author URL: https://joe.szalai.org
@@ -61,7 +61,7 @@ You can disable this with `'multilang' => false` option.
 - Files are loaded only when required.
 - Minimum footprint.
 - Multilang support for WPML, Polylang, WP Multilang and qTranslate-X.
-- Availability to save post meta as simple (each setting has it's own custom field) istead of an array.
+- Availability to save post meta as simple (each setting has it's own custom field) instead of an array.
 
 #### Why did we add options to save meta as "simple"
 Simple options is stored az induvidual meta key, value pair, otherwise it is stored in an array.
@@ -313,20 +313,14 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as 
 * exopite_sof_form_meta_after (unique)
 
 ### TODOS/KNOWN ISSUES
-* Recursive santization for tab, fieldset and group field<br>
-  This is a little bit complexer work and I do not need them in the moment,
-  so it may take a while. Of course, your welcome to write it. Then please make a pull request ;)
+* Font preview not working in groups, if it is newly created (with the add button)
 
-  However, you can sanitize the values yourself with the following filter hooks:
-    - Both options and metas:<br>
-      `exopite_sof_save_options`
-    - Options only:<br>
-      `exopite_sof_save_menu_options`
-    - Meta only:<br>
-      `exopite_sof_save_meta_options`
-* Switcher and (single) checkbox not saved in nested groups if default is yes and user select no, because it is not sent via $_POST and recursive santization ont implemented yet for groups.
-<br>Nevertheless, you can sanitize them yourself. See previous point.
 ### CHANGELOG
+
+= 20190407 - 2019-04-07 =
+* Add: recursive santization for tab, fieldset and group field.
+* Fix: switcher, select and (single) checkbox not saved in nested groups if default is yes and user select no.
+* Fix: Group title apply only current group
 
 = 20190331 - 2019-03-31 =
 * Move sanitization functions to a separate class.
