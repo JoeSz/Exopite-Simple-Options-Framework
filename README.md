@@ -319,11 +319,12 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as 
 ### CHANGELOG
 
 = 20190407 - 2019-04-07 =
-* Add: recursive santization for tab, fieldset and group field.
-* Fix: switcher, select and (single) checkbox not saved in nested groups if default is yes and user select no.
-* Fix: Group title apply only current group
-* Fix: Font preview not working in groups, if it is newly created (with the add button)
-* Fix: WP Editor not working in groups after clone
+* Add recursive santization for tab, fieldset and group field.
+* Fix switcher, select and (single) checkbox not saved in nested groups if default is yes and user select no.
+* Fix group title (should) apply only current group
+* Fix font preview not working in groups, if it is newly created (with the add button)
+* Fix WP Editor not working in groups after clone
+* Fix Chosen not working in groups after clone
 
 = 20190331 - 2019-03-31 =
 * Move sanitization functions to a separate class.
