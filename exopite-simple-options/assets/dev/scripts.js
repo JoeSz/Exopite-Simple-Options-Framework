@@ -683,9 +683,9 @@ jQuery.fn.findExclude = function (selector, mask, result) {
             var plugin = this;
 
             var $sizeHeightWrapper = this.$element.children('.exopite-sof-typography-size-height');
-            // var $colorWrapper = this.$element.children('.exopite-sof-typography-color');
+            var $colorWrapper = this.$element.children('.exopite-sof-typography-color');
             plugin.preview = this.$element.children('.exopite-sof-font-preview');
-            // plugin.fontColor = $colorWrapper.find( ' > .wp-picker-container > .wp-picker-input-wrap > label > .font-color-js' );
+            plugin.fontColor = $colorWrapper.find('.font-color-js').first();
             plugin.fontSize = $sizeHeightWrapper.children('span').children('.font-size-js');
             plugin.lineHeight = $sizeHeightWrapper.children('span').children('.line-height-js');
             // plugin.lineHeight = this.$element.find( '.line-height-js' );
@@ -695,6 +695,7 @@ jQuery.fn.findExclude = function (selector, mask, result) {
             // Set current values to preview
             this.loadGoogleFont();
             this.updatePreview();
+            this.setColorOnStart();
 
             this.bindEvents();
 
@@ -728,6 +729,11 @@ jQuery.fn.findExclude = function (selector, mask, result) {
             // this.element.removeData();
             this.element = null;
             this.$element = null;
+        },
+        setColorOnStart: function() {
+            var plugin = this;
+            var color = plugin.fontColor.val();
+            plugin.preview.css({ 'color': color });
         },
         updatePreview: function () {
             var plugin = this;
