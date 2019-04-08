@@ -26,6 +26,54 @@ already make unuseable in mobile devices.
 For my theme I used to use CodeStar Framework, so I created similarly. Unfortunately CodeStar Framework based on static class, can not initialize multiple times and this is required for plugns. <br>
 (Ps. the new CodeStar (2.x) can be used multiple times, but only Options Frameworks are free.)
 
+### FEATURES
+
+- Easy field generator for plugin options for metabox for any post type.
+- All field support callback on default value, content callback for content and notice field.
+- Dependency handling, also for section tabs (only in tabbed=true).
+- No ads, and never will.
+- Files are loaded only when required.
+- Minimum footprint.
+- Multilang support for WPML, Polylang, WP Multilang and qTranslate-X.
+- Availability to save post meta as simple (each setting has it's own custom field) instead of an array.
+
+### Fields:
+- accordion
+- ACE editor
+- attached (Attached files/images/etc..., multiselect, AJAX delete. Metabox only.)
+- backup
+- button
+- button_bar
+- card
+- checkbox
+- color  (rgb/rgba/html5)
+- color_minicolor
+- content
+- date   (datepicker/html5)
+- editor (Trumbowyg or WYSIWYG WordPress Editor)
+- fieldset
+- group  (Dynamically add groups. Repeatable, nestable and sortable (on/off).)
+- hidden
+- image
+- image_select
+- meta
+- notice
+- number
+- password
+- radio
+- range
+- select (single/multiselect + posttype)
+- switcher
+- tab (nestable)
+- tap_list
+- text
+- textarea
+- typography
+- upload (multiple, on post type -post, page, custom- you can attach uploaded to post)
+- video (mp4/oembed, eg.: youtube,
+  embed handled by WordPress embed,
+  for complete list, see: https://codex.wordpress.org/Embeds)
+
 #### Lightweight
 
 No ads, Files are loaded only when required. Minimum footprint.
@@ -51,17 +99,6 @@ You can disable this with `'multilang' => false` option.
 > Documentation is still in-progress.
 >
 > The Framework based on some CodeStar Framework, MetaBox.io code and design. The fields configs desgin also based on CodeStar Framework.
-
-### FEATURES
-
-- Easy field generator for plugin options for metabox for any post type.
-- All field support callback on default value, content callback for content and notice field.
-- Dependency handling, also for section tabs (only in tabbed=true).
-- No ads, and never will.
-- Files are loaded only when required.
-- Minimum footprint.
-- Multilang support for WPML, Polylang, WP Multilang and qTranslate-X.
-- Availability to save post meta as simple (each setting has it's own custom field) instead of an array.
 
 #### Why did we add options to save meta as "simple"
 Simple options is stored az induvidual meta key, value pair, otherwise it is stored in an array.
@@ -101,42 +138,6 @@ https://wpquestions.com/Order_by_meta_key_where_value_is_serialized/7908<br>
 > Instead, save serialization for data that you do not intend to query in that nature, but instead would only access in
 > a passive fashion by the direct WP API call get_post_meta() - from that function you can unpack a serialized entry
 > to access its array properties too."
-
-### Fields:
-- accordion
-- ACE editor
-- attached (Attached files/images/etc..., multiselect, AJAX delete. Metabox only.)
-- backup
-- button
-- button_bar
-- card
-- checkbox
-- color  (rgb/rgba/html5)
-- content
-- date   (datepicker/html5)
-- editor (Trumbowyg or WYSIWYG WordPress Editor)
-- fieldset
-- group  (Dynamically add groups. Repeatable and sortable (on/off).)
-- hidden
-- image
-- image_select
-- meta
-- notice
-- number
-- password
-- radio
-- range
-- select (single/multiselect + posttype)
-- switcher
-- tab
-- tap_list
-- text
-- textarea
-- typography
-- upload (multiple, on post type -post, page, custom- you can attach uploaded to post)
-- video (mp4/oembed, eg.: youtube,
-  embed handled by WordPress embed,
-  for complete list, see: https://codex.wordpress.org/Embeds)
 
 ### REQUIREMENTS
 
