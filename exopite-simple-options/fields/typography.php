@@ -142,7 +142,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_typography' ) ) {
 
 				$field_color = array(
 					'id'      => 'color',
-                    'type'    => 'color',
+                    'type'    => 'color_minicolor',
                     'rgba'   => true,
                     'default' =>  ( isset( $this->field['default']['color'] ) ) ? $this->field['default']['color'] : '',
 					// 'before'  => 'Color ',
