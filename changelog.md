@@ -1,6 +1,9 @@
 ### CHANGELOG
 
-= 20190407 - 2019-04-08 =
+= 20190409 - 2019-04-09 =
+* Set minicolor az default colorpicker
+
+= 20190408 - 2019-04-08 =
 * Fix color picker not working in groups after clone:<br>
 Add new colorpicker. Minicolor https://github.com/claviska/jquery-minicolors
 
