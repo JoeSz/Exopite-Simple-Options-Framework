@@ -47,7 +47,7 @@ For my theme I used to use CodeStar Framework, so I created similarly. Unfortuna
 - card
 - checkbox
 - color  (rgb/rgba/html5)
-- color_minicolor
+- color_wp (rgb/rgba, WordPress Iris Color Picker, not working with clone)
 - content
 - date   (datepicker/html5)
 - editor (Trumbowyg or WYSIWYG WordPress Editor)
