@@ -142,7 +142,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_typography' ) ) {
 
 				$field_color = array(
 					'id'      => 'color',
-                    'type'    => 'color_minicolor',
+                    'type'    => 'color',
                     'rgba'   => true,
                     'default' =>  ( isset( $this->field['default']['color'] ) ) ? $this->field['default']['color'] : '',
 					// 'before'  => 'Color ',
@@ -213,7 +213,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_typography' ) ) {
 					'fn'         => 'loader-jquery-chosen.min.js',
 					'type'       => 'script',
 					'dependency' => array( 'jquery-chosen' ),
-					'version'    => '',
+					'version'    => '20190407',
 					'attr'       => true,
 				),
 			);
