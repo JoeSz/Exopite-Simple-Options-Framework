@@ -5,7 +5,7 @@ Lightweight, easy to use Option Framework for WordPress Plugins and Themes and a
 ## Fast, easy and lightweight option/metabox form generator.
 
 - Author: Joe Szalai and raoabid
-- Version: 20190409
+- Version: 20190411
 - Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 - GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 - Author URL: https://joe.szalai.org
@@ -52,6 +52,7 @@ For my theme I used to use CodeStar Framework, so I created similarly. Unfortuna
 - date   (datepicker/html5)
 - editor (Trumbowyg or WYSIWYG WordPress Editor)
 - fieldset
+- gallery
 - group  (Dynamically add groups. Repeatable, nestable and sortable (on/off).)
 - hidden
 - image
