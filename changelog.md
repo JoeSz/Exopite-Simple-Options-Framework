@@ -1,5 +1,8 @@
 ### CHANGELOG
 
+= 20190411 - 2019-04-11 =
+* Add gallery field
+
 = 20190409 - 2019-04-09 =
 * Set minicolor az default colorpicker
 
