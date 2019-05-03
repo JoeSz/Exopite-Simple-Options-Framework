@@ -1,5 +1,10 @@
 ### CHANGELOG
 
+= 20190503 - 2019-05-03 =
+* Fix: checkbox ans select with attribute multiple not sent in metabox
+* Fix some style in metabox under Gutenberg
+* Fix unserialize if value serialized
+
 = 20190411 - 2019-04-11 =
 * Add gallery field
 
