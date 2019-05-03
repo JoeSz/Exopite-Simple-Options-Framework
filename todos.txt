@@ -1,4 +1,0 @@
-- typography for groups
-- group title from the _same_ gorup fiels (not closest, so may select parent too)
-- reqrusive sanitization
-  - fix checkbox not save in nested group field
