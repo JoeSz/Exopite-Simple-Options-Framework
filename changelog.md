@@ -1,5 +1,9 @@
 ### CHANGELOG
 
+= 20190518 - 2019-05-18 =
+* Fix: wp.media is not a function
+* Fix: image field not included if it is included in group field
+
 = 20190503 - 2019-05-03 =
 * Fix: checkbox ans select with attribute multiple not sent in metabox
 * Fix some style in metabox under Gutenberg
