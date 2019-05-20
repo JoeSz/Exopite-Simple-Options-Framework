@@ -1,6 +1,6 @@
 ### CHANGELOG
 
-= 20190518 - 2019-05-18 =
+= 20190520 - 2019-05-20 =
 * Fix: wp.media is not a function
 * Fix: image field not included if it is included in group field
 
