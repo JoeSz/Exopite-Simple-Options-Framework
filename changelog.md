@@ -1,5 +1,8 @@
 ### CHANGELOG
 
+= 20190527 - 2019-05-27 =
+* Fix: load textdomain
+
 = 20190520 - 2019-05-20 =
 * Fix: wp.media is not a function
 * Fix: image field not included if it is included in group field
