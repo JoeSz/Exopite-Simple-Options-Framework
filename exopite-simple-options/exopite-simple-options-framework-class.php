@@ -2,7 +2,7 @@
 	die;
 } // Cannot access pages directly.
 /**
- * Last edit: 2019-05-20
+ * Last edit: 2019-05-27
  *
  * INFOS AND TODOS:
  * - fix: typography not working in group
@@ -167,7 +167,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				return;
 			}
 
-			$this->version = '20190520';
+			$this->version = '20190527';
 
 			// TODO: Do sanitize $config['id']
 			$this->unique = $config['id'];
