@@ -2580,6 +2580,9 @@ input:disabled + .switch__toggle {
     border: 1px solid #ddd;
     box-shadow: none;
 }
+.exopite-sof-fieldset .chosen-container-single .chosen-single abbr {
+    top: 9px;
+}
 .exopite-sof-help {
     cursor: help;
     border: 1px solid #ddd;
