@@ -809,7 +809,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				'position'      => 100,
 				'icon'          => '',
 				'multilang'     => true,
-				'options'       => false
+				'options'       => false,
+				'network'       => false
+				
 			);
 
 			return apply_filters( 'exopite_sof_filter_config_default_menu_array', $default );
