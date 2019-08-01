@@ -417,7 +417,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 
 			add_action( 'admin_init', array( $this, 'register_setting' ) );
-			add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
+
+			if ( (bool) $this->config['network'] ) {
+				add_action( 'network_admin_menu', array( $this, 'add_admin_menu' ) );
+			} else {
+				add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
+			}
+
 			add_action( 'wp_ajax_exopite-sof-export-options', array( $this, 'export_options' ) );
 			add_action( 'wp_ajax_exopite-sof-import-options', array( $this, 'import_options' ) );
 			add_action( 'wp_ajax_exopite-sof-reset-options', array( $this, 'reset_options' ) );
@@ -531,6 +537,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		protected function is_menu_page_loaded() {
 
 			$current_screen = get_current_screen();
+
+			$current_screen->id = str_replace( '-network', '', $current_screen->id );
 
 			return substr( $current_screen->id, - strlen( $this->unique ) ) === $this->unique;
 
