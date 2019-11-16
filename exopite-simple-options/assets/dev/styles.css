@@ -2922,12 +2922,12 @@ input[type="color"] {
     content: '×';
 }
 .exopite-sof-image-delete {
-    font-size: 20px;
+    font-size: 18px;
     position: absolute;
     top: 5px;
     right: 5px;
     line-height: 16px;
-    padding: 0 2px 3px 2px;
+    padding: 0 2px 2px 2px;
     background: red;
     color: #fff;
     display: inline-block;
