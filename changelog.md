@@ -1,5 +1,8 @@
 ### CHANGELOG
 
+= 20191116 - 2019-11-16 =
+* Fix: some typos and change some styles
+
 = 20190527 - 2019-05-27 =
 * Fix: load textdomain
 
