@@ -1326,6 +1326,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function include_field_class( $field ) {
 
+            if ( is_array( $field ) && isset( $field['type'] ) ) {
+                $field = $field['type'];
+            }
+
 			$class = 'Exopite_Simple_Options_Framework_Field_' . $field;
 
 			if ( ! class_exists( $class ) ) {
