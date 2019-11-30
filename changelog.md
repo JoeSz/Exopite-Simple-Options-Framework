@@ -1,5 +1,8 @@
 ### CHANGELOG
 
+= 20191130 - 2019-11-30 =
+* Fix some CSS issues
+
 = 20191116 - 2019-11-16 =
 * Fix: some typos and change some styles
 
