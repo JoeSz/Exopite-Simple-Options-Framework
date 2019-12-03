@@ -1,5 +1,8 @@
 ### CHANGELOG
 
+= 20191203 - 2019-12-03 =
+* Fix PHP warnings
+
 = 20191130 - 2019-11-30 =
 * Fix some CSS issues
 
