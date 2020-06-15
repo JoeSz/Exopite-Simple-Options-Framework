@@ -888,7 +888,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					$this->config['title'],
 					$this->config['capability'],
 					$this->unique, // slug
-					array( $this, 'display_page' )
+                    array( $this, 'display_page' ),
+                    $this->config['position']
 				);
 
 			}
