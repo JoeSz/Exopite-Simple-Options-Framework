@@ -1573,7 +1573,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			$current_language_title = '';
 			if ( $this->is_multilang() ) {
 				$current_language_title = apply_filters( 'exopite_sof_title_language_notice', $this->lang_current );
-				$current_language_title = ' [ ' . $current_language_title . ' ]';
+				$current_language_title = ' [' . $current_language_title . ']';
 			}
 
 			echo '<header class="exopite-sof-header exopite-sof-header-js">';
