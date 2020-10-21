@@ -161,7 +161,10 @@ https://caniuse.com/#feat=dragndrop
 
 * Copy to plugin/theme folder.
 * Indluce exopite-simple-options/exopite-simple-options-framework-class.php
-* Create options and fields nad hook to 'init'.
+* Create options and fields and hook to 'admin_menu'.
+```php
+add_action( 'admin_menu', 'create_menu', 0 );
+```
 
 #### Complete example with all available fields:
 https://github.com/JoeSz/WordPress-Plugin-Boilerplate-Tutorial/blob/ac49982cd61737a214a3b6a25b387034a9709321/plugin-name/admin/class-plugin-name-admin.php#L152
@@ -184,7 +187,8 @@ $config_submenu = array(
                                                             // get_option( id )
     'parent'            => 'plugins.php',                   // Required, sub page to your options page
     'submenu'           => true,                            // Required for submenu
-    'title'             => 'Demo Admin Page',               //The name of this page
+    'title'             => 'Demo Admin Page',               // The name in the WordPress menu and the title of the Option page
+    'option_title'      => 'Demo Admin Page',               // The title of the Option page, this will override 'title'
     'capability'        => 'manage_options',                // The capability needed to view the page
     'plugin_basename'   =>  plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_name . '.php' ),
     // 'tabbed'            => false,                        // is tabbed or not
