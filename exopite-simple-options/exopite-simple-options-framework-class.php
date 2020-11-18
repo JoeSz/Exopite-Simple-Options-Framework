@@ -803,6 +803,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				'tabbed'        => true,
 				'position'      => 100,
 				'icon'          => '',
+				'search_box'    => true,
 				'multilang'     => true,
 				'options'       => false
 			);
@@ -1582,7 +1583,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			echo '<header class="exopite-sof-header exopite-sof-header-js">';
 			echo '<h1>' . $option_title . $current_language_title . '</h1>';
 
-			echo '<span class="exopite-sof-search-wrapper"><input type="text" class="exopite-sof-search"></span>';
+			/*
+			 * Display search box if is enabled
+			 */
+            if ( $this->config['search_box'] ){
+                echo '<span class="exopite-sof-search-wrapper"><input type="text" class="exopite-sof-search"></span>';
+            }
 
 			echo '<fieldset><span class="exopite-sof-ajax-message"></span>';
 			submit_button( esc_attr__( 'Save Settings', 'exopite-sof' ), 'primary ' . 'exopite-sof-submit-button-js', $this->unique . '-save', false, array() );
