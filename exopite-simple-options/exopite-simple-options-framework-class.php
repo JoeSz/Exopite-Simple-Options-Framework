@@ -698,11 +698,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				// TRUE: if Settings link is not defined, lets create one
 				if ( $this->config['settings_link'] ) {
 
-					$options_base_file_name = sanitize_file_name( $this->config['parent'] );
-
-					$options_page_id = $this->unique;
-
-					$settings_link = "{$options_base_file_name}?page={$options_page_id}";
+					$settings_link = sanitize_file_name( $this->config['settings-link'] );
 
 					$settings_link_array = array(
 						'<a href="' . admin_url( $settings_link ) . '">' . __( 'Settings', '' ) . '</a>',
