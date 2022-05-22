@@ -189,6 +189,7 @@ $config_submenu = array(
     'submenu'           => true,                            // Required for submenu
     'title'             => 'Demo Admin Page',               // The name in the WordPress menu and the title of the Option page
     'option_title'      => 'Demo Admin Page',               // The title of the Option page, this will override 'title'
+    'menu_title'        => 'Title of the menu page'
     'capability'        => 'manage_options',                // The capability needed to view the page
     'plugin_basename'   =>  plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_name . '.php' ),
     // 'tabbed'            => false,                        // is tabbed or not
