@@ -1682,6 +1682,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		}
 
 		public function get_menu_item_icons( $section ) {
+			if ( !isset( $section['icon'] )){
+                return;
+            }
 
 			if ( strpos( $section['icon'], 'dashicon' ) !== false ) {
 				echo '<span class="exopite-sof-nav-icon dashicons-before ' . $section['icon'] . '"></span>';
