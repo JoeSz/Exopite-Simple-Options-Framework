@@ -1089,6 +1089,24 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					return null;
 				}
 
+				// keep only fields with values
+				if ( $this->is_options_simple() ) {
+					
+					$keys = [];
+					foreach ( $this->fields as $field){
+						if ( isset( $field['fields'])){
+							foreach ( $field['fields']  as $f){
+								$id = $f['id'];
+								$keys[]=$id;
+							}
+						}
+					}
+					$posted_data = array_filter( $posted_data , function($key) use($keys) {
+						return in_array( $key , $keys );
+					} , ARRAY_FILTER_USE_KEY );
+					
+				}
+
 			}
 
 			/**
