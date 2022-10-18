@@ -80,14 +80,16 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_image' ) ) {
 
 			if ( ! empty( $value ) ) {
 				$attachment = wp_get_attachment_image_src( $this->get_attachment_id( $value ), 'thumbnail' );
-				$preview    = $attachment[0];
+				$preview    = isset($attachment[0]) ? $attachment[0] : '' ;
 			}
 
 			echo '<div class="exopite-sof-media exopite-sof-image ' . $classes . '" ' . $this->element_attributes() . '>';
 			echo '<div class="exopite-sof-image-preview' . $hidden . '">';
-			echo '<div class="exopite-sof-image-inner"><i class="fa fa-times exopite-sof-image-remove"></i><img src="' . $preview . '" alt="preview" /></div>';
+			if($preview){
+                echo '<div class="exopite-sof-image-inner"><i class="fa fa-times exopite-sof-image-remove"></i><img src="' . $preview . '" alt="preview" /></div>';
+            }
 			echo '</div>';
-
+                
 			echo '<input type="text" name="' . $this->element_name() . '" value="' . $this->element_value() . '">';
 			echo '<a href="#" class="button button-primary exopite-sof-button">' . $add . '</a>';
 			echo '</div>';
