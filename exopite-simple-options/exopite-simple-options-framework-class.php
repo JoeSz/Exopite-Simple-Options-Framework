@@ -656,7 +656,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$path
 			);
 
-			return $url;
+			/**
+			 * Filter for the base url of the library ( for web assets )
+			 *
+			 * @param string $url the plugin base url
+			 */
+			return apply_filters( 'exopite_sof_url' , $url);
 		}
 
 		public function locate_template( $type ) {
