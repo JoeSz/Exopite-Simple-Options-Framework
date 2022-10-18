@@ -543,6 +543,7 @@
 .exopite-sof-fieldset input[type="number"],
 .exopite-sof-fieldset input[type="date"],
 .exopite-sof-fieldset input[type="email"],
+.exopite-sof-fieldset input[type="url"],
 .exopite-sof-fieldset input[type="password"],
 .exopite-sof-fieldset input[type="text"] {
     padding: 6px 12px;
@@ -2438,6 +2439,7 @@ input:disabled + .switch__toggle {
 .exopite-sof-fieldset input[type="number"],
 .exopite-sof-fieldset input[type="date"],
 .exopite-sof-fieldset input[type="email"],
+.exopite-sof-fieldset input[type="url"],
 .exopite-sof-fieldset input[type="password"],
 .exopite-sof-fieldset input[type="text"] {
     padding: 5px 12px;
@@ -2460,6 +2462,7 @@ input:disabled + .switch__toggle {
 .exopite-sof-fieldset input[type="number"],
 .exopite-sof-fieldset input[type="date"],
 .exopite-sof-fieldset input[type="email"],
+.exopite-sof-fieldset input[type="url"],
 .exopite-sof-fieldset input[type="password"],
 .exopite-sof-fieldset input[type="text"] {
     border: 1px solid #e5e5e5;
@@ -2470,12 +2473,14 @@ input:disabled + .switch__toggle {
 .exopite-sof-wrapper .exopite-sof-fieldset select,
 .exopite-sof-fieldset input[type="number"],
 .exopite-sof-fieldset input[type="email"],
+.exopite-sof-fieldset input[type="url"],
 .exopite-sof-fieldset input[type="password"],
 .exopite-sof-fieldset input[type="text"] {
     height: 31px;
 }
 .exopite-sof-fieldset select,
 .exopite-sof-fieldset input[type="email"],
+.exopite-sof-fieldset input[type="url"],
 .exopite-sof-fieldset input[type="password"],
 .exopite-sof-fieldset input[type="text"] {
     max-width: 375px;
