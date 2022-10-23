@@ -56,6 +56,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_fieldset' ) ) {
 				$col_classes[] = 'exopite-sof-col-lg';
 			}
 
+			// Add class
+            if (isset( $this->field['options']['class'])){
+                $col_classes[] =  $this->field['options']['class'] ;
+            }
+
 			foreach ( $fields as $field ) {
 
 				echo '<div class="' . implode( ' ', $col_classes ) . '">';
