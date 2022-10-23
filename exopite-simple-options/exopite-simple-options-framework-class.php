@@ -1,6 +1,4 @@
-<?php if ( ! defined( 'ABSPATH' ) ) {
-	die;
-} // Cannot access pages directly.
+<?php
 /**
  * Last edit: 2022-10-19
  *
@@ -1719,7 +1717,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		}
 
-		public function get_menu_item( $section, $active = '', $force_hidden ) {
+		public function get_menu_item( $section, $active = '', $force_hidden = false ) {
 
 			// $active = '';
 			// if ( $section === reset( $this->fields ) ) {
