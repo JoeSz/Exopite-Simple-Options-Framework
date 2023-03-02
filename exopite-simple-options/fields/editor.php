@@ -20,20 +20,22 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_editor' ) ) {
 			$editor  = ( isset( $this->field['editor'] ) ) ? $this->field['editor'] : 'tinymce';
 
 			echo $this->element_before();
+			// make sure that our ids are unique
+			$id = str_replace( ['[',']'], '-', $this->element_name() );
 
 			if ( $editor == 'tinymce' && isset( $this->field['sub'] ) && $this->field['sub'] ) {
 
 				$classes[] = 'tinymce-js';
 				$classes   = implode( ' ', $classes );
 
-				echo '<textarea id="' . $this->field['id'] . '" name="' . $this->element_name() . '" class="' . $classes . '"' . $this->element_attributes() . '>' . $this->element_value() . '</textarea>';
+				echo '<textarea id="' . $id . '" name="' . $this->element_name() . '" class="' . $classes . '"' . $this->element_attributes() . '>' . $this->element_value() . '</textarea>';
 
 			} elseif ( $editor == 'trumbowyg' ) {
 
 				$classes[] = 'trumbowyg-js';
 				$classes   = implode( ' ', $classes );
 
-				echo '<textarea id="' . $this->field['id'] . '" name="' . $this->element_name() . '" data-icon-path="' . plugin_dir_url( __DIR__ ) . 'assets/editors/trumbowyg/icons.svg" class="' . $classes . '"' . $this->element_attributes() . '>' . $this->element_value() . '</textarea>';
+				echo '<textarea id="' . $id . '" name="' . $this->element_name() . '" data-icon-path="' . plugin_dir_url( __DIR__ ) . 'assets/editors/trumbowyg/icons.svg" class="' . $classes . '"' . $this->element_attributes() . '>' . $this->element_value() . '</textarea>';
 
 			} else {
 
@@ -51,7 +53,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_editor' ) ) {
 					// load Quicktags, can be used to pass settings directly to Quicktags using an array()
 				);
 
-				wp_editor( $this->element_value(), $this->field['id'], $args );
+				wp_editor( $this->element_value(), $id, $args );
 
 			}
 
