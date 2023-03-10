@@ -1,8 +1,6 @@
-<?php if ( ! defined( 'ABSPATH' ) ) {
-	die;
-} // Cannot access pages directly.
+<?php
 /**
- * Last edit: 2020-05-21
+ * Last edit: 2022-10-19
  *
  * INFOS AND TODOS:
  *
@@ -36,6 +34,8 @@
  * - notice
  * - number
  * - password
+ * - email
+ * - url
  * - radio
  * - range
  * - select
@@ -164,7 +164,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				return;
 			}
 
-			$this->version = '20191203';
+			$this->version = '20221019';
 
 			// TODO: Do sanitize $config['id']
 			$this->unique = $config['id'];
@@ -656,7 +656,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$path
 			);
 
-			return $url;
+			/**
+			 * Filter for the base url of the library ( for web assets )
+			 *
+			 * @param string $url the plugin base url
+			 */
+			return apply_filters( 'exopite_sof_url' , $url);
 		}
 
 		public function locate_template( $type ) {
@@ -1087,6 +1092,24 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				// If the post type is not in our post_type array, do nothing
 				if ( ! in_array( get_post_type( $post_id ), $this->config['post_types'] ) ) {
 					return null;
+				}
+
+				// keep only fields with values
+				if ( $this->is_options_simple() ) {
+					
+					$keys = [];
+					foreach ( $this->fields as $field){
+						if ( isset( $field['fields'])){
+							foreach ( $field['fields']  as $f){
+								$id = $f['id'];
+								$keys[]=$id;
+							}
+						}
+					}
+					$posted_data = array_filter( $posted_data , function($key) use($keys) {
+						return in_array( $key , $keys );
+					} , ARRAY_FILTER_USE_KEY );
+					
 				}
 
 			}
@@ -1682,6 +1705,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		}
 
 		public function get_menu_item_icons( $section ) {
+			if ( !isset( $section['icon'] )){
+                return;
+            }
 
 			if ( strpos( $section['icon'], 'dashicon' ) !== false ) {
 				echo '<span class="exopite-sof-nav-icon dashicons-before ' . $section['icon'] . '"></span>';
@@ -1691,7 +1717,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		}
 
-		public function get_menu_item( $section, $active = '', $force_hidden ) {
+		public function get_menu_item( $section, $active = '', $force_hidden = false ) {
 
 			// $active = '';
 			// if ( $section === reset( $this->fields ) ) {

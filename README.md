@@ -5,7 +5,7 @@ Lightweight, easy to use Option Framework for WordPress Plugins and Themes and a
 ## Fast, easy and lightweight option/metabox form generator.
 
 - Author: Joe Szalai and raoabid
-- Version: 20191203
+- Version: 20221019
 - Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 - GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 - Author URL: https://joe.szalai.org
@@ -68,6 +68,8 @@ For my theme I used to use CodeStar Framework, so I created similarly. Unfortuna
 - tab (nestable)
 - tap_list
 - text
+- email (html5 input)
+- url (html5 input)
 - textarea
 - typography
 - upload (multiple, on post type -post, page, custom- you can attach uploaded to post)
@@ -159,8 +161,32 @@ https://caniuse.com/#feat=dragndrop
 
 ### INSTALLATION
 
+#### MANUAL COPY
 * Copy to plugin/theme folder.
-* Indluce exopite-simple-options/exopite-simple-options-framework-class.php
+* Include exopite-simple-options/exopite-simple-options-framework-class.php
+
+#### COMPOSER INSTALL
+
+* As for now, this package is not yet submited to packagist, you'll have the repository to your composer file like this :
+```json
+{
+    "require": {
+        "joesz/exopite-simple-options-framework": "dev-master"
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url":  "https://github.com/JoeSz/Exopite-Simple-Options-Framework.git"
+        }
+    ]
+}
+
+```
+
+* You'll be able to use Exopite_Simple_Options_Framework class after requiring vendor/autoload.php
+
+### USAGE
+
 * Create options and fields and hook to 'admin_menu'.
 ```php
 add_action( 'admin_menu', 'create_menu', 0 );
@@ -303,6 +329,7 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as 
 * exopite_sof_sanitize_value (value, config)
 * exopite_sof_add_field (output, field, config )
 * exopite_sof_meta_get_options (meta_options, unique, post_id )
+* exopite_sof_url (url )
 
 #### Actions
 * exopite_sof_do_save_options (valid, unique)

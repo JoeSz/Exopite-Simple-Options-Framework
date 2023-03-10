@@ -24,7 +24,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_content' ) ) {
 				if ( is_callable( $callback['function'] ) ) {
 
 					$args    = ( isset( $callback['args'] ) ) ? $callback['args'] : '';
-					$content = call_user_func( $callback['function'], $args );
+					$content .= call_user_func( $callback['function'], $args );
 
 				}
 			}
