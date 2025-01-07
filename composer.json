@@ -1,0 +1,7 @@
+{
+  "name": "joesz/exopite-simple-options-framework",
+  "type": "library",
+  "autoload": {
+    "files": ["exopite-simple-options/exopite-simple-options-framework-class.php"]
+  }
+}

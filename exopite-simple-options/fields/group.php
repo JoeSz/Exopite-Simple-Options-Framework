@@ -141,6 +141,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 				$classes[] = 'exopite-sof-accordion';
 			}
 
+			if (isset($this->field['class']) && $this->field['class']){
+            	$classes[] = $this->field['class'];
+            }
+
 			echo '<div class="' . implode( ' ', $classes ) . '" data-limit="' . $limit . '">';
 
 			$wrapper_classes = array( 'exopite-sof-accordion__wrapper' );
