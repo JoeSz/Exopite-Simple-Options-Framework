@@ -13,6 +13,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 
 	abstract class Exopite_Simple_Options_Framework_Fields {
 
+		// Declared for PHP 8.2+ (no dynamic properties).
+		public $google_fonts;
+
 		public $field;
 		public $value;
 		public $org_value;

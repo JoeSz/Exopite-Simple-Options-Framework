@@ -164,7 +164,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				return;
 			}
 
-			$this->version = '20191203';
+			$this->version = '20261009';
 
 			// TODO: Do sanitize $config['id']
 			$this->unique = $config['id'];
@@ -1691,7 +1691,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		}
 
-		public function get_menu_item( $section, $active = '', $force_hidden ) {
+		public function get_menu_item( $section, $active = '', $force_hidden = false ) {
 
 			// $active = '';
 			// if ( $section === reset( $this->fields ) ) {

@@ -1,5 +1,9 @@
 ### CHANGELOG
 
+= 20261009 - 2026-10-09 =
+* Fix PHP 8.0+ deprecation: optional parameters declared before required ones (get_menu_item, field constructors)
+* Fix PHP 8.2+ deprecation: declare dynamic properties (fields base class, accordion, group)
+
 = 20191203 - 2019-12-03 =
 * Fix PHP warnings
 

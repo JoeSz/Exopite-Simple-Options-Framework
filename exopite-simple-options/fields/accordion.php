@@ -10,7 +10,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_accordion' ) ) {
 
 	class Exopite_Simple_Options_Framework_Field_accordion extends Exopite_Simple_Options_Framework_Fields {
 
-		public function __construct( $field, $value = '', $unique = '', $config = array(), $multilang ) {
+		// Declared for PHP 8.2+ (no dynamic properties).
+		public $defaults;
+		public $is_accordion_closed;
+		public $allow_all_open;
+
+		public function __construct( $field, $value = '', $unique = '', $config = array(), $multilang = false ) {
 			parent::__construct( $field, $value, $unique, $config, $multilang );
 
 			$this->defaults = array(

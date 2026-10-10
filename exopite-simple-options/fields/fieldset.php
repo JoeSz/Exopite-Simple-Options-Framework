@@ -14,7 +14,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_fieldset' ) ) {
 
 	class Exopite_Simple_Options_Framework_Field_fieldset extends Exopite_Simple_Options_Framework_Fields {
 
-		public function __construct( $field, $value = '', $unique = '', $config = array(), $multilang ) {
+		public function __construct( $field, $value = '', $unique = '', $config = array(), $multilang = false ) {
 			parent::__construct( $field, $value, $unique, $config, $multilang );
 		}
 
