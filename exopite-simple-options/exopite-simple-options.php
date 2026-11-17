@@ -13,96 +13,79 @@
  * Text Domain:       exopite-sof
  * Domain Path:       /lang
  *
- * This file is only the plugin bootstrap. When the folder is bundled inside
- * another plugin or theme, this file is not loaded and nothing changes.
+ * Install this plugin once per site. Other plugins and themes do not contain
+ * a copy of the framework, they only call it.
  *
  * ---------------------------------------------------------------------------
  * HOW TO USE IT FROM ANOTHER PLUGIN OR A THEME
  * ---------------------------------------------------------------------------
  *
- * 1. Install and activate this plugin once per site.
+ * Create the options page or metabox on the "init" hook, never directly in
+ * the main plugin file. All plugin files are loaded before "init", so the
+ * framework class exists no matter in which order WordPress loaded the
+ * plugins. Themes are loaded after the plugins, so this works in
+ * functions.php too. The framework only runs in the admin area.
  *
- * 2. In your plugin or theme, create the options page or metabox on a hook,
- *    never directly in the main plugin file. All plugin files are loaded
- *    before "plugins_loaded", so on "init" the framework class exists no
- *    matter in which order WordPress loaded the plugins. Themes are loaded
- *    after the plugins, so this works in functions.php too.
+ *     add_action( 'init', 'prefix_register_options' );
  *
- *    The framework only runs in the admin area. Create it on "init" (or on
- *    "admin_menu" with priority 0), so its admin_menu, admin_init and
- *    save_post hooks are still registered in time.
+ *     function prefix_register_options() {
  *
- *        add_action( 'init', 'prefix_register_options' );
+ *         if ( ! is_admin() ) {
+ *             return;
+ *         }
  *
- *        function prefix_register_options() {
+ *         // The framework plugin is not active.
+ *         if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) {
+ *             add_action( 'admin_notices', 'prefix_framework_missing_notice' );
+ *             return;
+ *         }
  *
- *            if ( ! is_admin() ) {
- *                return;
- *            }
+ *         $config = array(
+ *             'type'       => 'menu',               // "menu" or "metabox".
+ *             'id'         => 'prefix_options',     // Option name in wp_options.
+ *             'parent'     => 'options-general.php',
+ *             'submenu'    => true,
+ *             'title'      => 'My Plugin',
+ *             'capability' => 'manage_options',
+ *         );
  *
- *            if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) {
+ *         $fields = array(
+ *             array(
+ *                 'name'   => 'general',
+ *                 'title'  => 'General',
+ *                 'fields' => array(
+ *                     array(
+ *                         'id'    => 'my_text',
+ *                         'type'  => 'text',
+ *                         'title' => 'My text',
+ *                     ),
+ *                 ),
+ *             ),
+ *         );
  *
- *                // Optional: fall back to a copy bundled with your plugin.
- *                $bundled = __DIR__ . '/exopite-simple-options/exopite-simple-options-framework-class.php';
+ *         new Exopite_Simple_Options_Framework( $config, $fields );
+ *     }
  *
- *                if ( ! file_exists( $bundled ) ) {
- *                    add_action( 'admin_notices', 'prefix_framework_missing_notice' );
- *                    return;
- *                }
+ * Read the values (front end and admin):
  *
- *                require_once $bundled;
- *            }
+ *     $options = get_exopite_sof_option( 'prefix_options' );    // Menu options, multilang aware.
+ *     $options = get_option( 'prefix_options' );                // Menu options, plain array.
+ *     $meta    = get_post_meta( $post_id, 'metabox_id', true ); // Metabox, saved as one array.
+ *     $value   = get_post_meta( $post_id, 'field_id', true );   // Metabox with 'options' => 'simple'.
  *
- *            $config = array(
- *                'type'       => 'menu',               // "menu" or "metabox".
- *                'id'         => 'prefix_options',     // Option name in wp_options.
- *                'parent'     => 'options-general.php',
- *                'submenu'    => true,
- *                'title'      => 'My Plugin',
- *                'capability' => 'manage_options',
- *            );
+ * On the front end check function_exists( 'get_exopite_sof_option' ) if the
+ * framework plugin may be inactive.
  *
- *            $fields = array(
- *                array(
- *                    'name'   => 'general',
- *                    'title'  => 'General',
- *                    'fields' => array(
- *                        array(
- *                            'id'    => 'my_text',
- *                            'type'  => 'text',
- *                            'title' => 'My text',
- *                        ),
- *                    ),
- *                ),
- *            );
+ * For dependent code:
+ * - Exopite_Simple_Options_Framework::VERSION is the framework version.
+ * - The action "exopite_sof_loaded" fires on plugins_loaded (priority 1).
  *
- *            new Exopite_Simple_Options_Framework( $config, $fields );
- *        }
+ * A complete example with every field type: the "exopite-simple-options-example"
+ * plugin in the repository (https://github.com/JoeSz/Exopite-Simple-Options-Framework).
  *
- *    Because the bundled copy above is only loaded on "init" and only if the
- *    class does not exist yet, this plugin always wins over bundled copies,
- *    whatever the load order is. A bundled copy that is required directly in
- *    a main plugin file (not on a hook) can still be loaded first; then an
- *    admin notice shows its path and version.
- *
- * 3. Read the values (front end and admin):
- *
- *        $options = get_exopite_sof_option( 'prefix_options' ); // Menu options, multilang aware.
- *        $options = get_option( 'prefix_options' );             // Plain options array.
- *        $meta    = get_post_meta( $post_id, 'metabox_id', true ); // Metabox, saved as one array.
- *        $value   = get_post_meta( $post_id, 'field_id', true );   // Metabox with 'options' => 'simple'.
- *
- *    get_exopite_sof_option() is defined by the framework class file, check
- *    it with function_exists() on the front end if the plugin may be inactive.
- *
- * Useful for dependent code:
- * - Action "exopite_sof_loaded" (plugins_loaded, priority 1): fires only when
- *   this plugin is active. Do not rely on it alone, it does not fire for
- *   bundled copies.
- * - Exopite_Simple_Options_Framework::VERSION: the version that is in use.
- *
- * All field types and config keys: see README.md
- * (https://github.com/JoeSz/Exopite-Simple-Options-Framework).
+ * Old plugins that still bundle their own copy of the framework keep working.
+ * If such a copy is loaded before this plugin, that copy is used for every
+ * plugin on the site and administrators see a notice with its path.
  *
  * @package Exopite_Simple_Options_Framework
  */

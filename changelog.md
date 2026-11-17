@@ -2,6 +2,8 @@
 
 = 20261117.4 - 2026-11-17 =
 * Can be installed and activated as a standalone plugin (exopite-simple-options.php), still works bundled
+* New example plugin (exopite-simple-options-example): options page with every field type, metabox and simple metabox
+* README and plugin header: documented as a plugin that other plugins and themes call on the init hook
 * Admin notice if another bundled copy was loaded before the plugin, action exopite_sof_loaded, constant Exopite_Simple_Options_Framework::VERSION
 * Fix: include the framework files with __DIR__ instead of relative paths (depended on include_path)
 
