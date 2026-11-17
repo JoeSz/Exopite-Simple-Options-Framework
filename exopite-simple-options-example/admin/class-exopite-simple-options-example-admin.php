@@ -1,27 +1,25 @@
 <?php
 /**
- * Example usage of the Exopite Simple Options Framework.
+ * Admin area: creates the options page and the metaboxes with the framework.
  *
- * @package Exopite_Sof_Example
+ * @package Exopite_Simple_Options_Example
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	die;
-}
+namespace Exopite_Simple_Options_Example;
 
 /**
  * Registers an options page with every field type, a metabox and a "simple"
- * metabox. Copy the parts you need into your own plugin or theme.
+ * metabox through the Exopite Simple Options Framework plugin.
  *
- * How it works:
- * - Everything is created on "init" (admin only). All plugins are loaded
- *   before "init", so the framework class exists, whatever the load order is.
- * - If the framework plugin is not active, an admin notice is shown instead.
+ * The framework is created on "init" (hooked in define_admin_hooks()). All
+ * plugins are loaded before "init", so the framework class exists, whatever
+ * the plugin load order is. If the framework plugin is not active, an admin
+ * notice is shown instead.
  */
-class Exopite_Sof_Example {
+final class Exopite_Simple_Options_Example_Admin {
 
 	/**
-	 * Option name of the options page (get_option( self::OPTION_ID )).
+	 * Option name of the options page: get_option( self::OPTION_ID ).
 	 */
 	const OPTION_ID = 'exopite_sof_example';
 
@@ -36,16 +34,22 @@ class Exopite_Sof_Example {
 	const SIMPLE_META_ID = 'exopite_sof_example_simple';
 
 	/**
-	 * Register the WordPress hooks.
+	 * Sets up the admin part.
+	 *
+	 * @param string $plugin_name Plugin slug.
+	 * @param string $version     Plugin version.
 	 */
-	public static function register_hooks() {
-		add_action( 'init', array( __CLASS__, 'init' ) );
-	}
+	public function __construct(
+		private string $plugin_name,
+		private string $version
+	) {}
 
 	/**
 	 * Create the options page and the metaboxes.
+	 *
+	 * Hooked to "init".
 	 */
-	public static function init() {
+	public function register_options(): void {
 
 		// The framework only works in the admin area.
 		if ( ! is_admin() ) {
@@ -53,21 +57,21 @@ class Exopite_Sof_Example {
 		}
 
 		// The framework plugin is not active.
-		if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) {
-			add_action( 'admin_notices', array( __CLASS__, 'framework_missing_notice' ) );
+		if ( ! class_exists( '\Exopite_Simple_Options_Framework' ) ) {
+			add_action( 'admin_notices', array( $this, 'framework_missing_notice' ) );
 			return;
 		}
 
-		new Exopite_Simple_Options_Framework( self::options_page_config(), self::options_page_fields() );
-		new Exopite_Simple_Options_Framework( self::metabox_config(), self::metabox_fields() );
-		new Exopite_Simple_Options_Framework( self::simple_metabox_config(), self::simple_metabox_fields() );
+		new \Exopite_Simple_Options_Framework( $this->options_page_config(), $this->options_page_fields() );
+		new \Exopite_Simple_Options_Framework( $this->metabox_config(), $this->metabox_fields() );
+		new \Exopite_Simple_Options_Framework( $this->simple_metabox_config(), $this->simple_metabox_fields() );
 	}
 
 	/**
 	 * Admin notice if the framework plugin is missing.
 	 */
-	public static function framework_missing_notice() {
-		echo '<div class="notice notice-error"><p>' . esc_html__( 'Exopite Simple Options Framework Example: please install and activate the "Exopite Simple Options Framework" plugin.', 'exopite-sof-example' ) . '</p></div>';
+	public function framework_missing_notice(): void {
+		echo '<div class="notice notice-error"><p>' . esc_html__( 'Exopite Simple Options Framework Example: please install and activate the "Exopite Simple Options Framework" plugin.', 'exopite-simple-options-example' ) . '</p></div>';
 	}
 
 	/*
@@ -81,16 +85,16 @@ class Exopite_Sof_Example {
 	 *
 	 * @return array
 	 */
-	private static function options_page_config(): array {
+	private function options_page_config(): array {
 		return array(
 			'type'            => 'menu',               // Required: "menu" or "metabox".
 			'id'              => self::OPTION_ID,      // Required: option name, get_option( id ).
-			'menu_title'      => __( 'SOF Example', 'exopite-sof-example' ),        // Required for menus.
-			'plugin_basename' => plugin_basename( dirname( __DIR__ ) . '/exopite-simple-options-example.php' ), // Required: adds "Settings" to the plugin list.
+			'menu_title'      => __( 'SOF Example', 'exopite-simple-options-example' ),        // Required for menus.
+			'plugin_basename' => plugin_basename( EXOPITE_SIMPLE_OPTIONS_EXAMPLE_FILE ), // Required: adds "Settings" to the plugin list.
 			'submenu'         => false,                // true: submenu of "parent".
 			'parent'          => 'options-general.php',
-			'title'           => __( 'Exopite Simple Options Framework Example', 'exopite-sof-example' ),
-			'option_title'    => __( 'Exopite Simple Options Framework Example: every field type', 'exopite-sof-example' ),
+			'title'           => __( 'Exopite Simple Options Framework Example', 'exopite-simple-options-example' ),
+			'option_title'    => __( 'Exopite Simple Options Framework Example: every field type', 'exopite-simple-options-example' ),
 			'capability'      => 'manage_options',
 			'settings_link'   => true,
 			'tabbed'          => true,
@@ -106,18 +110,18 @@ class Exopite_Sof_Example {
 	 *
 	 * @return array
 	 */
-	private static function options_page_fields(): array {
+	private function options_page_fields(): array {
 
 		$fields   = array();
-		$fields[] = self::section_basic();
-		$fields[] = self::section_choices();
-		$fields[] = self::section_media();
-		$fields[] = self::section_editors();
-		$fields[] = self::section_layout();
-		$fields[] = self::section_content();
-		$fields[] = self::section_nested_menu();
-		$fields[] = self::section_read_values();
-		$fields[] = self::section_backup();
+		$fields[] = $this->section_basic();
+		$fields[] = $this->section_choices();
+		$fields[] = $this->section_media();
+		$fields[] = $this->section_editors();
+		$fields[] = $this->section_layout();
+		$fields[] = $this->section_content();
+		$fields[] = $this->section_nested_menu();
+		$fields[] = $this->section_read_values();
+		$fields[] = $this->section_backup();
 
 		return $fields;
 	}
@@ -127,18 +131,18 @@ class Exopite_Sof_Example {
 	 *
 	 * @return array
 	 */
-	private static function section_basic(): array {
+	private function section_basic(): array {
 		return array(
 			'name'   => 'basic',
-			'title'  => __( 'Basic', 'exopite-sof-example' ),
+			'title'  => __( 'Basic', 'exopite-simple-options-example' ),
 			'icon'   => 'dashicons-admin-generic',
 			'fields' => array_merge(
-				self::basic_fields( '' ),
+				$this->basic_fields( '' ),
 				array(
 					array(
 						'id'    => 'password',
 						'type'  => 'password',
-						'title' => __( 'Password', 'exopite-sof-example' ),
+						'title' => __( 'Password', 'exopite-simple-options-example' ),
 					),
 					array(
 						'id'      => 'hidden',
@@ -148,7 +152,7 @@ class Exopite_Sof_Example {
 					array(
 						'id'      => 'number',
 						'type'    => 'number',
-						'title'   => __( 'Number (0 to 100)', 'exopite-sof-example' ),
+						'title'   => __( 'Number (0 to 100)', 'exopite-simple-options-example' ),
 						'min'     => 0,
 						'max'     => 100,
 						'step'    => 1,
@@ -158,7 +162,7 @@ class Exopite_Sof_Example {
 					array(
 						'id'      => 'range',
 						'type'    => 'range',
-						'title'   => __( 'Range', 'exopite-sof-example' ),
+						'title'   => __( 'Range', 'exopite-simple-options-example' ),
 						'min'     => 0,
 						'max'     => 50,
 						'step'    => 5,
@@ -168,18 +172,18 @@ class Exopite_Sof_Example {
 					array(
 						'id'      => 'text_prepend',
 						'type'    => 'text',
-						'title'   => __( 'Text with prepend, append and help', 'exopite-sof-example' ),
+						'title'   => __( 'Text with prepend, append and help', 'exopite-simple-options-example' ),
 						'prepend' => 'fa-font',
 						'append'  => 'dashicons-admin-links',
-						'help'    => __( 'Help text on mouse over', 'exopite-sof-example' ),
-						'before'  => __( 'Text before the field', 'exopite-sof-example' ),
-						'after'   => __( 'Text after the field', 'exopite-sof-example' ),
+						'help'    => __( 'Help text on mouse over', 'exopite-simple-options-example' ),
+						'before'  => __( 'Text before the field', 'exopite-simple-options-example' ),
+						'after'   => __( 'Text after the field', 'exopite-simple-options-example' ),
 					),
 					array(
 						'id'       => 'text_sanitize',
 						'type'     => 'text',
-						'title'    => __( 'Own sanitize function', 'exopite-sof-example' ),
-						'info'     => __( 'Saved with sanitize_email().', 'exopite-sof-example' ),
+						'title'    => __( 'Own sanitize function', 'exopite-simple-options-example' ),
+						'info'     => __( 'Saved with sanitize_email().', 'exopite-simple-options-example' ),
 						'sanitize' => 'sanitize_email',
 					),
 				)
@@ -193,39 +197,39 @@ class Exopite_Sof_Example {
 	 * @param string $prefix Field id prefix.
 	 * @return array
 	 */
-	private static function basic_fields( string $prefix ): array {
+	private function basic_fields( string $prefix ): array {
 		return array(
 			array(
 				'id'          => $prefix . 'text',
 				'type'        => 'text',
-				'title'       => __( 'Text', 'exopite-sof-example' ),
-				'description' => __( 'Field description', 'exopite-sof-example' ),
+				'title'       => __( 'Text', 'exopite-simple-options-example' ),
+				'description' => __( 'Field description', 'exopite-simple-options-example' ),
 				'default'     => 'Default text',
 				'attributes'  => array( 'placeholder' => 'Placeholder' ),
 			),
 			array(
 				'id'      => $prefix . 'textarea',
 				'type'    => 'textarea',
-				'title'   => __( 'Textarea', 'exopite-sof-example' ),
+				'title'   => __( 'Textarea', 'exopite-simple-options-example' ),
 				'default' => "Line 1\nLine 2",
 			),
 			array(
 				'id'    => $prefix . 'checkbox',
 				'type'  => 'checkbox',
-				'title' => __( 'Checkbox', 'exopite-sof-example' ),
-				'label' => __( 'Check me', 'exopite-sof-example' ),
+				'title' => __( 'Checkbox', 'exopite-simple-options-example' ),
+				'label' => __( 'Check me', 'exopite-simple-options-example' ),
 			),
 			array(
 				'id'    => $prefix . 'checkbox_fancy',
 				'type'  => 'checkbox',
-				'title' => __( 'Checkbox (fancy)', 'exopite-sof-example' ),
+				'title' => __( 'Checkbox (fancy)', 'exopite-simple-options-example' ),
 				'style' => 'fancy',
-				'label' => __( 'Check me', 'exopite-sof-example' ),
+				'label' => __( 'Check me', 'exopite-simple-options-example' ),
 			),
 			array(
 				'id'      => $prefix . 'select',
 				'type'    => 'select',
-				'title'   => __( 'Select', 'exopite-sof-example' ),
+				'title'   => __( 'Select', 'exopite-simple-options-example' ),
 				'options' => array(
 					'bmw'      => 'BMW',
 					'mercedes' => 'Mercedes',
@@ -236,7 +240,7 @@ class Exopite_Sof_Example {
 			array(
 				'id'         => $prefix . 'ace',
 				'type'       => 'ace_editor',
-				'title'      => __( 'ACE code editor', 'exopite-sof-example' ),
+				'title'      => __( 'ACE code editor', 'exopite-simple-options-example' ),
 				'options'    => array(
 					'theme' => 'ace/theme/chrome',
 					'mode'  => 'ace/mode/javascript',
@@ -251,28 +255,28 @@ class Exopite_Sof_Example {
 	 *
 	 * @return array
 	 */
-	private static function section_choices(): array {
+	private function section_choices(): array {
 		return array(
 			'name'   => 'choices',
-			'title'  => __( 'Choices', 'exopite-sof-example' ),
+			'title'  => __( 'Choices', 'exopite-simple-options-example' ),
 			'icon'   => 'fa fa-check-square-o',
 			'fields' => array(
 				array(
 					'id'    => 'switcher',
 					'type'  => 'switcher',
-					'title' => __( 'Switcher (controls the next field)', 'exopite-sof-example' ),
-					'label' => __( 'Show the dependent field', 'exopite-sof-example' ),
+					'title' => __( 'Switcher (controls the next field)', 'exopite-simple-options-example' ),
+					'label' => __( 'Show the dependent field', 'exopite-simple-options-example' ),
 				),
 				array(
 					'id'         => 'dependent',
 					'type'       => 'text',
-					'title'      => __( 'Dependent text (visible if the switcher is on)', 'exopite-sof-example' ),
+					'title'      => __( 'Dependent text (visible if the switcher is on)', 'exopite-simple-options-example' ),
 					'dependency' => array( 'switcher', '==', 'true' ),
 				),
 				array(
 					'id'      => 'radio',
 					'type'    => 'radio',
-					'title'   => __( 'Radio', 'exopite-sof-example' ),
+					'title'   => __( 'Radio', 'exopite-simple-options-example' ),
 					'options' => array(
 						'one' => 'One',
 						'two' => 'Two',
@@ -282,7 +286,7 @@ class Exopite_Sof_Example {
 				array(
 					'id'      => 'radio_fancy',
 					'type'    => 'radio',
-					'title'   => __( 'Radio (fancy)', 'exopite-sof-example' ),
+					'title'   => __( 'Radio (fancy)', 'exopite-simple-options-example' ),
 					'style'   => 'fancy',
 					'options' => array(
 						'a' => 'A',
@@ -292,7 +296,7 @@ class Exopite_Sof_Example {
 				array(
 					'id'      => 'button_bar',
 					'type'    => 'button_bar',
-					'title'   => __( 'Button bar', 'exopite-sof-example' ),
+					'title'   => __( 'Button bar', 'exopite-simple-options-example' ),
 					'options' => array(
 						'left'   => 'Left',
 						'center' => 'Center',
@@ -303,7 +307,7 @@ class Exopite_Sof_Example {
 				array(
 					'id'      => 'tap_list',
 					'type'    => 'tap_list',
-					'title'   => __( 'Tap list (checkboxes)', 'exopite-sof-example' ),
+					'title'   => __( 'Tap list (checkboxes)', 'exopite-simple-options-example' ),
 					'options' => array(
 						'red'   => 'Red',
 						'green' => 'Green',
@@ -313,7 +317,7 @@ class Exopite_Sof_Example {
 				array(
 					'id'      => 'tap_list_radio',
 					'type'    => 'tap_list',
-					'title'   => __( 'Tap list (radio)', 'exopite-sof-example' ),
+					'title'   => __( 'Tap list (radio)', 'exopite-simple-options-example' ),
 					'radio'   => true,
 					'options' => array(
 						'small' => 'Small',
@@ -323,7 +327,7 @@ class Exopite_Sof_Example {
 				array(
 					'id'          => 'image_select',
 					'type'        => 'image_select',
-					'title'       => __( 'Image select (text)', 'exopite-sof-example' ),
+					'title'       => __( 'Image select (text)', 'exopite-simple-options-example' ),
 					'text_select' => true,
 					'radio'       => true,
 					'options'     => array(
@@ -335,7 +339,7 @@ class Exopite_Sof_Example {
 				array(
 					'id'         => 'select_multi',
 					'type'       => 'select',
-					'title'      => __( 'Select multiple (chosen)', 'exopite-sof-example' ),
+					'title'      => __( 'Select multiple (chosen)', 'exopite-simple-options-example' ),
 					'class'      => 'chosen',
 					'attributes' => array(
 						'multiple' => 'multiple',
@@ -350,7 +354,7 @@ class Exopite_Sof_Example {
 				array(
 					'id'             => 'select_pages',
 					'type'           => 'select',
-					'title'          => __( 'Select from pages (query)', 'exopite-sof-example' ),
+					'title'          => __( 'Select from pages (query)', 'exopite-simple-options-example' ),
 					'query'          => array(
 						'type' => 'pages',
 						'args' => array(
@@ -358,7 +362,7 @@ class Exopite_Sof_Example {
 							'order'   => 'ASC',
 						),
 					),
-					'default_option' => __( '- select a page -', 'exopite-sof-example' ),
+					'default_option' => __( '- select a page -', 'exopite-simple-options-example' ),
 				),
 			),
 		);
@@ -369,46 +373,46 @@ class Exopite_Sof_Example {
 	 *
 	 * @return array
 	 */
-	private static function section_media(): array {
+	private function section_media(): array {
 		return array(
 			'name'   => 'media',
-			'title'  => __( 'Media and colors', 'exopite-sof-example' ),
+			'title'  => __( 'Media and colors', 'exopite-simple-options-example' ),
 			'icon'   => 'dashicons-format-image',
 			'fields' => array(
 				array(
 					'id'    => 'color',
 					'type'  => 'color',
-					'title' => __( 'Color (minicolors)', 'exopite-sof-example' ),
+					'title' => __( 'Color (minicolors)', 'exopite-simple-options-example' ),
 					'rgba'  => true,
 				),
 				array(
 					'id'    => 'color_wp',
 					'type'  => 'color_wp',
-					'title' => __( 'Color (WordPress color picker, rgba)', 'exopite-sof-example' ),
+					'title' => __( 'Color (WordPress color picker, rgba)', 'exopite-simple-options-example' ),
 					'rgba'  => true,
 				),
 				array(
 					'id'     => 'date',
 					'type'   => 'date',
-					'title'  => __( 'Date', 'exopite-sof-example' ),
+					'title'  => __( 'Date', 'exopite-simple-options-example' ),
 					'format' => 'yy-mm-dd',
 					'picker' => 'datepicker',
 				),
 				array(
 					'id'        => 'image',
 					'type'      => 'image',
-					'title'     => __( 'Image', 'exopite-sof-example' ),
-					'add_title' => __( 'Choose image', 'exopite-sof-example' ),
+					'title'     => __( 'Image', 'exopite-simple-options-example' ),
+					'add_title' => __( 'Choose image', 'exopite-simple-options-example' ),
 				),
 				array(
 					'id'    => 'gallery',
 					'type'  => 'gallery',
-					'title' => __( 'Gallery', 'exopite-sof-example' ),
+					'title' => __( 'Gallery', 'exopite-simple-options-example' ),
 				),
 				array(
 					'id'      => 'video',
 					'type'    => 'video',
-					'title'   => __( 'Video (oEmbed)', 'exopite-sof-example' ),
+					'title'   => __( 'Video (oEmbed)', 'exopite-simple-options-example' ),
 					'default' => 'https://vimeo.com/76979871',
 					'options' => array(
 						'input'  => true,
@@ -418,7 +422,7 @@ class Exopite_Sof_Example {
 				array(
 					'id'      => 'upload',
 					'type'    => 'upload',
-					'title'   => __( 'Upload (Fine Uploader)', 'exopite-sof-example' ),
+					'title'   => __( 'Upload (Fine Uploader)', 'exopite-simple-options-example' ),
 					'options' => array(
 						'attach'                   => false,
 						'filecount'                => 3,
@@ -439,30 +443,30 @@ class Exopite_Sof_Example {
 	 *
 	 * @return array
 	 */
-	private static function section_editors(): array {
+	private function section_editors(): array {
 		return array(
 			'name'   => 'editors',
-			'title'  => __( 'Editors and typography', 'exopite-sof-example' ),
+			'title'  => __( 'Editors and typography', 'exopite-simple-options-example' ),
 			'icon'   => 'dashicons-edit',
 			'fields' => array(
 				array(
 					'id'     => 'editor_tinymce',
 					'type'   => 'editor',
-					'title'  => __( 'Editor (TinyMCE)', 'exopite-sof-example' ),
+					'title'  => __( 'Editor (TinyMCE)', 'exopite-simple-options-example' ),
 					'editor' => 'tinymce',
 				),
 				array(
 					'id'     => 'editor_trumbowyg',
 					'type'   => 'editor',
-					'title'  => __( 'Editor (Trumbowyg)', 'exopite-sof-example' ),
+					'title'  => __( 'Editor (Trumbowyg)', 'exopite-simple-options-example' ),
 					'editor' => 'trumbowyg',
 				),
 				array(
 					'id'           => 'typography',
 					'type'         => 'typography',
-					'title'        => __( 'Typography', 'exopite-sof-example' ),
+					'title'        => __( 'Typography', 'exopite-simple-options-example' ),
 					'preview'      => true,
-					'preview_text' => __( 'The quick brown fox jumps over the lazy dog', 'exopite-sof-example' ),
+					'preview_text' => __( 'The quick brown fox jumps over the lazy dog', 'exopite-simple-options-example' ),
 					'default'      => array(
 						'family'  => 'Arial',
 						'variant' => 'regular',
@@ -480,21 +484,21 @@ class Exopite_Sof_Example {
 	 *
 	 * @return array
 	 */
-	private static function section_layout(): array {
+	private function section_layout(): array {
 		return array(
 			'name'   => 'layout',
-			'title'  => __( 'Group, tab, fieldset, accordion', 'exopite-sof-example' ),
+			'title'  => __( 'Group, tab, fieldset, accordion', 'exopite-simple-options-example' ),
 			'icon'   => 'dashicons-screenoptions',
 			'fields' => array(
 				array(
 					'id'      => 'group_repeater',
 					'type'    => 'group',
-					'title'   => __( 'Group (repeater, sortable)', 'exopite-sof-example' ),
+					'title'   => __( 'Group (repeater, sortable)', 'exopite-simple-options-example' ),
 					'options' => array(
 						'repeater'     => true,
 						'accordion'    => true,
-						'button_title' => __( 'Add new item', 'exopite-sof-example' ),
-						'group_title'  => __( 'Item', 'exopite-sof-example' ),
+						'button_title' => __( 'Add new item', 'exopite-simple-options-example' ),
+						'group_title'  => __( 'Item', 'exopite-simple-options-example' ),
 						'limit'        => 5,
 						'sortable'     => true,
 					),
@@ -502,87 +506,87 @@ class Exopite_Sof_Example {
 						array(
 							'id'    => 'g_title',
 							'type'  => 'text',
-							'title' => __( 'Title', 'exopite-sof-example' ),
+							'title' => __( 'Title', 'exopite-simple-options-example' ),
 						),
 						array(
 							'id'    => 'g_text',
 							'type'  => 'textarea',
-							'title' => __( 'Text', 'exopite-sof-example' ),
+							'title' => __( 'Text', 'exopite-simple-options-example' ),
 						),
 						array(
 							'id'    => 'g_switch',
 							'type'  => 'switcher',
-							'title' => __( 'Active', 'exopite-sof-example' ),
+							'title' => __( 'Active', 'exopite-simple-options-example' ),
 						),
 						array(
 							'id'    => 'g_color',
 							'type'  => 'color_wp',
-							'title' => __( 'Color', 'exopite-sof-example' ),
+							'title' => __( 'Color', 'exopite-simple-options-example' ),
 						),
 					),
 				),
 				array(
 					'id'      => 'group_single',
 					'type'    => 'group',
-					'title'   => __( 'Group (not a repeater)', 'exopite-sof-example' ),
+					'title'   => __( 'Group (not a repeater)', 'exopite-simple-options-example' ),
 					'options' => array(
 						'repeater'    => false,
-						'group_title' => __( 'Single group', 'exopite-sof-example' ),
+						'group_title' => __( 'Single group', 'exopite-simple-options-example' ),
 					),
 					'fields'  => array(
 						array(
 							'id'    => 'gs_text',
 							'type'  => 'text',
-							'title' => __( 'Text', 'exopite-sof-example' ),
+							'title' => __( 'Text', 'exopite-simple-options-example' ),
 						),
 						array(
 							'id'    => 'gs_number',
 							'type'  => 'number',
-							'title' => __( 'Number', 'exopite-sof-example' ),
+							'title' => __( 'Number', 'exopite-simple-options-example' ),
 						),
 					),
 				),
 				array(
 					'id'      => 'fieldset',
 					'type'    => 'fieldset',
-					'title'   => __( 'Fieldset (2 columns)', 'exopite-sof-example' ),
+					'title'   => __( 'Fieldset (2 columns)', 'exopite-simple-options-example' ),
 					'options' => array( 'cols' => 2 ),
 					'fields'  => array(
 						array(
 							'id'    => 'fs_first',
 							'type'  => 'text',
-							'title' => __( 'First name', 'exopite-sof-example' ),
+							'title' => __( 'First name', 'exopite-simple-options-example' ),
 						),
 						array(
 							'id'    => 'fs_last',
 							'type'  => 'text',
-							'title' => __( 'Last name', 'exopite-sof-example' ),
+							'title' => __( 'Last name', 'exopite-simple-options-example' ),
 						),
 					),
 				),
 				array(
 					'id'      => 'tab',
 					'type'    => 'tab',
-					'title'   => __( 'Tab', 'exopite-sof-example' ),
+					'title'   => __( 'Tab', 'exopite-simple-options-example' ),
 					'options' => array( 'equal_width' => true ),
 					'tabs'    => array(
 						array(
-							'title'  => __( 'Tab 1', 'exopite-sof-example' ),
+							'title'  => __( 'Tab 1', 'exopite-simple-options-example' ),
 							'fields' => array(
 								array(
 									'id'    => 'tab1_text',
 									'type'  => 'text',
-									'title' => __( 'Tab 1 text', 'exopite-sof-example' ),
+									'title' => __( 'Tab 1 text', 'exopite-simple-options-example' ),
 								),
 							),
 						),
 						array(
-							'title'  => __( 'Tab 2', 'exopite-sof-example' ),
+							'title'  => __( 'Tab 2', 'exopite-simple-options-example' ),
 							'fields' => array(
 								array(
 									'id'      => 'tab2_select',
 									'type'    => 'select',
-									'title'   => __( 'Tab 2 select', 'exopite-sof-example' ),
+									'title'   => __( 'Tab 2 select', 'exopite-simple-options-example' ),
 									'options' => array(
 										'x' => 'X',
 										'y' => 'Y',
@@ -595,29 +599,29 @@ class Exopite_Sof_Example {
 				array(
 					'id'       => 'accordion',
 					'type'     => 'accordion',
-					'title'    => __( 'Accordion', 'exopite-sof-example' ),
+					'title'    => __( 'Accordion', 'exopite-simple-options-example' ),
 					'options'  => array( 'allow_all_open' => false ),
 					'sections' => array(
 						array(
 							'options' => array(
-								'title'  => __( 'Section 1', 'exopite-sof-example' ),
+								'title'  => __( 'Section 1', 'exopite-simple-options-example' ),
 								'closed' => false,
 							),
 							'fields'  => array(
 								array(
 									'id'    => 'acc1_text',
 									'type'  => 'text',
-									'title' => __( 'Section 1 text', 'exopite-sof-example' ),
+									'title' => __( 'Section 1 text', 'exopite-simple-options-example' ),
 								),
 							),
 						),
 						array(
-							'options' => array( 'title' => __( 'Section 2', 'exopite-sof-example' ) ),
+							'options' => array( 'title' => __( 'Section 2', 'exopite-simple-options-example' ) ),
 							'fields'  => array(
 								array(
 									'id'    => 'acc2_textarea',
 									'type'  => 'textarea',
-									'title' => __( 'Section 2 textarea', 'exopite-sof-example' ),
+									'title' => __( 'Section 2 textarea', 'exopite-simple-options-example' ),
 								),
 							),
 						),
@@ -626,42 +630,42 @@ class Exopite_Sof_Example {
 				array(
 					'id'      => 'group_nested',
 					'type'    => 'group',
-					'title'   => __( 'Nested group (repeater in repeater)', 'exopite-sof-example' ),
+					'title'   => __( 'Nested group (repeater in repeater)', 'exopite-simple-options-example' ),
 					'options' => array(
 						'repeater'     => true,
 						'accordion'    => true,
-						'button_title' => __( 'Add outer item', 'exopite-sof-example' ),
-						'group_title'  => __( 'Outer item', 'exopite-sof-example' ),
+						'button_title' => __( 'Add outer item', 'exopite-simple-options-example' ),
+						'group_title'  => __( 'Outer item', 'exopite-simple-options-example' ),
 						'limit'        => 5,
 					),
 					'fields'  => array(
 						array(
 							'id'    => 'gn_title',
 							'type'  => 'text',
-							'title' => __( 'Outer title', 'exopite-sof-example' ),
+							'title' => __( 'Outer title', 'exopite-simple-options-example' ),
 						),
 						array(
 							'id'      => 'gn_inner',
 							'type'    => 'group',
-							'title'   => __( 'Inner group', 'exopite-sof-example' ),
+							'title'   => __( 'Inner group', 'exopite-simple-options-example' ),
 							'options' => array(
 								'repeater'     => true,
 								'accordion'    => true,
-								'button_title' => __( 'Add inner item', 'exopite-sof-example' ),
-								'group_title'  => __( 'Inner item', 'exopite-sof-example' ),
+								'button_title' => __( 'Add inner item', 'exopite-simple-options-example' ),
+								'group_title'  => __( 'Inner item', 'exopite-simple-options-example' ),
 								'limit'        => 5,
 							),
 							'fields'  => array(
 								array(
 									'id'    => 'gn_inner_text',
 									'type'  => 'text',
-									'title' => __( 'Inner text', 'exopite-sof-example' ),
+									'title' => __( 'Inner text', 'exopite-simple-options-example' ),
 								),
 								array(
 									'id'    => 'gn_inner_check',
 									'type'  => 'checkbox',
-									'title' => __( 'Inner check', 'exopite-sof-example' ),
-									'label' => __( 'Yes', 'exopite-sof-example' ),
+									'title' => __( 'Inner check', 'exopite-simple-options-example' ),
+									'label' => __( 'Yes', 'exopite-simple-options-example' ),
 								),
 							),
 						),
@@ -670,45 +674,45 @@ class Exopite_Sof_Example {
 				array(
 					'id'       => 'accordion_nested',
 					'type'     => 'accordion',
-					'title'    => __( 'Nested accordion (accordion, tab and group inside)', 'exopite-sof-example' ),
+					'title'    => __( 'Nested accordion (accordion, tab and group inside)', 'exopite-simple-options-example' ),
 					'options'  => array( 'allow_all_open' => true ),
 					'sections' => array(
 						array(
 							'options' => array(
-								'title'  => __( 'Accordion inside', 'exopite-sof-example' ),
+								'title'  => __( 'Accordion inside', 'exopite-simple-options-example' ),
 								'closed' => false,
 							),
 							'fields'  => array(
 								array(
 									'id'    => 'an_text',
 									'type'  => 'text',
-									'title' => __( 'Outer text', 'exopite-sof-example' ),
+									'title' => __( 'Outer text', 'exopite-simple-options-example' ),
 								),
 								array(
 									'id'       => 'an_inner_accordion',
 									'type'     => 'accordion',
-									'title'    => __( 'Inner accordion', 'exopite-sof-example' ),
+									'title'    => __( 'Inner accordion', 'exopite-simple-options-example' ),
 									'sections' => array(
 										array(
 											'options' => array(
-												'title'  => __( 'Inner A', 'exopite-sof-example' ),
+												'title'  => __( 'Inner A', 'exopite-simple-options-example' ),
 												'closed' => false,
 											),
 											'fields'  => array(
 												array(
 													'id'   => 'an_inner_a_text',
 													'type' => 'text',
-													'title' => __( 'Inner A text', 'exopite-sof-example' ),
+													'title' => __( 'Inner A text', 'exopite-simple-options-example' ),
 												),
 											),
 										),
 										array(
-											'options' => array( 'title' => __( 'Inner B', 'exopite-sof-example' ) ),
+											'options' => array( 'title' => __( 'Inner B', 'exopite-simple-options-example' ) ),
 											'fields'  => array(
 												array(
 													'id'   => 'an_inner_b_switch',
 													'type' => 'switcher',
-													'title' => __( 'Inner B switcher', 'exopite-sof-example' ),
+													'title' => __( 'Inner B switcher', 'exopite-simple-options-example' ),
 												),
 											),
 										),
@@ -717,31 +721,31 @@ class Exopite_Sof_Example {
 							),
 						),
 						array(
-							'options' => array( 'title' => __( 'Tab inside', 'exopite-sof-example' ) ),
+							'options' => array( 'title' => __( 'Tab inside', 'exopite-simple-options-example' ) ),
 							'fields'  => array(
 								array(
 									'id'      => 'an_tab',
 									'type'    => 'tab',
-									'title'   => __( 'Tab in accordion', 'exopite-sof-example' ),
+									'title'   => __( 'Tab in accordion', 'exopite-simple-options-example' ),
 									'options' => array( 'equal_width' => true ),
 									'tabs'    => array(
 										array(
-											'title'  => __( 'Tab A', 'exopite-sof-example' ),
+											'title'  => __( 'Tab A', 'exopite-simple-options-example' ),
 											'fields' => array(
 												array(
 													'id'   => 'an_tab_a_text',
 													'type' => 'text',
-													'title' => __( 'Tab A text', 'exopite-sof-example' ),
+													'title' => __( 'Tab A text', 'exopite-simple-options-example' ),
 												),
 											),
 										),
 										array(
-											'title'  => __( 'Tab B', 'exopite-sof-example' ),
+											'title'  => __( 'Tab B', 'exopite-simple-options-example' ),
 											'fields' => array(
 												array(
 													'id'   => 'an_tab_b_textarea',
 													'type' => 'textarea',
-													'title' => __( 'Tab B textarea', 'exopite-sof-example' ),
+													'title' => __( 'Tab B textarea', 'exopite-simple-options-example' ),
 												),
 											),
 										),
@@ -750,22 +754,22 @@ class Exopite_Sof_Example {
 							),
 						),
 						array(
-							'options' => array( 'title' => __( 'Group inside', 'exopite-sof-example' ) ),
+							'options' => array( 'title' => __( 'Group inside', 'exopite-simple-options-example' ) ),
 							'fields'  => array(
 								array(
 									'id'      => 'an_group',
 									'type'    => 'group',
-									'title'   => __( 'Group in accordion', 'exopite-sof-example' ),
+									'title'   => __( 'Group in accordion', 'exopite-simple-options-example' ),
 									'options' => array(
 										'repeater'     => true,
-										'button_title' => __( 'Add row', 'exopite-sof-example' ),
-										'group_title'  => __( 'Row', 'exopite-sof-example' ),
+										'button_title' => __( 'Add row', 'exopite-simple-options-example' ),
+										'group_title'  => __( 'Row', 'exopite-simple-options-example' ),
 									),
 									'fields'  => array(
 										array(
 											'id'    => 'an_group_text',
 											'type'  => 'text',
-											'title' => __( 'Row text', 'exopite-sof-example' ),
+											'title' => __( 'Row text', 'exopite-simple-options-example' ),
 										),
 									),
 								),
@@ -782,42 +786,42 @@ class Exopite_Sof_Example {
 	 *
 	 * @return array
 	 */
-	private static function section_content(): array {
+	private function section_content(): array {
 		return array(
 			'name'   => 'content',
-			'title'  => __( 'Content, notice, card, button', 'exopite-sof-example' ),
+			'title'  => __( 'Content, notice, card, button', 'exopite-simple-options-example' ),
 			'icon'   => 'dashicons-info',
 			'fields' => array(
 				array(
 					'type'    => 'notice',
 					'class'   => 'info',
-					'content' => __( 'This is an info notice.', 'exopite-sof-example' ),
+					'content' => __( 'This is an info notice.', 'exopite-simple-options-example' ),
 				),
 				array(
 					'type'    => 'notice',
 					'class'   => 'danger',
-					'content' => __( 'This is a danger notice.', 'exopite-sof-example' ),
+					'content' => __( 'This is a danger notice.', 'exopite-simple-options-example' ),
 				),
 				array(
 					'type'    => 'content',
-					'title'   => __( 'Content', 'exopite-sof-example' ),
-					'content' => '<p>' . sprintf( /* translators: %s: the word HTML in bold. */ esc_html__( 'Static %s content.', 'exopite-sof-example' ), '<strong>HTML</strong>' ) . '</p>',
+					'title'   => __( 'Content', 'exopite-simple-options-example' ),
+					'content' => '<p>' . sprintf( /* translators: %s: the word HTML in bold. */ esc_html__( 'Static %s content.', 'exopite-simple-options-example' ), '<strong>HTML</strong>' ) . '</p>',
 				),
 				array(
 					'type'    => 'card',
-					'title'   => __( 'Card', 'exopite-sof-example' ),
-					'header'  => __( 'Card header', 'exopite-sof-example' ),
-					'content' => __( 'Card content', 'exopite-sof-example' ),
-					'footer'  => __( 'Card footer', 'exopite-sof-example' ),
+					'title'   => __( 'Card', 'exopite-simple-options-example' ),
+					'header'  => __( 'Card header', 'exopite-simple-options-example' ),
+					'content' => __( 'Card content', 'exopite-simple-options-example' ),
+					'footer'  => __( 'Card footer', 'exopite-simple-options-example' ),
 				),
 				array(
 					'id'      => 'button',
 					'type'    => 'button',
-					'title'   => __( 'Button', 'exopite-sof-example' ),
+					'title'   => __( 'Button', 'exopite-simple-options-example' ),
 					'options' => array(
 						'href'   => 'https://wordpress.org',
 						'target' => '_blank',
-						'value'  => __( 'Open wordpress.org', 'exopite-sof-example' ),
+						'value'  => __( 'Open wordpress.org', 'exopite-simple-options-example' ),
 					),
 				),
 			),
@@ -829,30 +833,30 @@ class Exopite_Sof_Example {
 	 *
 	 * @return array
 	 */
-	private static function section_nested_menu(): array {
+	private function section_nested_menu(): array {
 		return array(
-			'title'    => __( 'Nested menu', 'exopite-sof-example' ),
+			'title'    => __( 'Nested menu', 'exopite-simple-options-example' ),
 			'icon'     => 'dashicons-menu',
 			'sections' => array(
 				array(
 					'name'   => 'nested1',
-					'title'  => __( 'Sub section 1', 'exopite-sof-example' ),
+					'title'  => __( 'Sub section 1', 'exopite-simple-options-example' ),
 					'fields' => array(
 						array(
 							'id'    => 'nested1_text',
 							'type'  => 'text',
-							'title' => __( 'Sub section 1 text', 'exopite-sof-example' ),
+							'title' => __( 'Sub section 1 text', 'exopite-simple-options-example' ),
 						),
 					),
 				),
 				array(
 					'name'   => 'nested2',
-					'title'  => __( 'Sub section 2', 'exopite-sof-example' ),
+					'title'  => __( 'Sub section 2', 'exopite-simple-options-example' ),
 					'fields' => array(
 						array(
 							'id'    => 'nested2_text',
 							'type'  => 'text',
-							'title' => __( 'Sub section 2 text', 'exopite-sof-example' ),
+							'title' => __( 'Sub section 2 text', 'exopite-simple-options-example' ),
 						),
 					),
 				),
@@ -865,17 +869,17 @@ class Exopite_Sof_Example {
 	 *
 	 * @return array
 	 */
-	private static function section_read_values(): array {
+	private function section_read_values(): array {
 		return array(
 			'name'   => 'read',
-			'title'  => __( 'Read the values', 'exopite-sof-example' ),
+			'title'  => __( 'Read the values', 'exopite-simple-options-example' ),
 			'icon'   => 'dashicons-editor-code',
 			'fields' => array(
 				array(
 					'type'     => 'content',
-					'title'    => __( 'Read the values in your code', 'exopite-sof-example' ),
+					'title'    => __( 'Read the values in your code', 'exopite-simple-options-example' ),
 					'callback' => array(
-						'function' => array( __CLASS__, 'render_read_values' ),
+						'function' => array( $this, 'render_read_values' ),
 					),
 				),
 			),
@@ -887,9 +891,9 @@ class Exopite_Sof_Example {
 	 *
 	 * @return string
 	 */
-	public static function render_read_values() {
+	public function render_read_values() {
 
-		$options = get_exopite_sof_option( self::OPTION_ID );
+		$options = \get_exopite_sof_option( self::OPTION_ID );
 		$text    = ( is_array( $options ) && isset( $options['text'] ) ) ? $options['text'] : '';
 
 		$code = "\$options = get_exopite_sof_option( '" . self::OPTION_ID . "' );\n"
@@ -900,7 +904,7 @@ class Exopite_Sof_Example {
 			. "\$value = get_post_meta( \$post_id, 'exopite_sof_example_simple_text', true );";
 
 		return '<pre><code>' . esc_html( $code ) . '</code></pre>'
-			. '<p>' . esc_html__( 'Saved value of the "Text" field:', 'exopite-sof-example' ) . ' <code>' . esc_html( $text ) . '</code></p>';
+			. '<p>' . esc_html__( 'Saved value of the "Text" field:', 'exopite-simple-options-example' ) . ' <code>' . esc_html( $text ) . '</code></p>';
 	}
 
 	/**
@@ -908,16 +912,16 @@ class Exopite_Sof_Example {
 	 *
 	 * @return array
 	 */
-	private static function section_backup(): array {
+	private function section_backup(): array {
 		return array(
 			'name'   => 'backup',
-			'title'  => __( 'Backup', 'exopite-sof-example' ),
+			'title'  => __( 'Backup', 'exopite-simple-options-example' ),
 			'icon'   => 'dashicons-backup',
 			'fields' => array(
 				array(
 					'id'    => 'backup',
 					'type'  => 'backup',
-					'title' => __( 'Import, export and reset', 'exopite-sof-example' ),
+					'title' => __( 'Import, export and reset', 'exopite-simple-options-example' ),
 				),
 			),
 		);
@@ -934,12 +938,12 @@ class Exopite_Sof_Example {
 	 *
 	 * @return array
 	 */
-	private static function metabox_config(): array {
+	private function metabox_config(): array {
 		return array(
 			'type'       => 'metabox',
 			'id'         => self::META_ID,             // Post meta key.
 			'post_types' => array( 'post', 'page' ),
-			'title'      => __( 'SOF Example: metabox (one array)', 'exopite-sof-example' ),
+			'title'      => __( 'SOF Example: metabox (one array)', 'exopite-simple-options-example' ),
 			'context'    => 'advanced',               // One of: normal, advanced, side.
 			'priority'   => 'default',
 			'capability' => 'edit_posts',
@@ -953,33 +957,33 @@ class Exopite_Sof_Example {
 	 *
 	 * @return array
 	 */
-	private static function metabox_fields(): array {
+	private function metabox_fields(): array {
 		return array(
 			array(
 				'name'   => 'meta_basic',
-				'title'  => __( 'Basic', 'exopite-sof-example' ),
+				'title'  => __( 'Basic', 'exopite-simple-options-example' ),
 				'icon'   => 'dashicons-admin-generic',
-				'fields' => self::basic_fields( 'meta_' ),
+				'fields' => $this->basic_fields( 'meta_' ),
 			),
 			array(
 				'name'   => 'meta_media',
-				'title'  => __( 'Media', 'exopite-sof-example' ),
+				'title'  => __( 'Media', 'exopite-simple-options-example' ),
 				'icon'   => 'dashicons-admin-media',
 				'fields' => array(
 					array(
 						'id'    => 'meta_image',
 						'type'  => 'image',
-						'title' => __( 'Image', 'exopite-sof-example' ),
+						'title' => __( 'Image', 'exopite-simple-options-example' ),
 					),
 					array(
 						'id'    => 'meta_gallery',
 						'type'  => 'gallery',
-						'title' => __( 'Gallery', 'exopite-sof-example' ),
+						'title' => __( 'Gallery', 'exopite-simple-options-example' ),
 					),
 					array(
 						'id'      => 'meta_upload',
 						'type'    => 'upload',
-						'title'   => __( 'Upload (attached to this post)', 'exopite-sof-example' ),
+						'title'   => __( 'Upload (attached to this post)', 'exopite-simple-options-example' ),
 						'options' => array(
 							'attach'                   => true,
 							'filecount'                => 3,
@@ -994,43 +998,43 @@ class Exopite_Sof_Example {
 					array(
 						'id'      => 'meta_attached',
 						'type'    => 'attached',
-						'title'   => __( 'Attached images (select and delete)', 'exopite-sof-example' ),
+						'title'   => __( 'Attached images (select and delete)', 'exopite-simple-options-example' ),
 						'options' => array( 'type' => 'image' ),
 					),
 				),
 			),
 			array(
 				'name'   => 'meta_more',
-				'title'  => __( 'More', 'exopite-sof-example' ),
+				'title'  => __( 'More', 'exopite-simple-options-example' ),
 				'icon'   => 'dashicons-list-view',
 				'fields' => array(
 					array(
 						'id'      => 'meta_group',
 						'type'    => 'group',
-						'title'   => __( 'Group (repeater)', 'exopite-sof-example' ),
+						'title'   => __( 'Group (repeater)', 'exopite-simple-options-example' ),
 						'options' => array(
 							'repeater'     => true,
-							'button_title' => __( 'Add row', 'exopite-sof-example' ),
-							'group_title'  => __( 'Row', 'exopite-sof-example' ),
+							'button_title' => __( 'Add row', 'exopite-simple-options-example' ),
+							'group_title'  => __( 'Row', 'exopite-simple-options-example' ),
 						),
 						'fields'  => array(
 							array(
 								'id'    => 'mg_text',
 								'type'  => 'text',
-								'title' => __( 'Text', 'exopite-sof-example' ),
+								'title' => __( 'Text', 'exopite-simple-options-example' ),
 							),
 							array(
 								'id'    => 'mg_check',
 								'type'  => 'checkbox',
-								'title' => __( 'Check', 'exopite-sof-example' ),
-								'label' => __( 'Yes', 'exopite-sof-example' ),
+								'title' => __( 'Check', 'exopite-simple-options-example' ),
+								'label' => __( 'Yes', 'exopite-simple-options-example' ),
 							),
 						),
 					),
 					array(
 						'id'       => 'meta_view',
 						'type'     => 'meta',
-						'title'    => __( 'Show a post meta value (read only)', 'exopite-sof-example' ),
+						'title'    => __( 'Show a post meta value (read only)', 'exopite-simple-options-example' ),
 						'meta-key' => '_edit_last',
 					),
 				),
@@ -1043,12 +1047,12 @@ class Exopite_Sof_Example {
 	 *
 	 * @return array
 	 */
-	private static function simple_metabox_config(): array {
+	private function simple_metabox_config(): array {
 		return array(
 			'type'       => 'metabox',
 			'id'         => self::SIMPLE_META_ID,
 			'post_types' => array( 'post', 'page' ),
-			'title'      => __( 'SOF Example: simple metabox', 'exopite-sof-example' ),
+			'title'      => __( 'SOF Example: simple metabox', 'exopite-simple-options-example' ),
 			'context'    => 'side',
 			'priority'   => 'default',
 			'capability' => 'edit_posts',
@@ -1062,26 +1066,26 @@ class Exopite_Sof_Example {
 	 *
 	 * @return array
 	 */
-	private static function simple_metabox_fields(): array {
+	private function simple_metabox_fields(): array {
 		return array(
 			array(
 				'name'   => 'simple',
-				'title'  => __( 'Simple', 'exopite-sof-example' ),
+				'title'  => __( 'Simple', 'exopite-simple-options-example' ),
 				'fields' => array(
 					array(
 						'id'    => 'exopite_sof_example_simple_text',
 						'type'  => 'text',
-						'title' => __( 'Text', 'exopite-sof-example' ),
+						'title' => __( 'Text', 'exopite-simple-options-example' ),
 					),
 					array(
 						'id'    => 'exopite_sof_example_simple_switch',
 						'type'  => 'switcher',
-						'title' => __( 'Switcher', 'exopite-sof-example' ),
+						'title' => __( 'Switcher', 'exopite-simple-options-example' ),
 					),
 					array(
 						'id'      => 'exopite_sof_example_simple_select',
 						'type'    => 'select',
-						'title'   => __( 'Select', 'exopite-sof-example' ),
+						'title'   => __( 'Select', 'exopite-simple-options-example' ),
 						'options' => array(
 							'a' => 'A',
 							'b' => 'B',

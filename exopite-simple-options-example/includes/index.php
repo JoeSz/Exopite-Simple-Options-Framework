@@ -2,5 +2,5 @@
 /**
  * Silence is golden.
  *
- * @package Exopite_Sof_Example
+ * @package Exopite_Simple_Options_Example
  */

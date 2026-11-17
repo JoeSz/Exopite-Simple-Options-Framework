@@ -235,7 +235,7 @@ For dependent code:
 
 #### Example plugin with all fields
 
-The `exopite-simple-options-example` folder is a small plugin that uses the framework: one options page with every field type and option, plus a metabox and a "simple" metabox for posts and pages. Copy it to `wp-content/plugins/`, activate it next to the framework plugin, and open "SOF Example" in the admin menu. Use its code as a template.
+The `exopite-simple-options-example` folder is a small plugin that uses the framework: one options page with every field type and option, plus a metabox and a "simple" metabox for posts and pages. Copy it to `wp-content/plugins/`, activate it next to the framework plugin, and open "SOF Example" in the admin menu. It is built on the WordPress Plugin Boilerplate: the framework is called on `init` (see `define_admin_hooks()` in `includes/class-exopite-simple-options-example.php`), all fields are in `admin/class-exopite-simple-options-example-admin.php`. Use its code as a template.
 
 #### Old plugins with a bundled copy
 
