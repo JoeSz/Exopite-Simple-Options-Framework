@@ -188,3 +188,11 @@ msgstr ""
 #: fields/video.php:74
 msgid "Add Video"
 msgstr ""
+#: class-exopite-sof-plugin.php
+msgid "unknown (older)"
+msgstr ""
+
+#. translators: 1: file path of the other copy, 2: its version, 3: version of this plugin.
+#: class-exopite-sof-plugin.php
+msgid "Exopite Simple Options Framework: another copy was loaded first and is used instead of this plugin: %1$s (version %2$s, this plugin: %3$s). Update or remove the bundled copy."
+msgstr ""

@@ -67,6 +67,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 	class Exopite_Simple_Options_Framework {
 
 		/**
+		 * Framework version (also used for asset cache busting).
+		 *
+		 * @var string
+		 */
+		const VERSION = '20261117.4';
+
+		/**
 		 *
 		 * dirname
 		 *
@@ -170,7 +177,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				return;
 			}
 
-			$this->version = '20261117.3';
+			$this->version = self::VERSION;
 
 			// TODO: Do sanitize $config['id'].
 			$this->unique = $config['id'];
@@ -755,10 +762,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function load_classes() {
 
-			require_once 'multilang-class.php';
-			require_once 'fields-class.php';
-			require_once 'upload-class.php';
-			require_once 'sanitize-class.php';
+			require_once __DIR__ . '/multilang-class.php';
+			require_once __DIR__ . '/fields-class.php';
+			require_once __DIR__ . '/upload-class.php';
+			require_once __DIR__ . '/sanitize-class.php';
 		}
 
 		/**
@@ -2087,7 +2094,7 @@ if ( ! function_exists( 'get_exopite_sof_option' ) ) {
 		 */
 
 		if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
-			require_once 'multilang-class.php';
+			require_once __DIR__ . '/multilang-class.php';
 		}
 
 		$language_defaults = Exopite_Simple_Options_Framework_Helper::get_language_defaults();

@@ -5,7 +5,7 @@ Lightweight, easy to use Option Framework for WordPress Plugins and Themes and a
 ## Fast, easy and lightweight option/metabox form generator.
 
 - Author: Joe Szalai and raoabid
-- Version: 20261117.3
+- Version: 20261117.4
 - Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 - GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 - Author URL: https://joe.szalai.org
@@ -144,7 +144,7 @@ https://wpquestions.com/Order_by_meta_key_where_value_is_serialized/7908<br>
 
 Server
 
-* WordPress 4.9+ (May work with earlier versions too)
+* WordPress 5.0+
 * PHP 8.2+ (Required)
 * jQuery 1.9.1+
 
@@ -159,9 +159,56 @@ https://caniuse.com/#feat=dragndrop
 
 ### INSTALLATION
 
-* Copy to plugin/theme folder.
-* Indluce exopite-simple-options/exopite-simple-options-framework-class.php
-* Create options and fields and hook to 'admin_menu'.
+There are two ways to use the framework. Both use the same code.
+
+#### A) As a plugin (recommended, one copy for the whole site)
+
+* Copy the `exopite-simple-options` folder to `wp-content/plugins/` (or zip it and upload it in WordPress).
+* Activate "Exopite Simple Options Framework" in the plugin list.
+* Every plugin and theme on the site can now use it, no copy is needed in them.
+* If another plugin or theme loads its own bundled copy before this plugin, that copy is used and administrators see a notice with its path and version.
+* The action `exopite_sof_loaded` fires on `plugins_loaded` (priority 1) when the plugin is active.
+
+In your plugin or theme, check that the framework is there, and fall back to a bundled copy (or show a notice) if not:
+
+```php
+add_action( 'init', 'prefix_register_options' );
+
+function prefix_register_options() {
+
+	if ( ! is_admin() ) {
+		return;
+	}
+
+	if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) {
+
+		// Optional fallback to a bundled copy.
+		$bundled = __DIR__ . '/exopite-simple-options/exopite-simple-options-framework-class.php';
+
+		if ( ! file_exists( $bundled ) ) {
+			add_action( 'admin_notices', function () {
+				echo '<div class="notice notice-error"><p>' . esc_html__( 'Please install and activate the Exopite Simple Options Framework plugin.', 'prefix' ) . '</p></div>';
+			} );
+			return;
+		}
+
+		require_once $bundled;
+	}
+
+	new Exopite_Simple_Options_Framework( $config, $fields );
+}
+```
+
+The installed framework version is in `Exopite_Simple_Options_Framework::VERSION`.
+
+#### B) Bundled into a plugin or theme
+
+* Copy the `exopite-simple-options` folder into your plugin/theme folder.
+* Include `exopite-simple-options/exopite-simple-options-framework-class.php`.
+* The plugin header file (`exopite-simple-options.php`) is not loaded in this case and does nothing.
+* If several plugins bundle the framework, the first loaded copy is used for all of them (`class_exists` guards).
+
+Create options and fields and hook to 'admin_menu' or 'init' (admin only, the framework does nothing on the front end):
 ```php
 add_action( 'admin_menu', 'create_menu', 0 );
 ```

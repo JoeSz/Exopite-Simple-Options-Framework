@@ -1,5 +1,10 @@
 ### CHANGELOG
 
+= 20261117.4 - 2026-11-17 =
+* Can be installed and activated as a standalone plugin (exopite-simple-options.php), still works bundled
+* Admin notice if another bundled copy was loaded before the plugin, action exopite_sof_loaded, constant Exopite_Simple_Options_Framework::VERSION
+* Fix: include the framework files with __DIR__ instead of relative paths (depended on include_path)
+
 = 20261117 - 2026-11-17 =
 * Security: upload/delete AJAX requests require a nonce and capability checks (upload_files, edit_post, delete_post)
 * Security: import/export/reset require the options capability and a per-options-page nonce, only the own option can be changed
