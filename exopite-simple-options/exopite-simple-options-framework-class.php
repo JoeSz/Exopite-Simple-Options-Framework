@@ -61,52 +61,55 @@
  */
 if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
+	/**
+	 * Class Exopite_Simple_Options_Framework.
+	 */
 	class Exopite_Simple_Options_Framework {
 
 		/**
 		 *
 		 * dirname
+		 *
 		 * @access public
 		 * @var string
-		 *
 		 */
 		public $dirname = '';
 
 		/**
 		 *
 		 * unique
+		 *
 		 * @access public
 		 * @var string
-		 *
 		 */
 		public $unique = '';
 
 		/**
 		 *
 		 * notice
+		 *
 		 * @access public
 		 * @var boolean
-		 *
 		 */
 		public $notice = false;
 
 		/**
 		 *
 		 * settings
+		 *
 		 * @access public
 		 * @var array
-		 *
 		 */
 		public $config = array();
 
 		/**
 		 *
 		 * options
+		 *
 		 * @access public
 		 * @var array
-		 *
 		 */
-		public $fields = array();
+		public $fields   = array();
 		public $elements = array();
 
 		public $is_multilang = null;
@@ -119,20 +122,20 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		public $version;
 
-		// public $debug = true;
 		public $debug = false;
 
 		/**
 		 *
 		 * options store
+		 *
 		 * @access public
 		 * @var array
-		 *
 		 */
 		public $db_options = array();
 
 		/**
 		 * Sets the type to  metabox|menu
+		 *
 		 * @var string
 		 */
 		private $type;
@@ -157,6 +160,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		protected $required_keys_metabox = array( 'id', 'post_types', 'title', 'capability' );
 
+		/**
+		 * Constructor.
+		 */
 		public function __construct( $config, $elements ) {
 
 			// If we are not in admin area exit.
@@ -164,20 +170,20 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				return;
 			}
 
-			$this->version = '20261009';
+			$this->version = '20261117.2';
 
-			// TODO: Do sanitize $config['id']
+			// TODO: Do sanitize $config['id'].
 			$this->unique = $config['id'];
 
 			// Filter for override every exopite $config and $fields
 			// $this->config = apply_filters( 'exopite_sof_config', $config );
-			// $this->elements = apply_filters( 'exopite_sof_options', $fields );
+			// $this->elements = apply_filters( 'exopite_sof_options', $fields );.
 
-			// Filter for override $config and $fields with respect to $config and $fields
-			$this->config = apply_filters( 'exopite_sof_config_' . $this->unique, $config );
+			// Filter for override $config and $fields with respect to $config and $fields.
+			$this->config   = apply_filters( 'exopite_sof_config_' . $this->unique, $config );
 			$this->elements = apply_filters( 'exopite_sof_options_' . $this->unique, $elements );
 
-			// now is_menu() and is_metabox() available
+			// now is_menu() and is_metabox() available.
 
 			$this->load_textdomain();
 
@@ -196,11 +202,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			$this->define_shared_hooks();
 
 			$this->define_hooks();
-
 		}
 
+		/**
+		 * Get mo file.
+		 */
 		public function get_mo_file() {
-			$path = wp_normalize_path( dirname( __FILE__ ) ) . '/lang';
+			$path   = wp_normalize_path( __DIR__ ) . '/lang';
 			$domain = 'exopite-sof';
 			if ( function_exists( 'determine_locale' ) ) {
 				$locale = determine_locale();
@@ -211,16 +219,21 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			return $path . '/' . $domain . '-' . $locale . '.mo';
 		}
 
+		/**
+		 * Load textdomain.
+		 */
 		public function load_textdomain() {
 
 			$mofile = $this->get_mo_file();
 			load_textdomain( 'exopite-sof', $mofile );
-
 		}
 
+		/**
+		 * Setup multilang.
+		 */
 		protected function setup_multilang() {
 
-			// Srt Defaults for all cases
+			// Srt Defaults for all cases.
 			$multilang_defaults = Exopite_Simple_Options_Framework_Helper::get_language_defaults();
 
 			if ( is_array( $multilang_defaults ) ) {
@@ -232,14 +245,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$this->languages    = $this->multilang['languages'];
 
 			}
-
 		}
 
 		/**
 		 * Return the array of languages except current language
 		 *
 		 * @return array $languages_except_current
-		 *
 		 */
 		public function languages_except_current_language() {
 
@@ -254,7 +265,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			unset( $all_languages );
 
 			return $languages_except_current;
-
 		}
 
 		/**
@@ -262,7 +272,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 * and throw admin error if a required key is missing
 		 */
 		protected function check_required_configuration_keys() {
-			// instantiate the Wp_Error for $this->errors
+			// instantiate the Wp_Error for $this->errors.
 			$this->errors = new WP_Error();
 
 			$required_key_array = $this->required_keys_all_types;
@@ -281,21 +291,19 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				foreach ( $required_key_array as $key ) :
 
 					if ( ! array_key_exists( $key, $this->config ) ) {
-						// Add error message to the WP_Error object
-						$this->errors->add( "missing_config_key_{$key}", sprintf( eac_attr__( "%s is missing in the configuration array", 'exopite-sof' ), $key ) );
+						// Add error message to the WP_Error object.
+						$this->errors->add( "missing_config_key_{$key}", sprintf( __( '%s is missing in the configuration array', 'exopite-sof' ), $key ) );
 					}
 
 				endforeach;
 
 				$errors_array = $this->errors->get_error_messages();
 
-				// if the errors are logged, add the admin display hook
+				// if the errors are logged, add the admin display hook.
 				if ( ! empty( $errors_array ) ) {
 					add_action( 'admin_notices', array( $this, 'display_admin_error' ) );
 				}
-
 			} // ! empty( $required_key_array )
-
 		} //check_required_keys()
 
 		/**
@@ -307,65 +315,71 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$this->set_type( $this->config['type'] );
 			}
 
-			// Parse the configuration against default values for Menu
+			// Parse the configuration against default values for Menu.
 			if ( $this->is_menu() ) {
 				$default_menu_config = $this->get_config_default_menu();
 				$this->config        = wp_parse_args( $this->config, $default_menu_config );
 
-				// override option type to nullify 'simple' even if added
-				$this->config['options'] = ''; // so, even if options is 'simple', we make it non-simple
+				// override option type to nullify 'simple' even if added.
+				$this->config['options'] = ''; // so, even if options is 'simple', we make it non-simple.
 
 			}
 
-			// Parse the configuration against default values for Metabox
+			// Parse the configuration against default values for Metabox.
 			if ( $this->is_metabox() ) {
 				$default_metabox_config = $this->get_config_default_metabox();
 				$this->config           = wp_parse_args( $this->config, $default_metabox_config );
 
-				// This override s done for testing active plugin for qTranX and Wp-Multilang
+				// This override s done for testing active plugin for qTranX and Wp-Multilang.
 				if ( $this->is_special_multilang_active() ) {
 
-					$this->config['multilang'] = true; // so, even if multilingual was TRUE, we make it FALSE
-					$this->config['options']   = false; // We can only save data for special languages in non-simple options
+					$this->config['multilang'] = true; // so, even if multilingual was TRUE, we make it FALSE.
+					$this->config['options']   = false; // We can only save data for special languages in non-simple options.
 
 				} else {
-					// override multilang true so that we dont save meta for language
-					$this->config['multilang'] = false; // so, even if multilingual was TRUE, we make it FALSE
+					// override multilang true so that we dont save meta for language.
+					$this->config['multilang'] = false; // so, even if multilingual was TRUE, we make it FALSE.
 
 				}
-
 			}
 
 			$this->set_is_multilang_from_config();
 
 			$this->config['is_options_simple'] = ( $this->is_options_simple() ) ? true : false;
 
-			$this->dirname = wp_normalize_path( dirname( __FILE__ ) );
+			$this->dirname = wp_normalize_path( __DIR__ );
 		}
 
+		/**
+		 * Is special multilang active.
+		 */
 		public function is_special_multilang_active() {
 
 			return Exopite_Simple_Options_Framework_Helper::is_special_multilang_plugin_active();
-
 		}
 
+		/**
+		 * Display error.
+		 */
 		public function display_error() {
 			add_action( 'admin_notices', array( $this, 'display_admin_error' ) );
 		}
 
+		/**
+		 * Display admin error.
+		 */
 		public function display_admin_error() {
 
 			$class        = 'notice notice-error';
 			$message      = '';
 			$errors_array = $this->errors->get_error_messages();
 
-
 			if ( ! empty( $errors_array ) ) {
-				// Get the error messages from the array
-				$message .= esc_html( implode( ', ', $errors_array ) );
+				// Get the error messages from the array.
+				$message .= implode( ', ', $errors_array );
 			} else {
-				// if no message is set, throw generic error message
-				$message .= eac_attr__( 'Irks! An un-known error has occurred.', 'exopite-sof' );
+				// if no message is set, throw generic error message.
+				$message .= __( 'Irks! An un-known error has occurred.', 'exopite-sof' );
 			}
 
 			printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
@@ -376,20 +390,23 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		protected function define_shared_hooks() {
 
-			// Upload hooks are only required for both,
+			// Upload hooks are only required for both,.
 			Exopite_Simple_Options_Framework_Upload::add_hooks();
 
-			//scripts and styles
+			// scripts and styles.
 			add_action( 'admin_enqueue_scripts', array( $this, 'load_scripts_styles' ) );
 
 			/**
 			 * Add "code" plugin for TinyMCE
+			 *
 			 * @link https://www.tinymce.com/docs/plugins/code/
 			 */
 			add_filter( 'mce_external_plugins', array( $this, 'mce_external_plugins' ) );
+		}//end define_shared_hooks()
 
-		}//define_shared_hooks()
-
+		/**
+		 * Define hooks.
+		 */
 		protected function define_hooks() {
 
 			if ( $this->is_menu() ) {
@@ -401,7 +418,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$this->define_metabox_hooks();
 
 			}
-
 		}
 
 		/**
@@ -417,7 +433,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			 */
 			$this->db_options = apply_filters( 'exopite_sof_menu_get_options', get_option( $this->unique ), $this->unique );
 
-
 			add_action( 'admin_init', array( $this, 'register_setting' ) );
 			add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
 			add_action( 'wp_ajax_exopite-sof-export-options', array( $this, 'export_options' ) );
@@ -425,12 +440,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			add_action( 'wp_ajax_exopite-sof-reset-options', array( $this, 'reset_options' ) );
 
 			if ( isset( $this->config['plugin_basename'] ) && ! empty( $this->config['plugin_basename'] ) ) {
-				add_filter( 'plugin_action_links_' . $this->config['plugin_basename'], array(
-					$this,
-					'plugin_action_links'
-				) );
+				add_filter(
+					'plugin_action_links_' . $this->config['plugin_basename'],
+					array(
+						$this,
+						'plugin_action_links',
+					)
+				);
 			}
-
 		}
 
 		/**
@@ -447,7 +464,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			 */
 			add_action( 'admin_init', array( $this, 'add_meta_box' ) );
 			add_action( 'save_post', array( $this, 'save' ) );
-
 		}
 
 		/**
@@ -471,7 +487,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				default:
 					$this->type = '';
 			}
-
 		}
 
 		/**
@@ -479,7 +494,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		protected function is_metabox() {
 
-			return ( $this->type === 'metabox' ) ? true : false;
+			return ( 'metabox' === $this->type ) ? true : false;
 		}
 
 		/**
@@ -487,7 +502,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		protected function is_menu() {
 
-			return ( $this->type === 'menu' ) ? true : false;
+			return ( 'menu' === $this->type ) ? true : false;
 		}
 
 		/**
@@ -496,9 +511,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		protected function is_options_simple() {
 
 			// 'options'    => 'simple' in $config only required for metabox type
-			return ( ! $this->is_menu() && isset( $this->config['options'] ) && $this->config['options'] === 'simple' ) ? true : false;
+			return ( ! $this->is_menu() && isset( $this->config['options'] ) && 'simple' === $this->config['options'] ) ? true : false;
 		}
 
+		/**
+		 * Set is multilang from config.
+		 */
 		protected function set_is_multilang_from_config() {
 
 			/**
@@ -514,8 +532,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$this->is_multilang = $this->config['is_multilang'] = false;
 			}
 
-			$this->is_multilang = $this->config['is_multilang'] = isset( $this->config['multilang'] ) && ( $this->config['multilang'] === true ) ? true : false;
-
+			$this->is_multilang = $this->config['is_multilang'] = isset( $this->config['multilang'] ) && ( true === $this->config['multilang'] ) ? true : false;
 		}
 
 		/**
@@ -524,7 +541,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		protected function is_multilang() {
 
 			return $this->is_multilang;
-
 		}
 
 		/**
@@ -534,12 +550,16 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			$current_screen = get_current_screen();
 
-			return substr( $current_screen->id, - strlen( $this->unique ) ) === $this->unique;
+			if ( ! $current_screen ) {
+				return false;
+			}
 
+			return substr( $current_screen->id, - strlen( $this->unique ) ) === $this->unique;
 		}
 
 		/**
 		 * check if the admin screen is of the post_type defined in config
+		 *
 		 * @return bool true if its menu options
 		 */
 		protected function is_metabox_enabled_post_type() {
@@ -550,14 +570,17 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			$current_screen = get_current_screen();
 
+			if ( ! $current_screen ) {
+				return false;
+			}
+
 			$post_type_loaded = $current_screen->id;
 
 			return ( in_array( $post_type_loaded, $this->config['post_types'] ) ) ? true : false;
-
 		}
 
 
-		// for TinyMCE Code Plugin
+		// for TinyMCE Code Plugin.
 		public function mce_external_plugins( $plugins ) {
 			$url             = $this->get_url( $this->dirname );
 			$base            = trailingslashit( join( '/', array( $url, 'assets' ) ) );
@@ -566,66 +589,165 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			return $plugins;
 		}
 
+		/**
+		 * Nonce action for saving the metabox.
+		 *
+		 * @return string
+		 */
+		public function get_metabox_nonce_action() {
+			return 'exopite_sof_metabox_' . $this->unique;
+		}
+
+		/**
+		 * Nonce field name for saving the metabox.
+		 *
+		 * @return string
+		 */
+		public function get_metabox_nonce_name() {
+			return '_exopite_sof_nonce_' . $this->unique;
+		}
+
+		/**
+		 * Collect all field ids (recursive, including fields in tabs, fieldsets, groups, etc.).
+		 *
+		 * @param array|null $array
+		 *
+		 * @return array
+		 */
+		public function get_field_ids( $array = null ) {
+
+			if ( null === $array ) {
+				$array = $this->fields;
+			}
+
+			$ids = array();
+
+			if ( ! is_array( $array ) ) {
+				return $ids;
+			}
+
+			foreach ( $array as $value ) {
+
+				if ( ! is_array( $value ) ) {
+					continue;
+				}
+
+				if ( isset( $value['type'] ) && isset( $value['id'] ) && is_scalar( $value['id'] ) && '' !== $value['id'] ) {
+					$ids[] = (string) $value['id'];
+				}
+
+				$ids = array_merge( $ids, $this->get_field_ids( $value ) );
+
+			}
+
+			return array_values( array_unique( $ids ) );
+		}
+
+		/**
+		 * Nonce action for the backup (import/export/reset) requests of this options page.
+		 *
+		 * @return string
+		 */
+		public function get_backup_nonce_action() {
+			return 'exopite_sof_backup_' . $this->unique;
+		}
+
+		/**
+		 * Check if a backup (import/export/reset) request belongs to this instance.
+		 *
+		 * Every framework instance registers the same AJAX actions, so an instance
+		 * must only handle requests for its own options and let the others run.
+		 *
+		 * @param array  $request $_POST or $_GET
+		 * @param string $key    request key which holds the options unique id
+		 *
+		 * @return bool
+		 */
+		protected function is_own_backup_request( $request, $key ) {
+			return isset( $request[ $key ] ) && is_string( $request[ $key ] ) && wp_unslash( $request[ $key ] ) === $this->unique;
+		}
+
+		/**
+		 * Verify nonce and capability for backup requests, stop the request if not allowed.
+		 *
+		 * @param array $request $_POST or $_GET
+		 */
+		protected function verify_backup_request( $request ) {
+
+			$nonce = ( isset( $request['wpnonce'] ) && is_string( $request['wpnonce'] ) ) ? sanitize_text_field( wp_unslash( $request['wpnonce'] ) ) : '';
+
+			if ( ! current_user_can( $this->config['capability'] ) || ! wp_verify_nonce( $nonce, $this->get_backup_nonce_action() ) ) {
+				status_header( 403 );
+				die( 'error' );
+			}
+		}
+
+		/**
+		 * Import options.
+		 */
 		public function import_options() {
+
+			if ( ! $this->is_own_backup_request( $_POST, 'unique' ) ) {
+				return;
+			}
+
+			$this->verify_backup_request( $_POST );
 
 			$retval = 'error';
 
-			$nonce_v = wp_verify_nonce( $_POST['wpnonce'], 'exopite_sof_backup' );
-			$nonce = $_POST['wpnonce'];
+			if ( ! empty( $_POST['value'] ) && is_string( $_POST['value'] ) ) {
 
-			if ( isset( $_POST['unique'] ) && ! empty( $_POST['value'] ) && isset( $_POST['wpnonce'] ) && wp_verify_nonce( $_POST['wpnonce'], 'exopite_sof_backup' ) ) {
-
-				$option_key = sanitize_key( $_POST['unique'] );
-
-				//Using json_decode
-				$value = json_decode( stripslashes( $_POST['value'] ), true );
+				// Using json_decode.
+				$value = json_decode( wp_unslash( $_POST['value'] ), true );
 
 				if ( is_array( $value ) ) {
 
-					update_option( $option_key, $value );
+					update_option( $this->unique, $value );
 					$retval = 'success';
 
 				}
-
 			}
 
-			die( $retval );
-
+			die( esc_html( $retval ) );
 		}
 
+		/**
+		 * Export options.
+		 */
 		public function export_options() {
 
-			if ( isset( $_GET['export'] ) && isset( $_GET['wpnonce'] ) && wp_verify_nonce( $_GET['wpnonce'], 'exopite_sof_backup' ) ) {
-
-				$option_key = sanitize_key( $_GET['export'] );
-
-				header( 'Content-Type: plain/text' );
-				header( 'Content-disposition: attachment; filename=exopite-sof-options-' . gmdate( 'd-m-Y' ) . '.txt' );
-				header( 'Content-Transfer-Encoding: binary' );
-				header( 'Pragma: no-cache' );
-				header( 'Expires: 0' );
-
-				// Using json_encode()
-				echo json_encode( get_option( $option_key ) );
-
+			if ( ! $this->is_own_backup_request( $_GET, 'export' ) ) {
+				return;
 			}
+
+			$this->verify_backup_request( $_GET );
+
+			header( 'Content-Type: text/plain' );
+			header( 'Content-disposition: attachment; filename=exopite-sof-options-' . gmdate( 'd-m-Y' ) . '.txt' );
+			header( 'Content-Transfer-Encoding: binary' );
+			header( 'Pragma: no-cache' );
+			header( 'Expires: 0' );
+
+			// Using json_encode().
+			echo json_encode( get_option( $this->unique ) );
 
 			die();
 		}
 
+		/**
+		 * Reset options.
+		 */
 		public function reset_options() {
 
-			$retval = 'error';
-
-			if ( isset( $_POST['unique'] ) && isset( $_POST['wpnonce'] ) && wp_verify_nonce( $_POST['wpnonce'], 'exopite_sof_backup' ) ) {
-
-				delete_option( sanitize_key( $_POST['unique'] ) );
-
-				$retval = 'success';
-
+			if ( ! $this->is_own_backup_request( $_POST, 'unique' ) ) {
+				return;
 			}
 
-			die( $retval );
+			$this->verify_backup_request( $_POST );
+
+			delete_option( $this->unique );
+
+			die( 'success' );
 		}
 
 		/**
@@ -637,7 +759,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			require_once 'fields-class.php';
 			require_once 'upload-class.php';
 			require_once 'sanitize-class.php';
-
 		}
 
 		/**
@@ -659,20 +780,22 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			return $url;
 		}
 
+		/**
+		 * Locate template.
+		 */
 		public function locate_template( $type ) {
 
 			/**
 			 * Ideas:
 			 * - May extend this with override.
 			 */
-			// This should be the name of directory in theme/ child theme
+			// This should be the name of directory in theme/ child theme.
 			$override_dir_name = 'exopite';
 			$fields_dir_name   = 'fields';
 
 			$template = join( DIRECTORY_SEPARATOR, array( $this->dirname, $fields_dir_name, $type . '.php' ) );
 
 			return $template;
-
 		}
 
 		/**
@@ -687,44 +810,43 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			 *  Documentation : https://codex.wordpress.org/Plugin_API/Filter_Reference/plugin_action_links_(plugin_file_name)
 			 */
 
-			// BOOL of settings is given true | false
+			// BOOL of settings is given true | false.
 			if ( is_bool( $this->config['settings_link'] ) ) {
 
-				// FALSE: If it is false, no need to go further
+				// FALSE: If it is false, no need to go further.
 				if ( ! $this->config['settings_link'] ) {
 					return $links;
 				}
 
-				// TRUE: if Settings link is not defined, lets create one
+				// TRUE: if Settings link is not defined, lets create one.
 				if ( $this->config['settings_link'] ) {
 
-					$settings_link = sanitize_file_name( $this->config['settings-link'] );
+					$settings_link = ( $this->config['submenu'] ) ? $this->get_submenu_settings_link() : 'admin.php?page=' . $this->unique;
 
 					$settings_link_array = array(
-						'<a href="' . admin_url( $settings_link ) . '">' . __( 'Settings', '' ) . '</a>',
+						'<a href="' . esc_url( admin_url( $settings_link ) ) . '">' . esc_html__( 'Settings', 'exopite-sof' ) . '</a>',
 					);
 
 					return array_merge( $settings_link_array, $links );
 				}
 			} // if ( is_bool( $this->config['settings_link'] ) )
 
-			// URL of settings is given
+			// URL of settings is given.
 			if ( ! is_bool( $this->config['settings_link'] ) && ! is_array( $this->config['settings_link'] ) ) {
 				$settings_link = esc_url( $this->config['settings_link'] );
 
-				return array_merge( $settings_link, $links );
+				return array_merge( array( '<a href="' . $settings_link . '">' . esc_html__( 'Settings', 'exopite-sof' ) . '</a>' ), $links );
 			}
 
-			// Array of settings_link is given
+			// Array of settings_link is given.
 			if ( is_array( $this->config['settings_link'] ) ) {
-
 
 				$settings_links_config_array = $this->config['settings_link'];
 				$settings_link_array         = array();
 
 				foreach ( $settings_links_config_array as $link ) {
 
-					$link_text         = isset( $link['text'] ) ? sanitize_text_field( $link['text'] ) : __( 'Settings', '' );
+					$link_text         = isset( $link['text'] ) ? sanitize_text_field( $link['text'] ) : __( 'Settings', 'exopite-sof' );
 					$link_url_un_clean = isset( $link['url'] ) ? $link['url'] : '#';
 
 					$link_type = isset( $link['type'] ) ? sanitize_key( $link['type'] ) : 'default';
@@ -739,32 +861,17 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 							break;
 
 						default:
-
 							if ( $this->config['submenu'] ) {
 
-								$options_base_file_name = sanitize_file_name( $this->config['parent'] );
-
-								$options_base_file_name_extension = pathinfo( parse_url( $options_base_file_name )['path'], PATHINFO_EXTENSION );
-
-								if ( $options_base_file_name_extension === 'php' ) {
-									$options_base = $options_base_file_name;
-								} else {
-									$options_base = 'admin.php';
-								}
-								$options_page_id = $this->unique;
-
-								$settings_link = "{$options_base}?page={$options_page_id}";
-
-								$link_url = admin_url( $settings_link );
+								$link_url = admin_url( $this->get_submenu_settings_link() );
 
 							} else {
 								$settings_link = "?page={$this->unique}";
 								$link_url      = admin_url( $settings_link );
 							}
-
 					}
 
-					$settings_link_array[] = '<a href="' . $link_url . '">' . $link_text . '</a>';
+					$settings_link_array[] = '<a href="' . esc_url( $link_url ) . '">' . esc_html( $link_text ) . '</a>';
 
 				}
 
@@ -772,28 +879,46 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			} // if ( is_array( $this->config['settings_link'] ) )
 
-			// if nothing is returned so far, return original $links
+			// if nothing is returned so far, return original $links.
 			return $links;
+		}
 
+		/**
+		 * Settings page link (relative to admin url) for submenu pages.
+		 *
+		 * @return string
+		 */
+		protected function get_submenu_settings_link() {
+
+			$options_base_file_name = sanitize_file_name( $this->config['parent'] );
+			$options_base_path      = parse_url( $options_base_file_name, PHP_URL_PATH );
+
+			if ( is_string( $options_base_path ) && pathinfo( $options_base_path, PATHINFO_EXTENSION ) === 'php' ) {
+				$options_base = $options_base_file_name;
+			} else {
+				$options_base = 'admin.php';
+			}
+
+			return "{$options_base}?page={$this->unique}";
 		}
 
 		/**
 		 * Get default config for menu
+		 *
 		 * @return array $default
 		 */
 		public function get_config_default_menu() {
 
 			$default = array(
-				//
 				'parent'        => 'options-general.php',
-				'menu'          => 'plugins.php', // For backward compatibility
-				'menu_title'    => __( 'Plugin Options', 'exopite-options-framework' ),
-				// Required for submenu
+				'menu'          => 'plugins.php', // For backward compatibility.
+				'menu_title'    => __( 'Plugin Options', 'exopite-sof' ),
+				// Required for submenu.
 				'submenu'       => false,
-				//The name of this page
-				'title'         => __( 'Plugin Options', 'exopite-options-framework' ),
+				// The name of this page.
+				'title'         => __( 'Plugin Options', 'exopite-sof' ),
 				'option_title'  => '',
-				// The capability needed to view the page
+				// The capability needed to view the page.
 				'capability'    => 'manage_options',
 				'settings_link' => true,
 				'tabbed'        => true,
@@ -801,7 +926,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				'icon'          => '',
 				'search_box'    => true,
 				'multilang'     => true,
-				'options'       => false
+				'options'       => false,
 			);
 
 			return apply_filters( 'exopite_sof_filter_config_default_menu_array', $default );
@@ -809,6 +934,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 		/**
 		 * Get default config for metabox
+		 *
 		 * @return array $default
 		 */
 		public function get_config_default_metabox() {
@@ -822,7 +948,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				'capability' => 'edit_posts',
 				'tabbed'     => true,
 				'options'    => false,
-				'multilang'  => false
+				'multilang'  => false,
 
 			);
 
@@ -840,7 +966,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$this->config['context'],
 				$this->config['priority']
 			);
-
 		}
 
 		/**
@@ -849,7 +974,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		public function register_setting() {
 
 			register_setting( $this->unique, $this->unique, array( $this, 'save' ) );
-
 		}
 
 		/**
@@ -857,20 +981,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function add_admin_menu() {
 
-			// Is it a main menu or sub_menu
+			// Is it a main menu or sub_menu.
 			if ( ! (bool) $this->config['submenu'] ) {
-
-//				$default['icon']     = '';
-//				$default['position'] = 100;
-//				$default['menu']     = 'Plugin menu';
-
-//				$this->config = wp_parse_args( $this->config, $default );
 
 				$menu = add_menu_page(
 					$this->config['title'],
 					$this->config['menu_title'],
 					$this->config['capability'],
-					$this->unique, //slug
+					$this->unique, // slug.
 					array( $this, 'display_page' ),
 					$this->config['icon'],
 					$this->config['position']
@@ -878,20 +996,17 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			} else {
 
-//				$this->config = wp_parse_args( $this->config, $default );
-
 				$submenu = add_submenu_page(
 					$this->config['parent'],
 					$this->config['title'],
 					$this->config['title'],
 					$this->config['capability'],
-					$this->unique, // slug
-                    array( $this, 'display_page' ),
-                    $this->config['position']
+					$this->unique, // slug.
+					array( $this, 'display_page' ),
+					$this->config['position']
 				);
 
 			}
-
 		}
 
 		/**
@@ -903,7 +1018,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function load_scripts_styles( $hook ) {
 
-			// return if not admin
+			// return if not admin.
 			if ( ! is_admin() ) {
 				return;
 			}
@@ -911,20 +1026,18 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			/**
 			 * Load Scripts for only Menu page
 			 */
-			if ( $this->is_menu_page_loaded() ):
-				// TODO: Shift Scripts from all $type to this section
+			if ( $this->is_menu_page_loaded() ) :
+				// TODO: Shift Scripts from all $type to this section.
 
-			endif; //$this->is_menu_page_loaded()
-
+			endif; // $this->is_menu_page_loaded()
 
 			/**
 			 * Load Scripts for metabox that have enabled metabox using Exopite framework
 			 */
-			if ( $this->is_metabox_enabled_post_type() ):
-				// TODO: Shift Scripts from all $type to this section
+			if ( $this->is_metabox_enabled_post_type() ) :
+				// TODO: Shift Scripts from all $type to this section.
 
 			endif; // $this->is_metabox_enabled_post_type()
-
 
 			/**
 			 * Load Scripts shared by all $type
@@ -947,16 +1060,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				 * @link https://developer.wordpress.org/reference/functions/wp_enqueue_script/
 				 */
 				wp_enqueue_style( 'jquery-ui-core' );
-				// wp_enqueue_style( 'jquery-ui', $base . 'jquery-ui.css', array(), '1.8.24', 'all' );
 				wp_enqueue_style( 'exopite-simple-options-framework', $base . 'styles.css', array(), $this->version, 'all' );
 
-				// Add jQuery form scripts for menu options AJAX save
+				// Add jQuery form scripts for menu options AJAX save.
 				wp_enqueue_script( 'jquery-form' );
 
-				// Add the date picker script
+				// Add the date picker script.
 				wp_enqueue_script( 'jquery-ui-datepicker' );
-
-				// wp_enqueue_script( 'jquery-ui-sortable' );
 
 				$scripts_styles = array(
 					array(
@@ -965,7 +1075,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 						'dep'  => array(
 							'jquery',
 							'jquery-ui-datepicker',
-							'wp-color-picker'
+							'wp-color-picker',
 						),
 					),
 					array(
@@ -982,7 +1092,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 							'jquery',
 							'jquery-ui-datepicker',
 							'wp-color-picker',
-							'jquery-interdependencies'
+							'jquery-interdependencies',
 						),
 					),
 				);
@@ -997,8 +1107,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				 */
 				$this->enqueue_field_classes();
 
-			endif; //$this->is_menu_page_loaded() || $this->is_metabox_enabled_post_type()
-
+			endif; // $this->is_menu_page_loaded() || $this->is_metabox_enabled_post_type()
 		}
 
 		/**
@@ -1008,7 +1117,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 *
 		 * @hooked  'save_post' for metabox
 		 * @hooked  register_setting() for menu
-		 *
 		 */
 		public function save( $posted_data ) {
 
@@ -1017,7 +1125,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				return null;
 			}
 
-			//TODO Verify nonce
+			// TODO Verify nonce.
 
 			$valid   = array();
 			$post_id = null;
@@ -1027,7 +1135,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			 */
 			$section_fields_with_values = array();
 
-			// Specific to Menu Options
+			// Specific to Menu Options.
 			if ( $this->is_menu() ) {
 
 				/**
@@ -1038,57 +1146,65 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				}
 
 				// Preserve values start with "_".
-                $options = get_option( $this->unique );
-                if ( is_array( $options ) ) {
+				$options = get_option( $this->unique );
+				if ( is_array( $options ) ) {
 
-                    foreach ( $options as $key => $value ) {
+					foreach ( $options as $key => $value ) {
 
-                        if ( substr( $key, 0, 1 ) === '_' ) {
+						if ( substr( $key, 0, 1 ) === '_' ) {
 
-                            $valid[ $key ] = $value;
+							$valid[ $key ] = $value;
 
-                        }
-
-                    }
-
-                }
-
+						}
+					}
+				}
 			}
 
-			// Specific to Metabox
+			// Specific to Metabox.
 			if ( $this->is_metabox() ) {
 
-				// if this is metabox, $posted_data is post_id we are saving
+				// if this is metabox, $posted_data is post_id we are saving.
 				$post_id = $posted_data;
-				if ( $this->is_options_simple() ) {
-					$posted_data = $_POST;
-				} else {
 
-					if ( isset( $_POST[ $this->unique ] ) ) {
-						$posted_data = $_POST[ $this->unique ];
-					} else {
-						return false;
-					}
-
+				// Only save if the request comes from our metabox (nonce) and the user can edit this post.
+				$nonce_name = $this->get_metabox_nonce_name();
+				$nonce      = ( isset( $_POST[ $nonce_name ] ) && is_string( $_POST[ $nonce_name ] ) ) ? sanitize_text_field( wp_unslash( $_POST[ $nonce_name ] ) ) : '';
+				if ( ! wp_verify_nonce( $nonce, $this->get_metabox_nonce_action() ) ) {
+					return null;
 				}
 
-				if ( $posted_data === null ) return;
+				if ( ! current_user_can( 'edit_post', $post_id ) ) {
+					return null;
+				}
 
-				// Stop WP from clearing custom fields on autosave
+				if ( $this->is_options_simple() ) {
+					// Only keep the values of our own fields, not the whole $_POST.
+					$posted_data = array_intersect_key( $_POST, array_flip( $this->get_field_ids() ) );
+				} elseif ( isset( $_POST[ $this->unique ] ) ) {
+
+						$posted_data = $_POST[ $this->unique ];
+				} else {
+					return false;
+				}
+
+				if ( null === $posted_data ) {
+					return;
+				}
+
+				// Stop WP from clearing custom fields on autosave.
 				if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 					return null;
 				}
 
-				// Prevent quick edit from clearing custom fields
+				// Prevent quick edit from clearing custom fields.
 				if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 					return null;
 				}
 
-				// If the post type is not in our post_type array, do nothing
+				// If the post type is not in our post_type array, do nothing.
 				if ( ! in_array( get_post_type( $post_id ), $this->config['post_types'] ) ) {
 					return null;
 				}
-
 			}
 
 			/**
@@ -1096,7 +1212,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			 * Maybe check first if qTranslate-X is installed and active?
 			 */
 			// Preserve other language setting
-			// Get current field value, make sure we are not override other language values
+			// Get current field value, make sure we are not override other language values.
 
 			if ( $this->is_multilang() ) {
 
@@ -1105,18 +1221,18 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				foreach ( $other_languages as $language ) {
 
 					if ( $this->is_metabox() ) {
-						// required for qTranslate-X and WP Multilang
+						// required for qTranslate-X and WP Multilang.
 						$post_meta = get_post_meta( $post_id );
 
-						if ( ! empty( $post_meta ) ) {
+						if ( isset( $post_meta[ $this->unique ][0] ) ) {
 							$options_array_from_post_meta = maybe_unserialize( $post_meta[ $this->unique ][0] );
-							if ( is_array( $options_array_from_post_meta ) ) {
+							if ( is_array( $options_array_from_post_meta ) && isset( $options_array_from_post_meta[ $language ] ) ) {
 								$section_fields_with_values[ $language ] = $options_array_from_post_meta[ $language ];
 							}
 						}
 					}
 
-					if ( $this->is_menu() ) {
+					if ( $this->is_menu() && is_array( $this->db_options ) && isset( $this->db_options[ $language ] ) ) {
 						$section_fields_with_values[ $language ] = $this->db_options[ $language ];
 					}
 				}
@@ -1124,18 +1240,19 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			$sanitizer = new Exopite_Simple_Options_Framework_Sanitize( $this->is_multilang(), $this->lang_current, $this->config, $this->fields );
 			if ( $this->is_multilang() ) {
-				$section_fields_with_values[ $this->lang_current ] = $sanitizer->get_sanitized_values( $this->fields, $posted_data[$this->lang_current] );
+				$current_lang_data                                 = ( is_array( $posted_data ) && isset( $posted_data[ $this->lang_current ] ) && is_array( $posted_data[ $this->lang_current ] ) ) ? $posted_data[ $this->lang_current ] : array();
+				$section_fields_with_values[ $this->lang_current ] = $sanitizer->get_sanitized_values( $this->fields, $current_lang_data );
 			} else {
 				$section_fields_with_values = $sanitizer->get_sanitized_values( $this->fields, $posted_data );
 			}
 
-            // Add values here, which start with '_', to skip sanitization.
-            // This values does not come from the framework.
-            foreach ( $valid as $key => $value ) {
-                if ( ! isset( $section_fields_with_values[ $key ] ) ) {
-                    $section_fields_with_values[ $key ] = $value;
-                }
-            }
+			// Add values here, which start with '_', to skip sanitization.
+			// This values does not come from the framework.
+			foreach ( $valid as $key => $value ) {
+				if ( ! isset( $section_fields_with_values[ $key ] ) ) {
+					$section_fields_with_values[ $key ] = $value;
+				}
+			}
 
 			/**
 			 * The idea here is that, this hook run on both.
@@ -1145,7 +1262,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			if ( $this->is_menu() ) {
 
-				// These actions and filters only for options menu
+				// These actions and filters only for options menu.
 				$valid = apply_filters( 'exopite_sof_save_menu_options', $section_fields_with_values, $this->unique );
 				do_action( 'exopite_sof_do_save_menu_options', $section_fields_with_values, $this->unique );
 
@@ -1154,7 +1271,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			if ( $this->is_metabox() ) {
 
-				// When we click on "New Post" (CPT), then $post is not available, so we need to check if it is set
+				// When we click on "New Post" (CPT), then $post is not available, so we need to check if it is set.
 				/**
 				 * NEED TESTING!
 				 * I'm not sure about this, need check. I think post ID IS available because saving custom field
@@ -1175,22 +1292,18 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					} else {
 						update_post_meta( $post_id, $this->unique, $valid );
 					}
-
 				}
-
 			}
 
 			unset( $post_id, $valid, $posted_data, $section_fields_with_values, $section_fields_current_lang );
-
 		}
 
-		//DEGUB
+		// DEGUB.
 		public function write_log( $type, $log_line ) {
 
 			$hash        = '';
 			$fn          = plugin_dir_path( __FILE__ ) . '/' . $type . $hash . '.log';
 			$log_in_file = file_put_contents( $fn, date( 'Y-m-d H:i:s' ) . ' - ' . $log_line . PHP_EOL, FILE_APPEND );
-
 		}
 
 		/**
@@ -1200,11 +1313,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function loop_fields( $callbacks ) {
 
-			if ( ! is_array( $this->fields ) ) return;
+			if ( ! is_array( $this->fields ) ) {
+				return;
+			}
 
 			foreach ( $this->fields as $section ) {
 
-				// before
+				// before.
 				if ( $callbacks['before'] ) {
 					call_user_func( array( $this, $callbacks['before'] ), $section );
 				}
@@ -1215,41 +1330,38 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 				foreach ( $section['fields'] as $field ) {
 
-					// If has subfields
-					if ( ( $callbacks['main'] == 'include_field_class' || $callbacks['main'] == 'enqueue_field_class' ) && isset( $field['fields'] ) ) {
+					// If has subfields.
+					if ( ( 'include_field_class' == $callbacks['main'] || 'enqueue_field_class' == $callbacks['main'] ) && isset( $field['fields'] ) ) {
 
 						foreach ( $field['fields'] as $subfield ) {
 
 							if ( $callbacks['main'] ) {
 								call_user_func( array( $this, $callbacks['main'] ), $subfield );
 							}
-
 						}
-
 					}
 
 					if ( $callbacks['main'] ) {
 						call_user_func( array( $this, $callbacks['main'] ), $field );
 					}
 
-					// main
+					// main.
 
 				}
 
-				// after
+				// after.
 				if ( $callbacks['after'] ) {
 					call_user_func( array( $this, $callbacks['after'] ) );
 				}
 			}
-
 		}
 
 		/**
 		 * @link https://thisinterestsme.com/php-using-recursion-print-values-multidimensional-array/
 		 */
-		public function recursive_walk( $array, &$fields ){
+		public function recursive_walk( $array, &$fields ) {
 
-			foreach( $array as $key => $value ) {
+			foreach ( $array as $key => $value ) {
 
 				if ( is_array( $value ) ) {
 
@@ -1258,7 +1370,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 						if ( ! in_array( $value['type'], $fields ) && ! empty( $value['type'] ) ) {
 
 							$temp_array = array(
-								'type' 	=> $value['type'],
+								'type' => $value['type'],
 							);
 
 							if ( isset( $value['id'] ) ) {
@@ -1269,7 +1381,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 						}
 
-						if ( $value['type'] == 'editor' && isset( $value['editor'] ) ) {
+						if ( 'editor' == $value['type'] && isset( $value['editor'] ) ) {
 
 							if ( ! isset( $fields[ $value['type'] ]['editor'] ) || ! is_array( $fields[ $value['type'] ]['editor'] ) ) {
 								$fields[ $value['type'] ]['editor'] = array();
@@ -1278,19 +1390,15 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 							if ( ! in_array( $value['editor'], $fields[ $value['type'] ]['editor'] ) ) {
 								$fields[ $value['type'] ]['editor'][] = $value['editor'];
 							}
-
 						}
-
 					}
 
 					$this->recursive_walk( $value, $fields );
 
 				}
-
 			}
 
 			return $fields;
-
 		}
 
 		/**
@@ -1310,7 +1418,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$this->include_field_class( $field );
 
 			}
-
 		}
 
 		/**
@@ -1330,7 +1437,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$this->enqueue_field_class( $args );
 
 			}
-
 		}
 
 		/**
@@ -1339,9 +1445,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function include_field_class( $field ) {
 
-            if ( is_array( $field ) && isset( $field['type'] ) ) {
-                $field = $field['type'];
-            }
+			if ( is_array( $field ) && isset( $field['type'] ) ) {
+				$field = $field['type'];
+			}
 
 			$class = 'Exopite_Simple_Options_Framework_Field_' . $field;
 
@@ -1351,16 +1457,17 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 				if ( file_exists( $field_filename ) ) {
 
-					require_once join( DIRECTORY_SEPARATOR, array(
-						$this->dirname,
-						'fields',
-						$field . '.php'
-					) );
+					require_once join(
+						DIRECTORY_SEPARATOR,
+						array(
+							$this->dirname,
+							'fields',
+							$field . '.php',
+						)
+					);
 
 				}
-
 			}
-
 		}
 
 		/**
@@ -1382,7 +1489,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$class::enqueue( $args );
 
 			}
-
 		}
 
 		/**
@@ -1401,27 +1507,26 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			$class      = 'Exopite_Simple_Options_Framework_Field_' . $field['type'];
 			$depend     = '';
 			$wrap_class = ( ! empty( $field['wrap_class'] ) ) ? ' ' . $field['wrap_class'] : '';
-			$hidden     = ( $field['type'] == 'hidden' ) ? ' hidden' : '';
+			$hidden     = ( 'hidden' == $field['type'] ) ? ' hidden' : '';
 			$sub        = ( ! empty( $field['sub'] ) ) ? 'sub-' : '';
 
 			/**
 			 * Add editor name to classes for styling purposes.
 			 */
-			if (  $field['type'] == 'editor' ) {
+			if ( 'editor' == $field['type'] ) {
 
-				if ( ! isset( $field['editor'] ) || $field['editor'] == 'tinymce' ) {
+				if ( ! isset( $field['editor'] ) || 'tinymce' == $field['editor'] ) {
 					$wrap_class .= ' exopite-sof-tinymce-editor';
-				} elseif ( isset( $field['editor'] ) && $field['editor'] == 'trumbowyg' ) {
+				} elseif ( isset( $field['editor'] ) && 'trumbowyg' == $field['editor'] ) {
 					$wrap_class .= ' exopite-sof-trumbowyg-editor';
 				}
-
 			}
 
 			if ( ! empty( $field['dependency'] ) ) {
-				$hidden = ' hidden';
-				$depend .= ' data-' . $sub . 'controller="' . $field['dependency'][0] . '"';
-				$depend .= ' data-' . $sub . 'condition="' . $field['dependency'][1] . '"';
-				$depend .= ' data-' . $sub . 'value="' . $field['dependency'][2] . '"';
+				$hidden  = ' hidden';
+				$depend .= ' data-' . $sub . 'controller="' . esc_attr( $field['dependency'][0] ) . '"';
+				$depend .= ' data-' . $sub . 'condition="' . esc_attr( $field['dependency'][1] ) . '"';
+				$depend .= ' data-' . $sub . 'value="' . esc_attr( $field['dependency'][2] ) . '"';
 			}
 
 			if ( ! isset( $field['pseudo'] ) || ! $field['pseudo'] ) {
@@ -1438,18 +1543,18 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					$output .= '<p class="exopite-sof-description">' . $field['description'] . '</p>';
 				}
 
-				$output .= '</h4>'; // exopite-sof-title
+				$output .= '</h4>'; // exopite-sof-title.
 				$output .= '<div class="exopite-sof-fieldset">';
 			}
 
 			if ( class_exists( $class ) ) {
 
-				if ( empty( $value ) && $value !== 0 && $value !== '0' ) {
+				if ( empty( $value ) && $value !== 0 && '0' !== $value ) {
 
-					// NEW
+					// NEW.
 
 					if ( ( isset( $field['sub'] ) && ! empty( $field['sub'] ) ) || $this->is_menu() ) {
-						$value = $this->get_value( $this->db_options, $field  );
+						$value = $this->get_value( $this->db_options, $field );
 					}
 
 					if ( $this->is_metabox() ) {
@@ -1471,16 +1576,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 							} else {
 								$value = null;
 							}
-
 						} else {
 
 							$meta  = get_post_meta( get_the_ID(), $this->unique, true );
-							$value = $this->get_value( $meta, $field  );
+							$value = $this->get_value( $meta, $field );
 
 						}
-
 					}
-
 				}
 
 				ob_start();
@@ -1491,8 +1593,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			} else {
 
 				$output .= '<div class="danger unknown">';
-				$output .= esc_attr__( 'ERROR:', 'exopite-simple-options' ) . ' ';
-				$output .= esc_attr__( 'This field class is not available!', 'exopite-simple-options' );
+				$output .= esc_attr__( 'ERROR:', 'exopite-sof' ) . ' ';
+				$output .= esc_attr__( 'This field class is not available!', 'exopite-sof' );
 				$output .= ' <i>(' . $field['type'] . ')</i>';
 				$output .= '</div>';
 
@@ -1504,18 +1606,21 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			if ( ! isset( $field['pseudo'] ) || ! $field['pseudo'] ) {
 				$output .= '<div class="clearfix"></div>';
-				$output .= '</div>'; // exopite-sof-field
+				$output .= '</div>'; // exopite-sof-field.
 			}
 
 			do_action( 'exopite_sof_after_generate_field', $field, $this->config );
 
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML built from escaped parts and trusted developer config.
 			echo apply_filters( 'exopite_sof_add_field', $output, $field, $this->config );
 
 			do_action( 'exopite_sof_after_add_field', $field, $this->config );
-
 		}
 
-		public function get_value( $options, $field  ) {
+		/**
+		 * Get value.
+		 */
+		public function get_value( $options, $field ) {
 
 			/**
 			 * IF MULTILANG
@@ -1535,7 +1640,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 				$value = $options[ $this->lang_current ][ $field['id'] ];
 
-			} elseif ( $value === null && isset( $options[ $field['id'] ] ) ) {
+			} elseif ( null === $value && isset( $options[ $field['id'] ] ) ) {
 
 				$value = $options[ $field['id'] ];
 
@@ -1547,15 +1652,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			 * add_filter( 'exopite_sof_field_value', 'prefix_exopite_sof_field_value', 10, 5 );
 			 * public function prefix_exopite_sof_field_value( $value, $unique, $options, $field ) {
 			 *
-			 *	   if ( $unique == $this->plugin_name && $field['id'] == 'your-field-id' ) {
-			 *		   // do the magic ;)
-			 *	   }
+			 *     if ( $unique == $this->plugin_name && $field['id'] == 'your-field-id' ) {
+			 *         // do the magic ;)
+			 *     }
 			 *
-			 *	   return $value;
+			 *     return $value;
 			 * }
 			 */
 			return apply_filters( 'exopite_sof_field_value', $value, $this->unique, $options, $field );
-
 		}
 
 		/**
@@ -1564,7 +1668,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function display_options_page_header() {
 
-			echo '<form method="post" action="options.php" enctype="multipart/form-data" name="' . $this->unique . '" class="exopite-sof-form-js ' . $this->unique . '-form" data-save="' . esc_attr__( 'Saving...', 'exopite-sof' ) . '" data-saved="' . esc_attr__( 'Saved Successfully.', 'exopite-sof' ) . '">';
+			echo '<form method="post" action="options.php" enctype="multipart/form-data" name="' . esc_attr( $this->unique ) . '" class="exopite-sof-form-js ' . esc_attr( $this->unique ) . '-form" data-save="' . esc_attr__( 'Saving...', 'exopite-sof' ) . '" data-saved="' . esc_attr__( 'Saved Successfully.', 'exopite-sof' ) . '">';
 
 			settings_fields( $this->unique );
 			do_settings_sections( $this->unique );
@@ -1577,20 +1681,19 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			$option_title = ( ! empty( $this->config['option_title'] ) ) ? $this->config['option_title'] : $this->config['title'];
 
 			echo '<header class="exopite-sof-header exopite-sof-header-js">';
-			echo '<h1>' . $option_title . $current_language_title . '</h1>';
+			echo '<h1>' . wp_kses_post( $option_title . $current_language_title ) . '</h1>';
 
 			/*
 			 * Display search box if is enabled
 			 */
-            if ( $this->config['search_box'] ){
-                echo '<span class="exopite-sof-search-wrapper"><input type="text" class="exopite-sof-search"></span>';
-            }
+			if ( $this->config['search_box'] ) {
+				echo '<span class="exopite-sof-search-wrapper"><input type="text" class="exopite-sof-search"></span>';
+			}
 
 			echo '<fieldset><span class="exopite-sof-ajax-message"></span>';
 			submit_button( esc_attr__( 'Save Settings', 'exopite-sof' ), 'primary ' . 'exopite-sof-submit-button-js', $this->unique . '-save', false, array() );
 			echo '</fieldset>';
 			echo '</header>';
-
 		}
 
 		/**
@@ -1608,7 +1711,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			echo '</footer>';
 
 			echo '</form>';
-
 		}
 
 		/**
@@ -1621,10 +1723,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				$visibility = '';
 			}
 
-            $section_name = ( isset( $section['name'] ) ) ? $section['name'] : '';
-            $section_icon = ( isset( $section['icon'] ) ) ? $section['icon'] : '';
+			$section_name = ( isset( $section['name'] ) ) ? $section['name'] : '';
+			$section_icon = ( isset( $section['icon'] ) ) ? $section['icon'] : '';
 
-			echo '<div class="exopite-sof-section exopite-sof-section-' . $section_name . $visibility . '">';
+			echo '<div class="exopite-sof-section exopite-sof-section-' . esc_attr( $section_name . $visibility ) . '">';
 
 			if ( isset( $section['title'] ) && ! empty( $section['title'] ) ) {
 
@@ -1635,10 +1737,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					$icon_before = 'fa-before ';
 				}
 
-				echo '<h2 class="exopite-sof-section-header" data-section="' . $section_name . '"><span class="' . $icon_before . $section_icon . '"></span>' . $section['title'] . '</h2>';
+				echo '<h2 class="exopite-sof-section-header" data-section="' . esc_attr( $section_name ) . '"><span class="' . esc_attr( $icon_before . $section_icon ) . '"></span>' . wp_kses_post( $section['title'] ) . '</h2>';
 
 			}
-
 		}
 
 		/**
@@ -1646,83 +1747,89 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 		 */
 		public function display_options_section_footer() {
 
-			echo '</div>'; // exopite-sof-section
-
+			echo '</div>'; // exopite-sof-section.
 		}
 
+		/**
+		 * Get fields.
+		 */
 		public function get_fields() {
 
-			if ( ! $this->elements ) return;
+			if ( ! $this->elements ) {
+				return;
+			}
 
 			$fields = array();
 
 			foreach ( $this->elements as $key => $value ) {
 
-				if( isset( $value['sections'] ) ) {
+				if ( isset( $value['sections'] ) ) {
 
 					foreach ( $value['sections'] as $section ) {
 
-						if( isset( $section['fields'] ) ) {
+						if ( isset( $section['fields'] ) ) {
 							$fields[] = $section;
 						}
-
 					}
+				} elseif ( isset( $value['fields'] ) ) {
 
-				} else {
-
-					if( isset( $value['fields'] ) ) {
 						$fields[] = $value;
-					}
-
 				}
-
 			}
 
 			$this->fields = $fields;
 		}
 
+		/**
+		 * Get menu item icons.
+		 */
 		public function get_menu_item_icons( $section ) {
 
-			if ( strpos( $section['icon'], 'dashicon' ) !== false ) {
-				echo '<span class="exopite-sof-nav-icon dashicons-before ' . $section['icon'] . '"></span>';
-			} elseif ( strpos( $section['icon'], 'fa' ) !== false ) {
-				echo '<span class="exopite-sof-nav-icon fa-before ' . $section['icon'] . '" aria-hidden="true"></span>';
+			if ( empty( $section['icon'] ) || ! is_string( $section['icon'] ) ) {
+				return;
 			}
 
+			if ( strpos( $section['icon'], 'dashicon' ) !== false ) {
+				echo '<span class="exopite-sof-nav-icon dashicons-before ' . esc_attr( $section['icon'] ) . '"></span>';
+			} elseif ( strpos( $section['icon'], 'fa' ) !== false ) {
+				echo '<span class="exopite-sof-nav-icon fa-before ' . esc_attr( $section['icon'] ) . '" aria-hidden="true"></span>';
+			}
 		}
 
+		/**
+		 * Get menu item.
+		 */
 		public function get_menu_item( $section, $active = '', $force_hidden = false ) {
 
-			// $active = '';
 			// if ( $section === reset( $this->fields ) ) {
-			// 	$active = ' active';
-			// }
+			// $active = ' active';
+			// }.
 
 			$depend = '';
 			$hidden = ( $force_hidden ) ? ' hidden' : '';
 
-			// Dependency for tabs too
+			// Dependency for tabs too.
 			if ( ! empty( $section['dependency'] ) ) {
-				$hidden = ' hidden';
-				$depend = ' data-controller="' . $section['dependency'][0] . '"';
-				$depend .= ' data-condition="' . $section['dependency'][1] . '"';
-				$depend .= ' data-value="' . $section['dependency'][2] . '"';
+				$hidden  = ' hidden';
+				$depend  = ' data-controller="' . esc_attr( $section['dependency'][0] ) . '"';
+				$depend .= ' data-condition="' . esc_attr( $section['dependency'][1] ) . '"';
+				$depend .= ' data-value="' . esc_attr( $section['dependency'][2] ) . '"';
 			}
 
-            $section_name = ( isset( $section['name'] ) ) ? $section['name'] : '';
+			$section_name = ( isset( $section['name'] ) ) ? $section['name'] : '';
 
-			echo '<li  class="exopite-sof-nav-list-item' . $active . $hidden . '"' . $depend . ' data-section="' . $section_name . '">';
+			echo '<li  class="exopite-sof-nav-list-item' . esc_attr( $active . $hidden ) . '"' . $depend . ' data-section="' . esc_attr( $section_name ) . '">';
 			echo '<span class="exopite-sof-nav-list-item-title">';
 			$this->get_menu_item_icons( $section );
-			echo $section['title'];
+			echo wp_kses_post( $section['title'] );
 			echo '</span>';
 			echo '</li>';
-
 		}
 
+		/**
+		 * Get menu.
+		 */
 		public function get_menu() {
-
-			// $fields = array();
 
 			echo '<div class="exopite-sof-nav"><ul class="exopite-sof-nav-list">';
 
@@ -1730,49 +1837,43 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 				$active = '';
 				reset( $this->elements );
-				if ( $key === key($this->elements ) ) {
+				if ( $key === key( $this->elements ) ) {
 					$active = ' active';
 				}
 
+				if ( isset( $value['sections'] ) ) {
 
-				if( isset( $value['sections'] ) ) {
-
-					echo '<li  class="exopite-sof-nav-list-parent-item' . $active . '">';
+					echo '<li  class="exopite-sof-nav-list-parent-item' . esc_attr( $active ) . '">';
 					echo '<span class="exopite-sof-nav-list-item-title">';
 					$this->get_menu_item_icons( $value );
-					echo $value['title'];
+					echo wp_kses_post( $value['title'] );
 					echo '</span>';
 					echo '<ul style="display:none;">';
 
 					foreach ( $value['sections'] as $section ) {
 
-						if( isset( $section['fields'] ) ) {
+						if ( isset( $section['fields'] ) ) {
 
 							$this->get_menu_item( $section, $active, false );
 
 						}
-
 					}
 
 					echo '</ul>';
 					echo '</li>';
 
-				} else {
-
-					if( isset( $value['fields'] ) ) {
+				} elseif ( isset( $value['fields'] ) ) {
 
 						$this->get_menu_item( $value, $active, false );
-
-					}
-
 				}
-
 			}
 
 			echo '</ul></div>';
-
 		}
 
+		/**
+		 * Display debug infos.
+		 */
 		public function display_debug_infos() {
 
 			echo '<pre>MULTILANG<br>';
@@ -1794,7 +1895,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			echo '<pre>DB_OPTIONS<br>';
 			var_export( $this->db_options );
 			echo '</pre>';
-
 		}
 
 		/**
@@ -1806,18 +1906,26 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			settings_errors();
 
-			echo '<div class="exopite-sof-wrapper exopite-sof-wrapper-' . $this->config['type'] . ' ' . $this->unique . '-options">';
+			echo '<div class="exopite-sof-wrapper exopite-sof-wrapper-' . esc_attr( $this->config['type'] ) . ' ' . esc_attr( $this->unique ) . '-options">';
 
 			switch ( $this->config['type'] ) {
 				case 'menu':
-					add_action( 'exopite_sof_display_page_header', array(
-						$this,
-						'display_options_page_header'
-					), 10, 1 );
+					add_action(
+						'exopite_sof_display_page_header',
+						array(
+							$this,
+							'display_options_page_header',
+						),
+						10,
+						1
+					);
 					do_action( 'exopite_sof_display_page_header', $this->config );
 					break;
 
 				case 'metabox':
+					// Nonce for save(), without the referer field.
+					wp_nonce_field( $this->get_metabox_nonce_action(), $this->get_metabox_nonce_name(), false );
+
 					/**
 					 * Get options
 					 * Can not get options in __consturct, because there, the_ID is not yet available.
@@ -1826,6 +1934,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					 * Simple options is stored az induvidual meta key, value pair, otherwise it is stored in an array.
 					 *
 					 * I implemented this option because it is possible to search in serialized (array) post meta:
+					 *
 					 * @link https://wordpress.stackexchange.com/questions/16709/meta-query-with-meta-values-as-serialize-arrays
 					 * @link https://stackoverflow.com/questions/15056407/wordpress-search-serialized-meta-data-with-custom-query
 					 * @link https://www.simonbattersby.com/blog/2013/03/querying-wordpress-serialized-custom-post-data/
@@ -1860,7 +1969,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 					 * a passive fashion by the direct WP API call get_post_meta() - from that function you can unpack a serialized entry
 					 * to access its array properties too."
 					 */
-					if ( $this->config['type'] == 'metabox' && ( ! isset( $this->config['options'] ) || $this->config['options'] != 'simple' ) ) {
+					if ( 'metabox' == $this->config['type'] && ( ! isset( $this->config['options'] ) || 'simple' != $this->config['options'] ) ) {
 						$meta_options     = get_post_meta( get_the_ID(), $this->unique, true );
 						$this->db_options = apply_filters( 'exopite-simple-options-framework-meta-get-options', $meta_options, $this->unique, get_the_ID() );
 					}
@@ -1883,21 +1992,16 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 						break;
 
 					case 'metabox':
-						// Pages/Posts can not have "All languages" displayed, then default will be displayed
-						$current_language = ( $this->config['multilang']['current'] == 'all' ) ? $this->config['multilang']['default'] : $this->config['multilang']['current'];
+						// Pages/Posts can not have "All languages" displayed, then default will be displayed.
+						$current_language = ( 'all' == $this->config['multilang']['current'] ) ? $this->config['multilang']['default'] : $this->config['multilang']['current'];
 						break;
 				}
 
 				/**
-				 * ToDos:
-				 * - check this value, shouldn't be hard coded.
-				 */
-				$current_language = 'en';
-				/**
 				 * Current language need to pass to save function, if "All languages" seleted, WPML report default
 				 * on save hook.
 				 */
-				echo '<input type="hidden" name="_language" value="' . $current_language . '">';
+				echo '<input type="hidden" name="_language" value="' . esc_attr( $current_language ) . '">';
 			}
 
 			$sections = count( $this->fields );
@@ -1913,8 +2017,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			/**
 			 * Generate fields
 			 */
-			// Generate tab navigation
-			echo '<div class="exopite-sof-content' . $tabbed . '">';
+			// Generate tab navigation.
+			echo '<div class="exopite-sof-content' . esc_attr( $tabbed ) . '">';
 
 			if ( ! empty( $tabbed ) ) {
 
@@ -1924,23 +2028,28 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 
 			echo '<div class="exopite-sof-sections">';
 
-			// Generate fields
+			// Generate fields.
 			$callbacks = array(
 				'before' => 'display_options_section_header',
 				'main'   => 'add_field',
-				'after'  => 'display_options_section_footer'
+				'after'  => 'display_options_section_footer',
 			);
 
 			$this->loop_fields( $callbacks );
 
-			echo '</div>'; // sections
-			echo '</div>'; // content
-			if ( $this->config['type'] == 'menu' ) {
+			echo '</div>'; // sections.
+			echo '</div>'; // content.
+			if ( 'menu' == $this->config['type'] ) {
 
-				add_action( 'exopite_sof_display_page_footer', array(
-					$this,
-					'display_options_page_footer'
-				), 10, 1 );
+				add_action(
+					'exopite_sof_display_page_footer',
+					array(
+						$this,
+						'display_options_page_footer',
+					),
+					10,
+					1
+				);
 				do_action( 'exopite_sof_display_page_footer', $this->config );
 
 			}
@@ -1948,10 +2057,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 			echo '</div>';
 
 			do_action( 'exopite_sof_form_' . $this->config['type'] . '_after' );
-
 		} // display_page()
-
-
 	} //class
 
 endif;
@@ -1969,10 +2075,14 @@ endif;
  *  }
  */
 if ( ! function_exists( 'get_exopite_sof_option' ) ) {
-	function get_exopite_sof_option( $option_slug, $default = false  ) {
+	/**
+	 * Get exopite sof option.
+	 */
+	function get_exopite_sof_option( $option_slug, $default = false ) {
 
 		/**
 		 * save in cache?
+		 *
 		 * @link https://codex.wordpress.org/Transients_API
 		 */
 
@@ -1984,19 +2094,18 @@ if ( ! function_exists( 'get_exopite_sof_option' ) ) {
 
 		$options = apply_filters( 'get_exopite_sof_option', get_option( $option_slug, $default ), $option_slug, $default );
 
-		if ( isset( $options[$language_defaults['current']] ) ) {
+		if ( isset( $options[ $language_defaults['current'] ] ) ) {
 
-			return $options[$language_defaults['current']];
+			return $options[ $language_defaults['current'] ];
 
-		} elseif ( isset( $options[$language_defaults['default']] ) ) {
+		} elseif ( isset( $options[ $language_defaults['default'] ] ) ) {
 
-			return $options[$language_defaults['default']];
+			return $options[ $language_defaults['default'] ];
 
 		} else {
 
 			return $options;
 
 		}
-
 	}
 }

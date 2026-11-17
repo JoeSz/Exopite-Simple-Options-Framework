@@ -4,21 +4,29 @@
 /**
  *
  * Field: Number
- *
  */
 if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_number' ) ) {
 
+	/**
+	 * Class Exopite_Simple_Options_Framework_Field_number.
+	 */
 	class Exopite_Simple_Options_Framework_Field_number extends Exopite_Simple_Options_Framework_Fields {
 
+		/**
+		 * Constructor.
+		 */
 		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 			parent::__construct( $field, $value, $unique, $config );
 		}
 
+		/**
+		 * Render the field output.
+		 */
 		public function output() {
 
 			echo $this->element_before();
 
-			$unit = ( isset( $this->field['unit'] ) ) ? '<em>' . $this->field['unit'] . '</em>' : '';
+			$unit = ( isset( $this->field['unit'] ) ) ? '<em>' . esc_html( $this->field['unit'] ) . '</em>' : '';
 
 			$attr = array();
 			if ( isset( $this->field['min'] ) ) {
@@ -34,16 +42,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_number' ) ) {
 
 			echo $this->element_prepend();
 
-			echo '<input type="number" name="' . $this->element_name() . '" value="' . $this->element_value() . '"' . $this->element_class() . $this->element_attributes() . $attrs . '/>';
+			echo '<input type="number" name="' . $this->element_name() . '" value="' . esc_attr( $this->element_value() ) . '"' . $this->element_class() . $this->element_attributes() . $attrs . '/>';
 
 			echo $this->element_append();
 
 			echo $unit;
 
 			echo $this->element_after();
-
 		}
-
 	}
 
 }

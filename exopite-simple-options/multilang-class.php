@@ -7,16 +7,21 @@
  *
  * @since 1.0.0
  * @version 1.0.0
- *
  */
 if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 
+	/**
+	 * Class Exopite_Simple_Options_Framework_Helper.
+	 */
 	class Exopite_Simple_Options_Framework_Helper {
 
 
+		/**
+		 * Get active multilang plugins.
+		 */
 		public static function get_active_multilang_plugins() {
 
-			// Including file library if not exist
+			// Including file library if not exist.
 			if ( ! function_exists( 'is_plugin_active' ) ) {
 
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -25,32 +30,36 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 
 			$language_plugins_active = array();
 
-			// List Plugins in priority order
+			// List Plugins in priority order.
 
 			$language_plugins_active[] = ( is_plugin_active( 'sitepress-multilingual-cms/sitepress.php' ) && class_exists( 'SitePress' ) ) ? 'wpml' : false;
-			// polylang : https://wordpress.org/plugins/polylang/
+			// polylang : https://wordpress.org/plugins/polylang/.
 			$language_plugins_active[] = ( is_plugin_active( 'polylang/polylang.php' ) && class_exists( 'Polylang' ) ) ? 'polylang' : false;
-			// qTranX : https://wordpress.org/plugins/qtranslate-x/
+			// qTranX : https://wordpress.org/plugins/qtranslate-x/.
 			$language_plugins_active[] = ( is_plugin_active( 'qtranslate-x/qtranslate.php' ) && function_exists( 'qtranxf_getSortedLanguages' ) ) ? 'qtran' : false;
-			// Wp Multilang : https://wordpress.org/plugins/wp-multilang/
+			// Wp Multilang : https://wordpress.org/plugins/wp-multilang/.
 			$language_plugins_active[] = ( is_plugin_active( 'wp-multilang/wp-multilang.php' ) && function_exists( 'wpm_get_user_language' ) ) ? 'wpm' : false;
 
 			return apply_filters( 'exopite_sof_active_multilang_plugins', $language_plugins_active );
-
 		}
 
 
+		/**
+		 * Is special multilang plugin active.
+		 */
 		public static function is_special_multilang_plugin_active() {
 
 			$language_plugins_active = self::get_active_multilang_plugins();
 
 			if ( ! empty( $language_plugins_active ) ) {
 
-				$special_plugins = apply_filters( 'exopite_sof_special_multilang_plugins', array(
-					'qtran', // for qtranslateX
-					'wpm' // wp-multilang
-				) );
-
+				$special_plugins = apply_filters(
+					'exopite_sof_special_multilang_plugins',
+					array(
+						'qtran', // for qtranslateX.
+						'wpm', // wp-multilang.
+					)
+				);
 
 				foreach ( $special_plugins as $special_plugin ) {
 					if ( in_array( $special_plugin, $language_plugins_active ) ) {
@@ -59,10 +68,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 				}
 			}
 
-
 			return false;
-
-
 		}
 
 
@@ -83,28 +89,27 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 			}
 			$multilang = array();
 
-			// Fallbacks
+			// Fallbacks.
 			$default                = mb_substr( get_locale(), 0, 2 );
 			$multilang['default']   = $default;
 			$multilang['current']   = $default;
 			$multilang['languages'] = array( $default );
 
-			// List Plugins in priority order
+			// List Plugins in priority order.
 
 			$language_plugins_active = self::get_active_multilang_plugins();
 
-			// Get only non-false values
+			// Get only non-false values.
 			$language_plugins_active = array_filter( $language_plugins_active );
 
-			// get the first element priority of language plugins
+			// get the first element priority of language plugins.
 			$language_plugin_priority = ( is_array( $language_plugins_active ) ) ? array_shift( $language_plugins_active ) : array();
 
 			if ( ! empty( $language_plugin_priority ) && is_string( $language_plugin_priority ) ) {
 
 				switch ( $language_plugin_priority ) {
 
-					case( 'wpml' ):
-
+					case ( 'wpml' ):
 						global $sitepress;
 						$multilang['default'] = $sitepress->get_default_language();
 						$multilang['current'] = $sitepress->get_current_language();
@@ -114,11 +119,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 							$multilang['languages'] = array_keys( $active_languages );
 						}
 
-						break; // case( 'wpml' )
+						break; // case( 'wpml' ).
 
-					case( 'polylang' ):
-
-						// These checks of function_exists() and method_exists() added as deactivating polylang was giving fatal error
+					case ( 'polylang' ):
+						// These checks of function_exists() and method_exists() added as deactivating polylang was giving fatal error.
 
 						global $polylang;
 
@@ -132,7 +136,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 
 						if (
 							// if i do not check for is_object( $polylang ), it gives $polylang as NULL
-							// in short, these polylang methods not available to us while calling from plugin (not exopite framework)
+							// in short, these polylang methods not available to us while calling from plugin (not exopite framework).
 							is_object( $polylang ) &&
 							property_exists( $polylang, 'model' ) &&
 							method_exists( $polylang->model, 'get_languages_list' )
@@ -140,22 +144,20 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 							$poly_langs = $polylang->model->get_languages_list();
 						}
 
-
 						if ( isset( $poly_langs ) && is_array( $poly_langs ) ) {
 							foreach ( $poly_langs as $p_lang ) {
 								$languages[ $p_lang->slug ] = $p_lang->slug;
 							}
 						}
 
-
 						$multilang['default'] = $default;
-						// When all languages selected, then $current is false, so make $current as $default
+						// When all languages selected, then $current is false, so make $current as $default.
 						$multilang['current']   = ( isset( $current ) && $current ) ? $current : $multilang['current'];
 						$multilang['languages'] = ( isset( $languages ) && $languages ) ? $languages : $multilang['languages'];
 
-						break; // case( 'polylang' )
+						break; // case( 'polylang' ).
 
-					case( 'qtran' ):
+					case ( 'qtran' ):
 						global $q_config;
 						$multilang['default']   = $q_config['default_language'];
 						$multilang['current']   = $q_config['language'];
@@ -163,8 +165,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 
 						break;
 
-					case( 'wpm' ):
-
+					case ( 'wpm' ):
 						$multilang['default']   = wpm_get_default_language();
 						$multilang['current']   = wpm_get_user_language();
 						$multilang['languages'] = array_keys( wpm_get_languages() );
@@ -172,35 +173,34 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Helper' ) ) {
 						break;
 
 					default:
-
 				}
-
 			}
-
 
 			$multilang = apply_filters( 'exopite_sof_language_defaults', $multilang );
 
 			return ( ! empty( $multilang ) ) ? $multilang : false;
-
 		}
 
 
+		/**
+		 * Get current language code.
+		 */
 		public static function get_current_language_code() {
 
 			$multilang = self::get_language_defaults();
 
 			return $multilang['current'];
-
 		}
 
+		/**
+		 * Get default language code.
+		 */
 		public static function get_default_language_code() {
 
 			$multilang = self::get_language_defaults();
 
 			return $multilang['default'];
-
 		}
-
 	}
 
 }

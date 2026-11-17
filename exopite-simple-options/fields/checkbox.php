@@ -4,22 +4,29 @@
 /**
  *
  * Field: Checkbox
- *
  */
 if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_checkbox' ) ) {
 
+	/**
+	 * Class Exopite_Simple_Options_Framework_Field_checkbox.
+	 */
 	class Exopite_Simple_Options_Framework_Field_checkbox extends Exopite_Simple_Options_Framework_Fields {
 
+		/**
+		 * Constructor.
+		 */
 		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 
 			parent::__construct( $field, $value, $unique, $config );
-
 		}
 
+		/**
+		 * Render the field output.
+		 */
 		public function output() {
 
 			echo $this->element_before();
-			$label = ( isset( $this->field['label'] ) ) ? $this->field['label'] : '';
+			$label = ( isset( $this->field['label'] ) ) ? wp_kses_post( $this->field['label'] ) : '';
 			$style = ( isset( $this->field['style'] ) ) ? $this->field['style'] : '';
 
 			switch ( $style ) {
@@ -36,11 +43,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_checkbox' ) ) {
 					break;
 			}
 
-
 			echo $this->element_after();
-
 		}
-
 	}
 
 }

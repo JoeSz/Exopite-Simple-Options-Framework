@@ -11,46 +11,81 @@
  *
  * @since 1.0.0
  * @version 1.0.0
- *
  */
 if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 
+	/**
+	 * Class Exopite_Simple_Options_Framework_Upload.
+	 */
 	class Exopite_Simple_Options_Framework_Upload {
 
+		/**
+		 * Add hooks.
+		 */
 		public static function add_hooks() {
 
-			add_action( 'wp_ajax_exopite-sof-file_uploader', array(
-				'Exopite_Simple_Options_Framework_Upload',
-				'file_uploader_callback'
-			) );
-			add_action( 'wp_ajax_exopite-sof-file-batch-delete', array(
-				'Exopite_Simple_Options_Framework_Upload',
-				'file_batch_delete_callback'
-			) );
-
+			add_action(
+				'wp_ajax_exopite-sof-file_uploader',
+				array(
+					'Exopite_Simple_Options_Framework_Upload',
+					'file_uploader_callback',
+				)
+			);
+			add_action(
+				'wp_ajax_exopite-sof-file-batch-delete',
+				array(
+					'Exopite_Simple_Options_Framework_Upload',
+					'file_batch_delete_callback',
+				)
+			);
 		}
 
-		//DEGUB
+		// DEGUB.
 		public static function write_log( $type, $log_line ) {
 
 			$hash        = '';
 			$fn          = plugin_dir_path( __FILE__ ) . '/' . $type . '-' . $hash . '.log';
 			$log_in_file = file_put_contents( $fn, date( 'Y-m-d H:i:s' ) . ' - ' . $log_line . PHP_EOL, FILE_APPEND );
-
 		}
 
 		/**
 		 * Handle Response
 		 *
 		 * Code based on:
+		 *
 		 * @link https://wordpress.org/plugins/wp-multi-file-uploader/
 		 * @link https://wordpress.org/plugins/wp-dropzone/
 		 */
+		/**
+		 * Nonce action for the upload/delete AJAX requests.
+		 */
+		const NONCE_ACTION = 'exopite_sof_upload';
+
+		/**
+		 * Verify the AJAX nonce, stop the request if it is invalid.
+		 */
+		protected static function verify_nonce() {
+
+			$nonce = ( isset( $_POST['_wpnonce'] ) ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
+
+			if ( ! wp_verify_nonce( $nonce, self::NONCE_ACTION ) ) {
+				status_header( 403 );
+				die( json_encode( array( 'error' => 'Invalid nonce' ) ) );
+			}
+		}
+
+		/**
+		 * File uploader callback.
+		 */
 		public static function file_uploader_callback() {
 
-			// file_put_contents( dirname(__FILE__) . '\test.log', var_export( $_POST, true ) . PHP_EOL . PHP_EOL, FILE_APPEND );
+			// file_put_contents( dirname(__FILE__) . '\test.log', var_export( $_POST, true ) . PHP_EOL . PHP_EOL, FILE_APPEND );.
 
-			if ( strtoupper( sanitize_key( $_POST['_method'] ) ) == 'DELETE' && isset( $_POST['qquuid'] ) ) {
+			self::verify_nonce();
+
+			$method = ( isset( $_POST['_method'] ) ) ? strtoupper( sanitize_key( $_POST['_method'] ) ) : '';
+
+			if ( 'DELETE' === $method && isset( $_POST['qquuid'] ) ) {
 
 				/**
 				 * Delete file on AJAX request with qquuid
@@ -60,7 +95,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 				 */
 				$result = self::file_delete();
 
-//				$protocol = ( isset( $_SERVER['SERVER_PROTOCOL'] ) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0' );
 				$protocol = wp_get_server_protocol();
 
 				header( $protocol . $result );
@@ -69,38 +103,49 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 
 				$result = self::file_uploader();
 
-				header( "Content-Type: text/plain" );
+				header( 'Content-Type: text/plain' );
 				echo json_encode( $result );
 
 			}
 
 			die();
-
 		}
 
+		/**
+		 * File batch delete callback.
+		 */
 		public static function file_batch_delete_callback() {
 
 			$deleted = array();
 
+			self::verify_nonce();
+
 			if ( isset( $_POST['media-ids'] ) && is_array( $_POST['media-ids'] ) ) {
 
-				// Sanitize attachment ids, these should be absint
+				// Sanitize attachment ids, these should be absint.
 				$attachment_id_array = array_map( 'absint', $_POST['media-ids'] );
-
 
 				foreach ( $attachment_id_array as $attachmentid ) {
 
+					// Only attachments, and only if the current user is allowed to delete them.
+					if ( ! $attachmentid || get_post_type( $attachmentid ) !== 'attachment' || ! current_user_can( 'delete_post', $attachmentid ) ) {
+						continue;
+					}
+
 					$deleted_item = wp_delete_attachment( $attachmentid, true );
-					$deleted[]    = $deleted_item->ID;
 
+					if ( $deleted_item instanceof WP_Post ) {
+						$deleted[] = $deleted_item->ID;
+					}
 				}
-
 			}
 
 			die( json_encode( $deleted ) );
-
 		}
 
+		/**
+		 * File delete.
+		 */
 		public static function file_delete() {
 
 			/**
@@ -117,8 +162,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 						'key'     => 'qquuid',
 						'value'   => sanitize_text_field( $_POST['qquuid'] ),
 						'compare' => '=',
-					)
-				)
+					),
+				),
 
 			);
 
@@ -128,13 +173,16 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 
 				foreach ( $attachments as $attachment ) {
 
+					if ( ! current_user_can( 'delete_post', $attachment->ID ) ) {
+						return ' 403 Forbidden';
+					}
+
 					if ( wp_delete_post( $attachment->ID, true ) ) {
 
 						return ' 200 OK';
 
 					}
 				}
-
 			}
 
 			// Restore original post data.
@@ -142,19 +190,36 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 			wp_reset_query();
 
 			return ' 404 Not Found';
-
 		}
 
+		/**
+		 * File uploader.
+		 */
 		public static function file_uploader() {
 
-			// Make sure all files are allowed
+			// The user must be allowed to upload files.
+			if ( ! current_user_can( 'upload_files' ) ) {
+				return array( 'error' => 'You are not allowed to upload files' );
+			}
+
+			// If the file should be attached to a post, the user must be allowed to edit that post.
+			$post_id = ( isset( $_POST['postId'] ) ) ? absint( $_POST['postId'] ) : 0;
+			if ( $post_id && ! current_user_can( 'edit_post', $post_id ) ) {
+				return array( 'error' => 'You are not allowed to edit this post' );
+			}
+
+			if ( ! isset( $_FILES['qqfile']['name'] ) ) {
+				return array( 'error' => 'No file uploaded' );
+			}
+
+			// Make sure all files are allowed.
 			if ( ! self::check_file_type( $_FILES['qqfile']['name'] ) ) {
 
 				return array( 'error' => 'Unsupported file type' );
 
 			}
 
-			// Including file library if not exist
+			// Including file library if not exist.
 			if ( ! function_exists( 'wp_handle_upload' ) ) {
 
 				require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -165,24 +230,26 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 				$_FILES['qqfile']['name'] = sanitize_file_name( $_POST['qqfilename'] );
 			}
 
-			// Uploading file to server
+			// Uploading file to server.
 			$uploaded_file = $_FILES['qqfile'];
 
 			$upload_overrides = array( 'test_form' => false );
 			$movefile         = wp_handle_upload( $uploaded_file, $upload_overrides );
 
-			if ( $movefile ) {
+			if ( $movefile && empty( $movefile['error'] ) ) {
 
 				$wp_upload_dir = wp_upload_dir();
 				$filename      = str_replace( $wp_upload_dir['url'] . '/', '', $movefile['url'] );
 
 				$attachment = self::add_attachment( $movefile['url'], $movefile['file'] );
 
-				// Add qquuid for possibility to delete with AJAX fine uploader
-				update_post_meta( $attachment, 'qquuid', sanitize_text_field( $_POST['qquuid'] ) );
+				// Add qquuid for possibility to delete with AJAX fine uploader.
+				if ( isset( $_POST['qquuid'] ) ) {
+					update_post_meta( $attachment, 'qquuid', sanitize_text_field( $_POST['qquuid'] ) );
+				}
 
-				// Generate ALT attribute based on file name
-				$alt = substr( $_FILES['qqfile']['name'], 0, strrpos( $_FILES['qqfile']['name'], "." ) );
+				// Generate ALT attribute based on file name.
+				$alt = substr( $_FILES['qqfile']['name'], 0, strrpos( $_FILES['qqfile']['name'], '.' ) );
 				$alt = sanitize_title( $alt );
 				$alt = str_replace( '-', ' ', $alt );
 				$alt = ucwords( strtolower( $alt ) );
@@ -190,17 +257,16 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 
 				return array(
 					'success'      => $movefile,
-					'attachmentId' => $attachment
+					'attachmentId' => $attachment,
 				);
 
 			} else {
 
-				return array( 'error' => 'Can not move file' );
+				return array( 'error' => ( ! empty( $movefile['error'] ) ) ? $movefile['error'] : 'Can not move file' );
 
 			}
 
 			return array( 'error' => 'General error' );
-
 		}
 
 		/**
@@ -208,7 +274,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 		 */
 		public static function add_attachment( $url, $filepath ) {
 
-			$updated_url = trim( substr( $url, strpos( $url, 'uploads/') + 8 ));
+			$updated_url = trim( substr( $url, strpos( $url, 'uploads/' ) + 8 ) );
 
 			$wp_upload_dir = wp_upload_dir();
 			$filename      = str_replace( $wp_upload_dir['url'] . '/', '', $url );
@@ -220,10 +286,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 				'post_mime_type' => $wp_filetype['type'],
 				'post_title'     => preg_replace( '/\.[^.]+$/', '', basename( $filename ) ),
 				'post_content'   => '',
-				'post_status'    => 'inherit'
+				'post_status'    => 'inherit',
 			);
 
-			// Attach file to post if attach is true and it is uploaded in a post (metabox)
+			// Attach file to post if attach is true and it is uploaded in a post (metabox).
 			$post_id   = ( isset( $_POST['postId'] ) ) ? intval( $_POST['postId'] ) : 0;
 			$attach_id = wp_insert_attachment( $attachment, $updated_url, $post_id );
 
@@ -232,7 +298,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 
 				if ( ! function_exists( 'wp_generate_attachment_metadata' ) || ! function_exists( 'wp_update_attachment_metadata' ) ) {
 
-					require_once( ABSPATH . 'wp-admin/includes/image.php' );
+					require_once ABSPATH . 'wp-admin/includes/image.php';
 
 				}
 
@@ -253,10 +319,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 
 			foreach ( get_intermediate_image_sizes() as $size ) {
 
-				$sizes[ $size ]           = array( 'width' => '', 'height' => '', 'crop' => true );
-				$sizes[ $size ]['width']  = get_option( "{$size}_size_w" ); // For default sizes set in options
-				$sizes[ $size ]['height'] = get_option( "{$size}_size_h" ); // For default sizes set in options
-				$sizes[ $size ]['crop']   = get_option( "{$size}_crop" ); // For default sizes set in options
+				$sizes[ $size ]           = array(
+					'width'  => '',
+					'height' => '',
+					'crop'   => true,
+				);
+				$sizes[ $size ]['width']  = get_option( "{$size}_size_w" ); // For default sizes set in options.
+				$sizes[ $size ]['height'] = get_option( "{$size}_size_h" ); // For default sizes set in options.
+				$sizes[ $size ]['crop']   = get_option( "{$size}_crop" ); // For default sizes set in options.
 
 			}
 
@@ -278,7 +348,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 					$metadata[ $size ] = $resized;
 
 				}
-
 			}
 
 			return $metadata;
@@ -290,7 +359,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 		 * @since 1.1.0
 		 */
 		public static function allowed_mime_types() {
-			// Work through the WordPress supported mime types
+			// Work through the WordPress supported mime types.
 			$wp_allowed_mime_types = get_allowed_mime_types();
 
 			$allowed_mime_types = array();
@@ -299,15 +368,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 
 				$mime_types = explode( '|', $key );
 
-				// Build mime types array out of WordPress allowed mime types
+				// Build mime types array out of WordPress allowed mime types.
 				foreach ( $mime_types as $mime_type ) {
 
 					$allowed_mime_types[] = $mime_type;
 
 				}
-
 			}
-
 
 			return $allowed_mime_types;
 		}
@@ -317,13 +384,13 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 		 */
 		public static function check_file_type( $file_name ) {
 
-			// Get file info
+			// Get file info.
 			$filetype = wp_check_filetype( $file_name );
 
-			// Get from options
+			// Get from options.
 			$allowed_exts = self::allowed_mime_types();
 
-			// Make sure the file type is allowed
+			// Make sure the file type is allowed.
 			$ext = ( isset( $filetype['ext'] ) ) ? strtolower( $filetype['ext'] ) : '';
 
 			if ( in_array( $ext, $allowed_exts ) ) {
@@ -362,12 +429,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 					$max_size = $upload_max;
 
 				}
-
 			}
 
 			return $max_size;
 		}
 
+		/**
+		 * Parse size.
+		 */
 		public static function parse_size( $size ) {
 
 			$unit = preg_replace( '/[^bkmgtpezy]/i', '', $size ); // Remove the non-unit characters from the size.
@@ -383,9 +452,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Upload' ) ) {
 				return round( $size );
 
 			}
-
 		}
-
 	}
 
 }

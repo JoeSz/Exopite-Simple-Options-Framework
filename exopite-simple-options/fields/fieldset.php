@@ -8,28 +8,39 @@
  * - to group elements
  * - set element amount per row (1,2,3,4,6) <- like bootstrap
  * - title (if more then one) top or bottom of element
- *
  */
 if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_fieldset' ) ) {
 
+	/**
+	 * Class Exopite_Simple_Options_Framework_Field_fieldset.
+	 */
 	class Exopite_Simple_Options_Framework_Field_fieldset extends Exopite_Simple_Options_Framework_Fields {
 
+		/**
+		 * Constructor.
+		 */
 		public function __construct( $field, $value = '', $unique = '', $config = array(), $multilang = false ) {
 			parent::__construct( $field, $value, $unique, $config, $multilang );
 		}
 
+		/**
+		 * Render the field output.
+		 */
 		public function output() {
 
 			echo $this->element_before();
 
-			$unallows = array();
+			$unallows  = array();
 			$unique_id = ( ! empty( $this->unique ) ) ? $this->unique : $this->field['id'];
 
-			$self  = new Exopite_Simple_Options_Framework( array(
-				'id' => $this->element_name(),
-				'multilang' => $this->config['multilang'],
-				'is_options_simple' => $this->config['is_options_simple'],
-			), null );
+			$self = new Exopite_Simple_Options_Framework(
+				array(
+					'id'                => $this->element_name(),
+					'multilang'         => $this->config['multilang'],
+					'is_options_simple' => $this->config['is_options_simple'],
+				),
+				null
+			);
 
 			$i = 0;
 
@@ -46,9 +57,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_fieldset' ) ) {
 			 * 6 -> col-12 col-lg-2
 			 */
 
-			$col_classes = array( 'col', 'col-xs-12' );
+			$col_classes  = array( 'col', 'col-xs-12' );
 			$allowed_cols = array( 1, 2, 3, 4, 6 );
-			$col_number = ( isset( $this->field['options']['cols'] ) ) ? intval( $this->field['options']['cols'] ) : 1;
+			$col_number   = ( isset( $this->field['options']['cols'] ) ) ? intval( $this->field['options']['cols'] ) : 1;
 			if ( ! in_array( $col_number, $allowed_cols ) ) {
 				$col_number = 1;
 			} else {
@@ -58,7 +69,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_fieldset' ) ) {
 
 			foreach ( $fields as $field ) {
 
-				echo '<div class="' . implode( ' ', $col_classes ) . '">';
+				echo '<div class="' . esc_attr( implode( ' ', $col_classes ) ) . '">';
 
 				if ( in_array( $field['type'], $unallows ) ) {
 					$field['_notice'] = true;
@@ -80,17 +91,15 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_fieldset' ) ) {
 
 				echo $self->add_field( $field, $field_value );
 
-				echo '</div>'; // col
+				echo '</div>'; // col.
 
 			}
 
-			echo '</div>'; // row
-			echo '</div>'; // container
+			echo '</div>'; // row.
+			echo '</div>'; // container.
 
 			echo $this->element_after();
-
 		}
-
 	}
 
 }

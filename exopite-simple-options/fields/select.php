@@ -4,77 +4,86 @@
 /**
  *
  * Field: Select
- *
  */
-/* Usage:
+/*
+Usage:
  *
 array(
-    'id'             => 'select_1',
-    'type'           => 'select',
-    'title'          => 'Title',
-    'query'          => array(
-        'type'          => 'callback',
-        'function'      => array( $this, 'function_name' ),
-        'args'          => array()                              // WordPress query args
-    ),
+	'id'             => 'select_1',
+	'type'           => 'select',
+	'title'          => 'Title',
+	'query'          => array(
+		'type'          => 'callback',
+		'function'      => array( $this, 'function_name' ),
+		'args'          => array()                              // WordPress query args
+	),
 ),
 
 OPTIONS OR QUERY:
 
 - with static options
 'options'        => array(
-    'bmw'            => 'BMW',
-    'mercedes'       => 'Mercedes',
-    'volkswagen'     => 'Volkswagen',
-    'other'          => 'Other',
+	'bmw'            => 'BMW',
+	'mercedes'       => 'Mercedes',
+	'volkswagen'     => 'Volkswagen',
+	'other'          => 'Other',
 ),
 
 - with a callback function
 'query'          => array(
-    'type'          => 'callback',
-    'function'      => array( $this, 'function_name' ),
-    'args'          => array()                                  // WordPress query args
+	'type'          => 'callback',
+	'function'      => array( $this, 'function_name' ),
+	'args'          => array()                                  // WordPress query args
 ),
 
 - with a build-in types, you can use: posts, pages, categories, tags, menus, post_types and users
 'query'          => array(
-    'type'          => 'users',
-    'args'			=> array(                                   // WordPress query args
-        'orderby'   	=> 'nicename',
-        'meta_query'	=> array(),                             // Your meta query
-    ),
+	'type'          => 'users',
+	'args'          => array(                                   // WordPress query args
+		'orderby'       => 'nicename',
+		'meta_query'    => array(),                             // Your meta query
+	),
 ),
 
 - also possible to use different args on different pages with ['query']['args']['multi_query'] = true
 'query'          => array(
-    'type'          => 'users',
-    'args' 		    => array(                                   // WordPress query args
-        'multi_query'	=> true,                                // to activate multi query
-        array(
-            'display_on'	=> array( 'page-slugs or ids' ),    // page slug or id where this args should apply
-            ... continue with your meta query ...
-        ),
-        array(
-            'display_on'	=> array( 'page-slugs or ids' ),    // page slug or id where this args should apply
-            'orderby'   	=> 'nicename',
-            'meta_query'	=> array(
-                'relation'		=> 'AND',
-                array(), // your meta query
-                array(), // your meta query
-            ),
-        ),
-    ),
+	'type'          => 'users',
+	'args'          => array(                                   // WordPress query args
+		'multi_query'   => true,                                // to activate multi query
+		array(
+			'display_on'    => array( 'page-slugs or ids' ),    // page slug or id where this args should apply
+			... continue with your meta query ...
+		),
+		array(
+			'display_on'    => array( 'page-slugs or ids' ),    // page slug or id where this args should apply
+			'orderby'       => 'nicename',
+			'meta_query'    => array(
+				'relation'      => 'AND',
+				array(), // your meta query
+				array(), // your meta query
+			),
+		),
+	),
 ),
 
  */
 if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_select' ) ) {
 
+	/**
+	 * Class Exopite_Simple_Options_Framework_Field_select.
+	 */
 	class Exopite_Simple_Options_Framework_Field_select extends Exopite_Simple_Options_Framework_Fields {
 
+		/**
+		 * Constructor.
+		 */
 		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 			parent::__construct( $field, $value, $unique, $config );
 		}
 
+		/**
+		 * Render the field output.
+		 */
 		public function output() {
 
 			echo $this->element_before();
@@ -91,12 +100,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_select' ) ) {
 
 				echo '<select name="' . $this->element_name( $extra_name ) . '"' . $this->element_class() . $this->element_attributes() . '>';
 
-				echo ( isset( $this->field['default_option'] ) ) ? '<option value="">' . $this->field['default_option'] . '</option>' : '';
+				echo ( isset( $this->field['default_option'] ) ) ? '<option value="">' . esc_html( $this->field['default_option'] ) . '</option>' : '';
 
 				if ( ! empty( $select ) ) {
 
 					foreach ( $select as $key => $value ) {
-						echo '<option value="' . $key . '" ' . $this->checked( $this->element_value(), $key, 'selected' ) . '>' . $value . '</option>';
+						echo '<option value="' . esc_attr( $key ) . '" ' . $this->checked( $this->element_value(), $key, 'selected' ) . '>' . esc_html( $value ) . '</option>';
 
 					}
 				}
@@ -108,7 +117,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_select' ) ) {
 			echo $this->element_append();
 
 			echo $this->element_after();
-
 		}
 
 		/**
@@ -125,12 +133,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_select' ) ) {
 			 */
 			if ( isset( $query['args'] ) && is_array( $query['args'] ) ) {
 
-				// Check if multi_query is set
+				// Check if multi_query is set.
 				if ( isset( $query['args']['multi_query'] ) && true === $query['args']['multi_query'] ) {
 
 					foreach ( $query['args'] as $args ) {
 
-						// Skip if not an array (eg. 'multi_query' => true )
+						// Skip if not an array (eg. 'multi_query' => true ).
 						if ( ! is_array( $args ) ) {
 							continue;
 						}
@@ -139,30 +147,26 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_select' ) ) {
 
 						// 'disply_on' is the post slog or id
 						if ( ( is_array( $display_on ) && in_array( $post->post_name, $display_on ) ) ||
-						     ( ! is_array( $display_on ) && $display_on == $post->post_name ) ||
-						     ( is_array( $display_on ) && in_array( $post->ID, $display_on ) ) ||
-						     ( ! is_array( $display_on ) && $display_on == $post->ID )
+							( ! is_array( $display_on ) && $display_on == $post->post_name ) ||
+							( is_array( $display_on ) && in_array( $post->ID, $display_on ) ) ||
+							( ! is_array( $display_on ) && $display_on == $post->ID )
 						) {
 
-							// remove 'display_on'
+							// remove 'display_on'.
 							unset( $args['display_on'] );
-							// set args
+							// set args.
 							$query_args = $args;
 						}
-
 					}
-
 				} else {
 					$query_args = $query['args'];
 				}
-
 			}
 
 			switch ( $type ) {
 
 				case 'pages':
 				case 'page':
-
 					$pages = get_pages( $query_args );
 
 					if ( ! is_wp_error( $pages ) && ! empty( $pages ) ) {
@@ -175,7 +179,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_select' ) ) {
 
 				case 'posts':
 				case 'post':
-
 					$posts = get_posts( $query_args );
 
 					if ( ! is_wp_error( $posts ) && ! empty( $posts ) ) {
@@ -188,7 +191,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_select' ) ) {
 
 				case 'categories':
 				case 'category':
-
 					$categories = get_categories( $query_args );
 
 					if ( ! is_wp_error( $categories ) && ! empty( $categories ) && ! isset( $categories['errors'] ) ) {
@@ -201,7 +203,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_select' ) ) {
 
 				case 'tags':
 				case 'tag':
-
 					$taxonomies = ( isset( $query_args['taxonomies'] ) ) ? $query_args['taxonomies'] : 'post_tag';
 					$tags       = get_terms( $taxonomies, $query_args );
 
@@ -215,7 +216,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_select' ) ) {
 
 				case 'menus':
 				case 'menu':
-
 					$menus = wp_get_nav_menus( $query_args );
 
 					if ( ! is_wp_error( $menus ) && ! empty( $menus ) ) {
@@ -228,7 +228,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_select' ) ) {
 
 				case 'post_types':
 				case 'post_type':
-
 					$query_args['show_in_nav_menus'] = true;
 					$post_types                      = get_post_types( $query_args );
 
@@ -242,15 +241,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_select' ) ) {
 
 				case 'users':
 				case 'user':
-
 					$users = get_users( $query_args );
 
 					/**
 					 * key:   the name in select
 					 * value: the value in select
 					 */
-					$key   = ( isset ( $this->field['query']['key'] ) ) ? sanitize_key( $this->field['query']['key'] ) : 'ID';
-					$value = ( isset ( $this->field['query']['value'] ) ) ? sanitize_key( $this->field['query']['value'] ) : 'user_login';
+					$key   = ( isset( $this->field['query']['key'] ) ) ? sanitize_key( $this->field['query']['key'] ) : 'ID';
+					$value = ( isset( $this->field['query']['value'] ) ) ? sanitize_key( $this->field['query']['value'] ) : 'user_login';
 
 					if ( ! is_wp_error( $users ) && ! empty( $users ) ) {
 						foreach ( $users as $user ) {
@@ -262,12 +260,11 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_select' ) ) {
 
 				case 'custom':
 				case 'callback':
-
 					/**
 					 * Get post object if it is a metabox and not yet set.
 					 * Then send post object to callback function.
 					 */
-					if ( isset( $this->config['type'] ) && $this->config['type'] == 'metabox' && ! isset( $post ) ) {
+					if ( isset( $this->config['type'] ) && 'metabox' == $this->config['type'] && ! isset( $post ) ) {
 						global $post;
 					} else {
 						$post = array();
@@ -285,6 +282,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_select' ) ) {
 		}
 
 
+		/**
+		 * Enqueue the field assets.
+		 */
 		public static function enqueue( $args ) {
 
 			/**
@@ -319,9 +319,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_select' ) ) {
 			);
 
 			parent::do_enqueue( $resources, $args );
-
 		}
-
 	}
 
 }

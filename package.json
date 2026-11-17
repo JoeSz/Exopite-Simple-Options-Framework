@@ -1,0 +1,13 @@
+{
+	"name": "exopite-simple-options-framework-build",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Build tooling for the minified assets of Exopite Simple Options Framework.",
+	"scripts": {
+		"build": "node tools/build.js"
+	},
+	"devDependencies": {
+		"clean-css": "^5.3.3",
+		"terser": "^5.36.0"
+	}
+}

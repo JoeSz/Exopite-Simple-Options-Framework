@@ -5,7 +5,7 @@ Lightweight, easy to use Option Framework for WordPress Plugins and Themes and a
 ## Fast, easy and lightweight option/metabox form generator.
 
 - Author: Joe Szalai and raoabid
-- Version: 20261009
+- Version: 20261117.2
 - Plugin URL: https://joe.szalai.org/exopite/exopite-simple-options-framework/
 - GitHub URL: https://github.com/JoeSz/Exopite-Simple-Options-Framework
 - Author URL: https://joe.szalai.org
@@ -145,7 +145,7 @@ https://wpquestions.com/Order_by_meta_key_where_value_is_serialized/7908<br>
 Server
 
 * WordPress 4.9+ (May work with earlier versions too)
-* PHP 5.6+ (Required)
+* PHP 8.2+ (Required)
 * jQuery 1.9.1+
 
 Browsers
@@ -318,6 +318,17 @@ $my_meta_options = get_post_meta( get_the_ID(), 'my-option-name', true ); // as 
 * exopite_sof_display_page_footer (config)
 * exopite_sof_form_menu_after (unique)
 * exopite_sof_form_meta_after (unique)
+
+### BUILD (development only)
+
+The minified assets are generated from `exopite-simple-options/assets/dev`. Edit the sources there, never the `.min.js` files or `assets/styles.css`.
+
+```
+npm install
+npm run build
+```
+
+The script is `tools/build.js` (terser for JS, clean-css for CSS). Vendored libraries and `loader-minicolors.js` are not rebuilt.
 
 ### TODOS/KNOWN ISSUES
 

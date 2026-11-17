@@ -4,36 +4,44 @@
 /**
  *
  * Field: Editor
- *
  */
 if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_editor' ) ) {
 
+	/**
+	 * Class Exopite_Simple_Options_Framework_Field_editor.
+	 */
 	class Exopite_Simple_Options_Framework_Field_editor extends Exopite_Simple_Options_Framework_Fields {
 
+		/**
+		 * Constructor.
+		 */
 		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 			parent::__construct( $field, $value, $unique, $config );
 		}
 
+		/**
+		 * Render the field output.
+		 */
 		public function output() {
 
-			$classes = ( isset( $this->field['class'] ) ) ? explode( ' ', $this->field['class'] ) : array();//$this->element_class()
+			$classes = ( isset( $this->field['class'] ) ) ? explode( ' ', $this->field['class'] ) : array();
 			$editor  = ( isset( $this->field['editor'] ) ) ? $this->field['editor'] : 'tinymce';
 
 			echo $this->element_before();
 
-			if ( $editor == 'tinymce' && isset( $this->field['sub'] ) && $this->field['sub'] ) {
+			if ( 'tinymce' == $editor && isset( $this->field['sub'] ) && $this->field['sub'] ) {
 
 				$classes[] = 'tinymce-js';
 				$classes   = implode( ' ', $classes );
 
-				echo '<textarea id="' . $this->field['id'] . '" name="' . $this->element_name() . '" class="' . $classes . '"' . $this->element_attributes() . '>' . $this->element_value() . '</textarea>';
+				echo '<textarea id="' . esc_attr( $this->field['id'] ) . '" name="' . $this->element_name() . '" class="' . esc_attr( $classes ) . '"' . $this->element_attributes() . '>' . esc_textarea( (string) $this->element_value() ) . '</textarea>';
 
-			} elseif ( $editor == 'trumbowyg' ) {
+			} elseif ( 'trumbowyg' == $editor ) {
 
 				$classes[] = 'trumbowyg-js';
 				$classes   = implode( ' ', $classes );
 
-				echo '<textarea id="' . $this->field['id'] . '" name="' . $this->element_name() . '" data-icon-path="' . plugin_dir_url( __DIR__ ) . 'assets/editors/trumbowyg/icons.svg" class="' . $classes . '"' . $this->element_attributes() . '>' . $this->element_value() . '</textarea>';
+				echo '<textarea id="' . esc_attr( $this->field['id'] ) . '" name="' . $this->element_name() . '" data-icon-path="' . esc_url( plugin_dir_url( __DIR__ ) . 'assets/editors/trumbowyg/icons.svg' ) . '" class="' . esc_attr( $classes ) . '"' . $this->element_attributes() . '>' . esc_textarea( (string) $this->element_value() ) . '</textarea>';
 
 			} else {
 
@@ -42,23 +50,25 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_editor' ) ) {
 					'editor_class'  => implode( ' ', $classes ),
 					'textarea_name' => $this->element_name(),
 					'teeny'         => false,
-					// output the minimal editor config used in Press This
+					// output the minimal editor config used in Press This.
 					'dfw'           => false,
-					// replace the default fullscreen with DFW (supported on the front-end in WordPress 3.4)
+					// replace the default fullscreen with DFW (supported on the front-end in WordPress 3.4).
 					'tinymce'       => true,
-					// load TinyMCE, can be used to pass settings directly to TinyMCE using an array()
-					'quicktags'     => true
-					// load Quicktags, can be used to pass settings directly to Quicktags using an array()
+					// load TinyMCE, can be used to pass settings directly to TinyMCE using an array().
+					'quicktags'     => true,
+					// load Quicktags, can be used to pass settings directly to Quicktags using an array().
 				);
 
-				wp_editor( $this->element_value(), $this->field['id'], $args );
+				wp_editor( (string) $this->element_value(), $this->field['id'], $args );
 
 			}
 
 			echo $this->element_after();
-
 		}
 
+		/**
+		 * Enqueue the field assets.
+		 */
 		public static function enqueue( $args ) {
 
 			if ( isset( $args['field'] ) && isset( $args['field']['editor'] ) && is_array( $args['field']['editor'] ) ) {
@@ -68,7 +78,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_editor' ) ) {
 					switch ( $editor ) {
 
 						case 'trumbowyg':
-
 							$resources = array(
 								array(
 									'name'       => 'trumbowyg',
@@ -150,14 +159,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_editor' ) ) {
 							break;
 
 					}
-
 				}
-
 			}
-
-
 		}
-
 	}
 
 }

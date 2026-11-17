@@ -4,12 +4,17 @@
 /**
  *
  * Field: Image
- *
  */
 if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_image' ) ) {
 
+	/**
+	 * Class Exopite_Simple_Options_Framework_Field_image.
+	 */
 	class Exopite_Simple_Options_Framework_Field_image extends Exopite_Simple_Options_Framework_Fields {
 
+		/**
+		 * Constructor.
+		 */
 		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 			parent::__construct( $field, $value, $unique, $config );
 		}
@@ -25,7 +30,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_image' ) ) {
 			$attachment_id = 0;
 			$dir           = wp_upload_dir();
 
-			// To handle relative urls
+			// To handle relative urls.
 			if ( substr( $url, 0, strlen( '/' ) ) === '/' ) {
 
 				$url = get_site_url() . $url;
@@ -43,7 +48,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_image' ) ) {
 							'compare' => 'LIKE',
 							'key'     => '_wp_attachment_metadata',
 						),
-					)
+					),
 				);
 				$query      = new WP_Query( $query_args );
 				if ( $query->have_posts() ) {
@@ -62,6 +67,9 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_image' ) ) {
 			return $attachment_id;
 		}
 
+		/**
+		 * Render the field output.
+		 */
 		public function output() {
 
 			/**
@@ -83,24 +91,24 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_image' ) ) {
 				$preview    = $attachment[0];
 			}
 
-			echo '<div class="exopite-sof-media exopite-sof-image ' . $classes . '" ' . $this->element_attributes() . '>';
-			echo '<div class="exopite-sof-image-preview' . $hidden . '">';
-			echo '<div class="exopite-sof-image-inner"><i class="fa fa-times exopite-sof-image-remove"></i><img src="' . $preview . '" alt="preview" /></div>';
+			echo '<div class="exopite-sof-media exopite-sof-image ' . esc_attr( $classes ) . '" ' . $this->element_attributes() . '>';
+			echo '<div class="exopite-sof-image-preview' . esc_attr( $hidden ) . '">';
+			echo '<div class="exopite-sof-image-inner"><i class="fa fa-times exopite-sof-image-remove"></i><img src="' . esc_url( $preview ) . '" alt="preview" /></div>';
 			echo '</div>';
 
-			echo '<input type="text" name="' . $this->element_name() . '" value="' . $this->element_value() . '">';
-			echo '<a href="#" class="button button-primary exopite-sof-button">' . $add . '</a>';
+			echo '<input type="text" name="' . $this->element_name() . '" value="' . esc_attr( $this->element_value() ) . '">';
+			echo '<a href="#" class="button button-primary exopite-sof-button">' . wp_kses_post( $add ) . '</a>';
 			echo '</div>';
 			echo $this->element_after();
-
 		}
 
+		/**
+		 * Enqueue the field assets.
+		 */
 		public static function enqueue( $args ) {
 
 			wp_enqueue_media();
-
 		}
-
 	}
 
 }

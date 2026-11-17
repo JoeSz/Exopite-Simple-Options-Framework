@@ -7,7 +7,6 @@
  *
  * @since 1.0.0
  * @version 1.0.0
- *
  */
 /**
  * loop reqursive $valuePOST, get the field from fields based on "name" == "id"
@@ -19,6 +18,9 @@
  */
 if ( ! class_exists( 'Exopite_Simple_Options_Framework_Sanitize' ) ) {
 
+	/**
+	 * Class Exopite_Simple_Options_Framework_Sanitize.
+	 */
 	class Exopite_Simple_Options_Framework_Sanitize {
 
 		public $is_multilang;
@@ -28,25 +30,25 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Sanitize' ) ) {
 
 		public static $parent_key;
 
+		/**
+		 * Constructor.
+		 */
 		public function __construct( $is_multilang, $lang_current, $config, $fields ) {
 
 			$this->is_multilang = $is_multilang;
 			$this->lang_current = $lang_current;
-			$this->config = $config;
-			$this->fields = $fields;
-
+			$this->config       = $config;
+			$this->fields       = $fields;
 		}
 
+		/**
+		 * Get sanitized values.
+		 */
 		public function get_sanitized_values( $fields, $posted_data ) {
-
-			// $this->write_log( 'post', var_export( $posted_data, true ) );
 
 			$posted_data = $this->array_search_and_replace( $posted_data );
 
-			// $this->write_log( 'post-after', var_export( $posted_data, true ) );
-
 			return $posted_data;
-
 		}
 
 		/**
@@ -60,13 +62,19 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Sanitize' ) ) {
 		 */
 		public function array_search_and_replace( &$arr ) {
 
+			if ( ! is_array( $arr ) ) {
+				return $arr;
+			}
+
 			foreach ( $arr as $key => $value ) {
 
 				// If array, then call self.
-				if( is_array( $value ) ) {
+				if ( is_array( $value ) ) {
 
-					if ( ! is_int( $key ) ) self::$parent_key = $key;
-					$this->array_search_and_replace( $arr[$key] );
+					if ( ! is_int( $key ) ) {
+						self::$parent_key = $key;
+					}
+					$this->array_search_and_replace( $arr[ $key ] );
 
 				} else {
 
@@ -77,7 +85,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Sanitize' ) ) {
 					 */
 					if ( ! is_int( $key ) ) {
 						$field = $this->find_sub_array( 'id', $key, $this->fields );
-						if ( $field == null ) {
+						if ( null == $field ) {
 							$field = $this->find_sub_array( 'id', self::$parent_key, $this->fields );
 						}
 					} else {
@@ -89,16 +97,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Sanitize' ) ) {
 					 * [key,] field and value
 					 */
 
-					$arr[$key] = $this->sanitize( $field, $value );
+					$arr[ $key ] = $this->sanitize( $field, $value );
 
 					// $this->write_log( 'test_print_ext', var_export( self::$parent_key, true ) . PHP_EOL . var_export( $field, true ) . PHP_EOL . var_export( $key, true ) . PHP_EOL . var_export( $value, true ) . PHP_EOL . '----' . PHP_EOL );
 
 				}
-
 			}
 
 			return $arr;
-
 		}
 
 		/**
@@ -106,31 +112,27 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Sanitize' ) ) {
 		 */
 		public function find_sub_array( $needle_key, $needle_value, $array ) {
 
-			if ( isset( $array[$needle_key] ) && $array[$needle_key] == $needle_value ) {
+			if ( isset( $array[ $needle_key ] ) && $array[ $needle_key ] == $needle_value ) {
 				return $array;
 			}
 
-			foreach( $array as $key => $value ) {
+			foreach ( $array as $key => $value ) {
 
 				if ( is_array( $value ) ) {
 
-					if ( isset( $value[$needle_key] ) && $value[$needle_key] == $needle_value ) {
+					if ( isset( $value[ $needle_key ] ) && $value[ $needle_key ] == $needle_value ) {
 						return $value;
 					} else {
 						$finded = $this->find_sub_array( $needle_key, $needle_value, $value );
 
-						if( $finded !== null ) {
+						if ( null !== $finded ) {
 							return $finded;
 						}
-
 					}
-
 				}
-
 			}
 
 			return null;
-
 		}
 
 		/**
@@ -145,7 +147,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Sanitize' ) ) {
 
 			$dirty_value = isset( $dirty_value ) ? $dirty_value : '';
 
-			// if $config array has sanitize function, then call it
+			// if $config array has sanitize function, then call it.
 			if (
 				isset( $field['sanitize'] ) &&
 				! empty( $field['sanitize'] ) &&
@@ -162,13 +164,12 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Sanitize' ) ) {
 
 			} else {
 
-				// if $config array does not have sanitize function, do sanitize on field type basis
+				// if $config array does not have sanitize function, do sanitize on field type basis.
 				$clean_value = $this->get_sanitized_field_value_by_type( $field, $dirty_value );
 
 			}
 
 			return apply_filters( 'exopite_sof_sanitize_value', $clean_value, $dirty_value, $field, $this->config );
-
 		}
 
 		/**
@@ -186,23 +187,24 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Sanitize' ) ) {
 			switch ( $field_type ) {
 
 				case 'editor':
-					// no break
+					// no break.
 				case 'textarea':
 					/**
 					 * HTML excepted accept <textarea>.
+					 *
 					 * @link https://codex.wordpress.org/Function_Reference/wp_kses_allowed_html
 					 */
 					$allowed_html = wp_kses_allowed_html( 'post' );
-					// Remove '<textarea>' tag
-					unset ( $allowed_html['textarea'] );
+					// Remove '<textarea>' tag.
+					unset( $allowed_html['textarea'] );
 					/**
 					 * wp_kses_allowed_html return the wrong values for wp_kses,
 					 * need to change "true" -> "array()"
 					 */
 					array_walk_recursive(
 						$allowed_html,
-						function (&$value) {
-							if (is_bool($value)) {
+						function ( &$value ) {
+							if ( is_bool( $value ) ) {
 								$value = array();
 							}
 						}
@@ -230,25 +232,25 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Sanitize' ) ) {
 					break;
 
 				case 'switcher':
-					// no break
+					// no break.
 				case 'checkbox':
 					/**
 					 * In theory this will be never an array.
 					 * Maybe in the future?
 					 */
 					if ( is_array( $value ) ) {
-						foreach( $value as &$item ) {
-							$item = ( $value === 'yes' ) ? 'yes' : 'no';
+						foreach ( $value as &$item ) {
+							$item = ( 'yes' === $item ) ? 'yes' : 'no';
 						}
+						unset( $item );
 					} else {
-						$value = ( $value === 'yes' ) ? 'yes' : 'no';
+						$value = ( 'yes' === $value ) ? 'yes' : 'no';
 					}
 					break;
 
 				case 'range':
-					// no break
+					// no break.
 				case 'number':
-
 					$value = ( is_numeric( $value ) ) ? $value : 0;
 					if ( isset( $field['min'] ) && $value < $field['min'] ) {
 						$value = $field['min'];
@@ -265,18 +267,15 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Sanitize' ) ) {
 			}
 
 			return $value;
-
 		}
 
-		//DEGUB
+		// DEGUB.
 		public function write_log( $type, $log_line ) {
 
 			$hash        = '';
 			$fn          = plugin_dir_path( __FILE__ ) . '/' . $type . $hash . '.log';
 			$log_in_file = file_put_contents( $fn, date( 'Y-m-d H:i:s' ) . ' - ' . $log_line . PHP_EOL, FILE_APPEND );
-
 		}
-
 	}
 
 }

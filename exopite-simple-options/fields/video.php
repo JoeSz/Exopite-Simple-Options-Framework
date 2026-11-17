@@ -4,12 +4,17 @@
 /**
  *
  * Field: Video
- *
  */
 if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_video' ) ) {
 
+	/**
+	 * Class Exopite_Simple_Options_Framework_Field_video.
+	 */
 	class Exopite_Simple_Options_Framework_Field_video extends Exopite_Simple_Options_Framework_Fields {
 
+		/**
+		 * Constructor.
+		 */
 		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 
 			parent::__construct( $field, $value, $unique, $config );
@@ -21,14 +26,16 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_video' ) ) {
 				'loop'     => '',
 				'autoplay' => '',
 				'muted'    => 'muted',
-				'controls' => 'controls'
+				'controls' => 'controls',
 			);
 
 			$options                = ( ! empty( $this->field['options'] ) ) ? $this->field['options'] : array();
 			$this->field['options'] = wp_parse_args( $options, $defaults );
-
 		}
 
+		/**
+		 * Render the field output.
+		 */
 		public function output() {
 
 			echo $this->element_before();
@@ -56,10 +63,10 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_video' ) ) {
 					$this->field['options']['loop'],
 					$this->field['options']['autoplay'],
 					$this->field['options']['muted'],
-					$this->field['options']['controls']
+					$this->field['options']['controls'],
 				);
 
-				echo '<video class="video-control" ' . implode( ' ', $video_atts ) . ' src="' . $video_url . '"></video>';
+				echo '<video class="video-control" ' . implode( ' ', $video_atts ) . ' src="' . esc_url( $video_url ) . '"></video>';
 
 			}
 
@@ -67,7 +74,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_video' ) ) {
 
 			if ( $this->field['options']['input'] ) {
 				echo '<div class="exopite-sof-video-input">';
-				echo '<input type="text" name="' . $this->element_name() . '" value="' . $this->element_value() . '"' . $this->element_attributes() . '/>';
+				echo '<input type="text" name="' . $this->element_name() . '" value="' . esc_attr( $this->element_value() ) . '"' . $this->element_attributes() . '/>';
 
 				if ( ! $this->field['options']['oembed'] ) {
 
@@ -80,9 +87,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_video' ) ) {
 			echo '</div>';
 
 			echo $this->element_after();
-
 		}
-
 	}
 
 }

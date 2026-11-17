@@ -60,7 +60,7 @@ msgstr ""
 
 #: fields/attached.php:45
 #, php-format
-msgid "There is no attachment with type %s for this %s."
+msgid "There is no attachment with type %1$s for this %2$s."
 msgstr ""
 
 #: fields/backup.php:41

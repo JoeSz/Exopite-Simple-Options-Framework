@@ -4,16 +4,24 @@
 /**
  *
  * Field: Button Bar
- *
  */
 if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_button_bar' ) ) {
 
+	/**
+	 * Class Exopite_Simple_Options_Framework_Field_button_bar.
+	 */
 	class Exopite_Simple_Options_Framework_Field_button_bar extends Exopite_Simple_Options_Framework_Fields {
 
+		/**
+		 * Constructor.
+		 */
 		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 			parent::__construct( $field, $value, $unique, $config );
 		}
 
+		/**
+		 * Render the field output.
+		 */
 		public function output() {
 
 			echo $this->element_before();
@@ -28,20 +36,17 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_button_bar' ) ) {
 					echo '<div class="button-bar">';
 					foreach ( $options as $key => $value ) {
 						echo '<div class="button-bar__item">';
-						echo '<input type="radio" name="' . $this->element_name() . '" value="' . $key . '"' . $this->element_attributes( $key ) . $this->checked( $this->element_value(), $key ) . '>';
-						echo '<button class="button-bar__button">' . $value . '</button>';
+						echo '<input type="radio" name="' . $this->element_name() . '" value="' . esc_attr( $key ) . '"' . $this->element_attributes( $key ) . $this->checked( $this->element_value(), $key ) . '>';
+						echo '<button type="button" class="button-bar__button">' . wp_kses_post( $value ) . '</button>';
 						echo '</div>';
 
 					}
 					echo '</div>';
 				}
-
 			}
 
 			echo $this->element_after();
-
 		}
-
 	}
 
 }

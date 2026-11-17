@@ -4,12 +4,17 @@
 /**
  *
  * Field: Button
- *
  */
 if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_button' ) ) {
 
+	/**
+	 * Class Exopite_Simple_Options_Framework_Field_button.
+	 */
 	class Exopite_Simple_Options_Framework_Field_button extends Exopite_Simple_Options_Framework_Fields {
 
+		/**
+		 * Constructor.
+		 */
 		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 
 			parent::__construct( $field, $value, $unique, $config );
@@ -18,8 +23,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_button' ) ) {
 				'href'      => '',
 				'target'    => '_self',
 				'value'     => 'button',
-                'btn-class' => 'exopite-sof-btn',
-                'btn-id'    => '',
+				'btn-class' => 'exopite-sof-btn',
+				'btn-id'    => '',
 			);
 
 			$options = ( ! empty( $this->field['options'] ) ) ? $this->field['options'] : array();
@@ -27,25 +32,26 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_button' ) ) {
 			$this->field['options'] = wp_parse_args( $options, $defaults );
 		}
 
+		/**
+		 * Render the field output.
+		 */
 		public function output() {
 
 			$classes = ( isset( $this->field['class'] ) ) ? implode( ' ', explode( ' ', $this->field['class'] ) ) : '';
 
 			echo $this->element_before();
-            echo '<a ';
-            if ( ! empty( $this->field['options']['href'] ) ) {
-                echo 'href="' . $this->field['options']['href'] . '"';
-            }
-            if ( ! empty( $this->field['options']['btn-id'] ) ) {
-                echo ' id="' . $this->field['options']['btn-id'] . '"';
-            }
-            echo ' target="' . $this->field['options']['target'] . '"';
-            echo ' class="' . $this->field['options']['btn-class'] . ' ' . $classes . '"';
-            echo $this->element_attributes() . '/>' . $this->field['options']['value'] . '</a>';
-            echo $this->element_after();
-
+			echo '<a ';
+			if ( ! empty( $this->field['options']['href'] ) ) {
+				echo 'href="' . esc_url( $this->field['options']['href'] ) . '"';
+			}
+			if ( ! empty( $this->field['options']['btn-id'] ) ) {
+				echo ' id="' . esc_attr( $this->field['options']['btn-id'] ) . '"';
+			}
+			echo ' target="' . esc_attr( $this->field['options']['target'] ) . '"';
+			echo ' class="' . esc_attr( $this->field['options']['btn-class'] ) . ' ' . esc_attr( $classes ) . '"';
+			echo $this->element_attributes() . '/>' . wp_kses_post( $this->field['options']['value'] ) . '</a>';
+			echo $this->element_after();
 		}
-
 	}
 
 }

@@ -1,5 +1,25 @@
 ### CHANGELOG
 
+= 20261117 - 2026-11-17 =
+* Security: upload/delete AJAX requests require a nonce and capability checks (upload_files, edit_post, delete_post)
+* Security: import/export/reset require the options capability and a per-options-page nonce, only the own option can be changed
+* Security: escape field values in the admin output (esc_attr, esc_textarea, esc_url)
+* Security: metabox save requires a nonce and edit_post capability for the saved post
+* Fix: "simple" metabox options saved the whole $_POST as post meta, now only the defined fields are saved
+* Fix: fatal error on missing config keys (eac_attr__ typo)
+* Fix: fatal error in plugin settings link if settings_link is an URL, wrong default settings link
+* Fix: checkbox array sanitization, hard coded "en" language in the hidden _language field
+* Fix: several PHP 8.1+ warnings and deprecations
+* Allow nested accordions (accordion field inside an accordion field)
+* Unify text domain to exopite-sof
+* Requires PHP 8.2+
+* Security: escape attributes, labels and titles in all field templates (esc_attr, esc_url, esc_html, wp_kses_post)
+* Fix: typography font family was not preselected (selected() echoed instead of returned)
+* Fix: button bar buttons have type="button", so they never submit the form
+* Coding standards: PHP, JS and CSS reformatted to the WordPress standards, dead debug code removed
+* Build: npm run build creates the minified JS and CSS from assets/dev
+* Fix alignment in WordPress 7 admin (40px controls): header search icon and title, button texts, field titles, number/range units, prepend/append, upload and image buttons
+
 = 20261009 - 2026-10-09 =
 * Fix PHP 8.0+ deprecation: optional parameters declared before required ones (get_menu_item, field constructors)
 * Fix PHP 8.2+ deprecation: declare dynamic properties (fields base class, accordion, group)

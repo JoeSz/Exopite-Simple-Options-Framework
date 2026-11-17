@@ -4,17 +4,25 @@
 /**
  *
  * Field: Color
- *
  */
 if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_color_wp' ) ) {
 
+	/**
+	 * Class Exopite_Simple_Options_Framework_Field_color_wp.
+	 */
 	class Exopite_Simple_Options_Framework_Field_color_wp extends Exopite_Simple_Options_Framework_Fields {
 
+		/**
+		 * Constructor.
+		 */
 		public function __construct( $field, $value = '', $unique = '', $config = array(), $multilang = false ) {
 
 			parent::__construct( $field, $value, $unique, $config, $multilang );
 		}
 
+		/**
+		 * Render the field output.
+		 */
 		public function output() {
 
 			$classes = ( isset( $this->field['class'] ) ) ? implode( ' ', explode( ' ', $this->field['class'] ) ) : '';
@@ -26,18 +34,20 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_color_wp' ) ) {
 			 */
 
 			echo $this->element_before();
-			echo '<input type="text" class="colorpicker ' . $classes . '" ';
+			echo '<input type="text" class="colorpicker ' . esc_attr( $classes ) . '" ';
 			if ( isset( $this->field['rgba'] ) && $this->field['rgba'] ) {
 				echo 'data-alpha="true" ';
 			}
-			echo 'name="' . $this->element_name() . '" value="' . $this->element_value() . '"';
+			echo 'name="' . $this->element_name() . '" value="' . esc_attr( $this->element_value() ) . '"';
 			echo $this->element_attributes() . '/>';
-
 		}
 
+		/**
+		 * Enqueue the field assets.
+		 */
 		public static function enqueue( $args ) {
 
-			// Add the color picker css file from WordPress
+			// Add the color picker css file from WordPress.
 			wp_enqueue_style( 'wp-color-picker' );
 
 			$resources = array(
@@ -60,9 +70,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_color_wp' ) ) {
 			);
 
 			parent::do_enqueue( $resources, $args );
-
 		}
-
 	}
 
 }

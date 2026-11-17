@@ -4,17 +4,24 @@
 /**
  *
  * Field: Ace Editor
- *
  */
 if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_ace_editor' ) ) {
+	/**
+	 * Class Exopite_Simple_Options_Framework_Field_ace_editor.
+	 */
 	class Exopite_Simple_Options_Framework_Field_ace_editor extends Exopite_Simple_Options_Framework_Fields {
 
+		/**
+		 * Constructor.
+		 */
 		public function __construct( $field, $value = '', $unique = '', $config = array() ) {
 
 			parent::__construct( $field, $value, $unique, $config );
-
 		}
 
+		/**
+		 * Render the field output.
+		 */
 		public function output() {
 
 			$editor_id = $this->field['id'];
@@ -35,31 +42,32 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_ace_editor' ) ) {
 			echo $this->element_before();
 
 			echo '<div class="exopite-sof-ace-editor-wrapper">';
-			echo '<div id="exopite-sof-ace-' . $editor_id . '" class="exopite-sof-ace-editor"' . $this->element_attributes() . '></div>';
+			echo '<div id="exopite-sof-ace-' . esc_attr( $editor_id ) . '" class="exopite-sof-ace-editor"' . $this->element_attributes() . '></div>';
 			echo '</div>';
 
-			echo '<textarea class="exopite-sof-ace-editor-textarea hidden" name="' . $this->element_name() . '">' . $this->element_value() . '</textarea>';
-			echo '<textarea class="exopite-sof-ace-editor-options hidden">' . $options . '</textarea>';
+			echo '<textarea class="exopite-sof-ace-editor-textarea hidden" name="' . $this->element_name() . '">' . esc_textarea( (string) $this->element_value() ) . '</textarea>';
+			echo '<textarea class="exopite-sof-ace-editor-options hidden">' . esc_textarea( $options ) . '</textarea>';
 
 			echo $this->element_after();
-
 		}
 
+		/**
+		 * Enqueue the field assets.
+		 */
 		public static function enqueue( $args ) {
 
-			//https://cdnjs.com/libraries/ace/
+			// https://cdnjs.com/libraries/ace/.
 
-//			wp_enqueue_script( 'ace-editor', '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.4/ace.js', array( 'jquery' ), '1.2.4', true );
-//
-//			wp_enqueue_script( 'ace-editor-language_tool', '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-language_tools.js', array( 'ace-editor' ), '1.2.4', true );
-//
-//			$script_file = 'ace-loader.min.js';
-//			$script_name = 'exopite-sof-ace-loader';
-//
-//			wp_enqueue_script( $script_name, $args['plugin_sof_url'] . 'assets/' . $script_file, array( 'ace-editor-language_tool' ), filemtime( join( DIRECTORY_SEPARATOR, array(
-//				$args['plugin_sof_path'] . 'assets',
-//				$script_file
-//			) ) ), true );
+			//
+			// wp_enqueue_script( 'ace-editor-language_tool', '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-language_tools.js', array( 'ace-editor' ), '1.2.4', true );
+			//
+			// $script_file = 'ace-loader.min.js';
+			// $script_name = 'exopite-sof-ace-loader';
+			//
+			// wp_enqueue_script( $script_name, $args['plugin_sof_url'] . 'assets/' . $script_file, array( 'ace-editor-language_tool' ), filemtime( join( DIRECTORY_SEPARATOR, array(
+			// $args['plugin_sof_path'] . 'assets',
+			// $script_file
+			// ) ) ), true );.
 
 			/**
 			 * For some reason this is not working. :-O
@@ -94,8 +102,6 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_ace_editor' ) ) {
 			);
 
 			parent::do_enqueue( $resources, $args );
-
 		}
-
 	}
 }

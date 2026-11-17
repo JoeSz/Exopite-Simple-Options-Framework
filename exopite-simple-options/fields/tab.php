@@ -4,29 +4,40 @@
 /**
  *
  * Field: Tab
- *
  */
 if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_tab' ) ) {
 
+	/**
+	 * Class Exopite_Simple_Options_Framework_Field_tab.
+	 */
 	class Exopite_Simple_Options_Framework_Field_tab extends Exopite_Simple_Options_Framework_Fields {
 
+		/**
+		 * Constructor.
+		 */
 		public function __construct( $field, $value = '', $unique = '', $config = array(), $multilang = false ) {
 			parent::__construct( $field, $value, $unique, $config, $multilang );
 		}
 
+		/**
+		 * Render the field output.
+		 */
 		public function output() {
 
 			echo $this->element_before();
 
-			$unallows = array();
-			$tabs    = array_values( $this->field['tabs'] );
+			$unallows  = array();
+			$tabs      = array_values( $this->field['tabs'] );
 			$unique_id = ( ! empty( $this->unique ) ) ? $this->unique : $this->field['id'];
 
-			$self  = new Exopite_Simple_Options_Framework( array(
-				'id' => $this->element_name(),
-				'multilang' => $this->config['multilang'],
-				'is_options_simple' => $this->config['is_options_simple'],
-			), null );
+			$self = new Exopite_Simple_Options_Framework(
+				array(
+					'id'                => $this->element_name(),
+					'multilang'         => $this->config['multilang'],
+					'is_options_simple' => $this->config['is_options_simple'],
+				),
+				null
+			);
 
 			echo '<div class="exopite-sof-tabs">';
 
@@ -37,14 +48,14 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_tab' ) ) {
 			/**
 			 * Tab navigation
 			 */
-			echo '<ul class="exopite-sof-tab-header' . $equal_width . '">';
+			echo '<ul class="exopite-sof-tab-header' . esc_attr( $equal_width ) . '">';
 
 			foreach ( $tabs as $key => $tab ) {
 
 				reset( $tabs );
 				$tab_active = ( $key === key( $tabs ) ) ? ' active' : '';
 
-				echo '<li class="exopite-sof-tab-link' . $tab_active . '">' . $tab['title'] . '</li>';
+				echo '<li class="exopite-sof-tab-link' . esc_attr( $tab_active ) . '">' . wp_kses_post( $tab['title'] ) . '</li>';
 
 			}
 
@@ -58,8 +69,8 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_tab' ) ) {
 				reset( $tabs );
 				$tab_active = ( $key === key( $tabs ) ) ? ' active' : '';
 
-				echo '<div class="exopite-sof-tab-content' . $tab_active . '">';
-				echo '<div class="exopite-sof-tab-mobile-header">' . $tab['title'] . '</div>';
+				echo '<div class="exopite-sof-tab-content' . esc_attr( $tab_active ) . '">';
+				echo '<div class="exopite-sof-tab-mobile-header">' . wp_kses_post( $tab['title'] ) . '</div>';
 				echo '<div class="exopite-sof-tab-content-body">';
 				echo '<div class="exopite-sof-tab-content-body-inner">';
 
@@ -96,9 +107,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_tab' ) ) {
 			echo '</div>';
 
 			echo $this->element_after();
-
 		}
-
 	}
 
 }
