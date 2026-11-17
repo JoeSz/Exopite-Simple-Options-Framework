@@ -16,6 +16,7 @@
 * Security: escape attributes, labels and titles in all field templates (esc_attr, esc_url, esc_html, wp_kses_post)
 * Fix: typography font family was not preselected (selected() echoed instead of returned)
 * Fix: button bar buttons have type="button", so they never submit the form
+* Fix: typography preview loads only Google fonts from Google, not websafe fonts (blocked MIME type error)
 * Coding standards: PHP, JS and CSS reformatted to the WordPress standards, dead debug code removed
 * Build: npm run build creates the minified JS and CSS from assets/dev
 * Fix alignment in WordPress 7 admin (40px controls): header search icon and title, button texts, field titles, number/range units, prepend/append, upload and image buttons

@@ -170,7 +170,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework' ) ) :
 				return;
 			}
 
-			$this->version = '20261117.2';
+			$this->version = '20261117.3';
 
 			// TODO: Do sanitize $config['id'].
 			$this->unique = $config['id'];

@@ -764,6 +764,14 @@ jQuery.fn.findExclude = function( selector, mask, result ) {
 
 			const font = plugin.fontFamily.val();
 			if ( !font ) return;
+
+			// Websafe fonts are installed locally, Google does not serve them.
+			if ( 'google' !== plugin.fontFamily.find( ':selected' ).data( 'type' ) ) {
+				$( '.cs-font-preview-' + plugin.$element.find( '.exopite-sof-font-field-js' ).data( 'id' ) ).remove();
+				plugin.preview.css( 'font-family', font ).css( 'font-weight', '400' );
+				return;
+			}
+
 			const href = '//fonts.googleapis.com/css?family=' + font + ':' + variants.replace( /\|/g, ',' );
 			const parentName = plugin.$element.find( '.exopite-sof-font-field-js' ).data( 'id' );
 			const html = '<link href="' + href + '" class="cs-font-preview-' + parentName + '" rel="stylesheet" type="text/css" />';
