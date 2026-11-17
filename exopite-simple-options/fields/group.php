@@ -222,7 +222,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 				} else {
 
 					if ( is_serialized( $this->value ) ) {
-						$this->value = unserialize( $this->value );
+						$this->value = self::unserialize_value( $this->value );
 					}
 
 					$field_value = ( isset( $field['id'] ) && isset( $this->value[ $field['id'] ] ) ) ? $this->value[ $field['id'] ] : '';
@@ -272,7 +272,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_group' ) ) {
 					if ( $this->config['is_options_simple'] ) {
 
 						if ( is_serialized( $this->value ) ) {
-							$this->value = unserialize( $this->value );
+							$this->value = self::unserialize_value( $this->value );
 						}
 					}
 

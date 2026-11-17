@@ -82,7 +82,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Field_tab' ) ) {
 					}
 
 					if ( is_serialized( $this->value ) ) {
-						$this->value = unserialize( $this->value );
+						$this->value = self::unserialize_value( $this->value );
 					}
 
 					$field_value = '';

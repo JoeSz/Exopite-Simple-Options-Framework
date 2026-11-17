@@ -261,11 +261,31 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Fields' ) ) {
 		}
 
 		/**
+		 * Unserializes a stored field value without creating objects.
+		 *
+		 * Field values come from post meta or options that users with edit rights
+		 * can fill, so a serialized object must never be woken up (PHP object
+		 * injection). Objects become __PHP_Incomplete_Class, arrays and scalars
+		 * stay as they are.
+		 *
+		 * @param mixed $value Value, maybe a serialized string.
+		 * @return mixed
+		 */
+		public static function unserialize_value( $value ) {
+
+			if ( ! is_serialized( $value ) ) {
+				return $value;
+			}
+
+			return @unserialize( trim( $value ), array( 'allowed_classes' => false ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize -- same as maybe_unserialize(), but without objects.
+		}
+
+		/**
 		 * Checked.
 		 */
 		public function checked( $value = '', $current = '', $type = 'checked', $echo = false ) {
 
-			$value = maybe_unserialize( $value );
+			$value = self::unserialize_value( $value );
 			if ( is_array( $value ) && in_array( $current, $value ) ) {
 				$result = ' ' . $type . '="' . $type . '"';
 			} elseif ( $value == $current ) {
