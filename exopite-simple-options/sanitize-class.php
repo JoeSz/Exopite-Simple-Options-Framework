@@ -269,7 +269,7 @@ if ( ! class_exists( 'Exopite_Simple_Options_Framework_Sanitize' ) ) {
 			return $value;
 		}
 
-		// DEGUB.
+		// DEBUG.
 		public function write_log( $type, $log_line ) {
 
 			$hash        = '';
